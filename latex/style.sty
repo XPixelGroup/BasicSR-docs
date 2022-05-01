@@ -16,21 +16,21 @@
 \allowdisplaybreaks             % позволяет делать разрывы страниц внутри align многострочных формул.
 
 %----------------------------------------------------------------------------------------
-%	ДИЗАЙН
+%	设计
 %----------------------------------------------------------------------------------------
 
-% Стиль страницы
+% 线条风格
 \makepagestyle{custom}
-\makeevenfoot{custom}{}{\thepage}{}   % внизу номер страницы
-\makeoddfoot{custom}{}{\thepage}{}    % внизу номер страницы
-\makeevenhead{custom}{}{}{}           % вверху пусто
-\makeoddhead{custom}{}{}{}            % вверху пусто
-\pagestyle{custom}                    % Выставляем стиль
-\setlrmarginsandblock{1.5cm}{1.5cm}{*}    % отступы слева-справа
-\setulmarginsandblock{1.5cm}{2cm}{*}  % отступы сверху-снизу
-\checkandfixthelayout                 % memoir хочет корректировку
+\makeevenfoot{custom}{}{\thepage}{}   % 页码底部
+\makeoddfoot{custom}{}{\thepage}{}    % 页码底部
+\makeevenhead{custom}{}{}{}           % 顶部为空
+\makeoddhead{custom}{}{}{}            % 顶部为空
+\pagestyle{custom}                    % 显示样式
+\setlrmarginsandblock{1.5cm}{1.5cm}{*}    % 左/右缩进
+\setulmarginsandblock{2cm}{2cm}{*}  % 上下缩进
+\checkandfixthelayout                 % memoir 希望调整
 
-% красивый шрифт
+% 漂亮字体
 \usepackage{opensans}
 
 % подключить прописные символы
