@@ -1,0 +1,118 @@
+% modified from: https://arxiv.org/abs/2201.09746
+
+\documentclass[a4paper, 12pt, oneside]{memoir}
+\usepackage{style}
+
+% ----------- support Chinese -------------
+\usepackage{CJKutf8}
+\usepackage{cmap}
+\usepackage[10pt]{type1ec}          % use only 10pt fonts
+\usepackage[T1]{fontenc}
+\usepackage{textalpha}              % improved LGR support
+\usepackage[overlap, CJK]{ruby}
+\usepackage{CJKulem}
+% ----------- End: support Chinese -------------
+
+% ----------- support table and shline -------------
+\usepackage{tabulary}
+\newcolumntype{x}[1]{>{\centering\arraybackslash}p{#1pt}}
+\newcommand{\tablestyle}[2]{\setlength{\tabcolsep}{#1}\renewcommand{\arraystretch}{#2}\centering\footnotesize}
+\newlength\savewidth\newcommand\shline{\noalign{\global\savewidth\arrayrulewidth
+		\global\arrayrulewidth 1pt}\hline\noalign{\global\arrayrulewidth\savewidth}}
+% ----------- End: support table and shline -------------	
+
+\usepackage{fontawesome5}
+
+%\usepackage{import}
+\usepackage{subfiles}
+
+% title
+\title{
+\vspace{4cm}
+\normalfont \normalsize 
+\horrule{0.5pt} \\[0.4cm]
+\huge \begin{CJK}{UTF8}{gbsn} BasicSR: 图像、视频复原增强开源库 
+\\ 解读文档\end{CJK}
+\horrule{2pt} \\[0.5cm]
+}
+
+%\author{\href{https://github.com/xinntao/BasicSR}}
+
+\date{\normalsize\today}
+
+\begin{document}
+\mathversion{bold}
+\maketitle
+\thispagestyle{empty}
+
+\vspace{-6.3cm}
+\begin{adjustwidth}{0.5cm}{}
+    \includegraphics[width=0.07\textwidth]{figures/rocket_logo.png}
+\end{adjustwidth}
+\vspace{5cm}
+
+%\begin{adjustwidth}{7cm}{}
+\begin{center}
+    \includegraphics[width=0.5\textwidth]{figures/basicsr_logo.png}
+\end{center}
+%\end{adjustwidth}
+\begin{center}
+	\underline{\textbf{\url{https://github.com/xinntao/BasicSR}}}
+\end{center}
+
+% 注释
+\vspace{2.2cm}
+\begin{center}
+\textcolor{ChadBlue}{\underline{\textbf{Notes}}}
+\end{center}
+
+\vspace{0.5cm}
+\begin{CJK}{UTF8}{gbsn} BasicSR: 图像视频复原增强开源库文档\end{CJK}
+
+\vspace{0.3cm}
+ \href{https://github.com/FortsAndMills/RL-Theory-book}{xxx}.
+
+
+
+% 目录
+\newpage
+\begin{CJK}{UTF8}{gbsn}
+
+{\Large\textbf{Authors}}
+
+\begin{itemize}
+	\item Xintao Wang (王鑫涛) ~\faIcon{envelope}~ xintao.alpha@gmail.com ~\faIcon{link}~ \url{https://xinntao.github.io/}
+\end{itemize}
+
+
+	
+\newpage
+	
+\tableofcontents*
+\end{CJK}
+
+% 正文
+\begin{CJK}{UTF8}{gbsn}
+\subfile{sections/introduction.tex}
+\subfile{sections/code_structure.tex}
+\subfile{sections/metrics.tex}
+\subfile{sections/deploy.tex}
+\subfile{sections/experience.tex}
+\end{CJK}
+
+\clearpage
+\newpage
+\thispagestyle{empty}
+\begin{center}
+\vspace*{5cm}
+%\includegraphics[width=10cm]{Images/reach.png}
+\end{center}
+
+\newpage
+
+\Large \begin{CJK}{UTF8}{gbsn}\textbf{参考文献}\end{CJK}
+{\small
+	\bibliography{bib}
+}
+
+\end{document}
