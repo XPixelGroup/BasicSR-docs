@@ -1,0 +1,80 @@
+name: release
+on:
+  push:
+    tags:
+      - '*'
+
+env:
+  APPLICATION_NAME: BasicSR-Tutorial
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      APPNAME: ${{ steps.get_appname.outputs.APPNAME }}
+      VERSION: ${{ steps.get_version.outputs.VERSION }}
+    steps:
+    - name: get-appname
+      id: get_appname
+      run: echo ::set-output name=APPNAME::${APPLICATION_NAME}
+    - name: get-version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
+  build_latex:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    env:
+      PACKAGENAME: ${{ needs.setup.outputs.APPNAME }}-${{ needs.setup.outputs.VERSION }}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    - name: Compile LaTeX
+      uses: xu-cheng/latex-action@master
+      with:
+        working_directory: latex
+        root_file: main.tex
+    - name: package
+      run: |
+        cd latex
+        ls
+        mv main.pdf ../${{ env.PACKAGENAME }}.pdf
+    - name: upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.PACKAGENAME }}
+        path: ${{ env.PACKAGENAME }}.pdf
+
+  release:
+    permissions: write-all
+    needs: [setup, build_latex]
+    runs-on: ubuntu-latest
+    steps:
+    - name: download
+      uses: actions/download-artifact@v2
+      with:
+        path: artifacts
+
+    - name: create-release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: true
+        prerelease: false
+
+    - name: upload-pdf
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PACKAGENAME: ${{ needs.setup.outputs.APPNAME }}-${{ needs.setup.outputs.VERSION }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: artifacts/${{ env.PACKAGENAME }}/${{ env.PACKAGENAME }}.pdf
+        asset_name: ${{ env.PACKAGENAME }}.pdf
+        asset_content_type: application/pdf
+
