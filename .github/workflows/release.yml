@@ -9,18 +9,6 @@ env:
   APPLICATION_NAME: BasicSR入门文档
 
 jobs:
-
-  name: Build LaTeX document
-on: [push]
-jobs:
-  build_latex:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up Git repository
-        uses: actions/checkout@v1
-
-
-
   setup:
     runs-on: ubuntu-latest
     outputs:
