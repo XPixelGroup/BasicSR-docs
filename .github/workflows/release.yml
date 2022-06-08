@@ -39,13 +39,14 @@ jobs:
         root_file: main.tex
     - name: package
       run: |
-        ls .
-        ls latex
+        cd latex
+        ls
+        mv main.pdf ../${{ env.PACKAGENAME }}
     - name: upload
       uses: actions/upload-artifact@v2
       with:
         name: ${{ env.PACKAGENAME }}
-        path: latex/${{ env.PACKAGENAME }}
+        path: ${{ env.PACKAGENAME }}
 
   # release:
   #   needs: [setup, windows, macos]
