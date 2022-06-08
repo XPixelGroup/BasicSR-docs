@@ -1,9 +1,8 @@
 name: release
-# on:
-#   push:
-#     tags:
-#       - '*'
-on: push
+on:
+  push:
+    tags:
+      - '*'
 
 env:
   APPLICATION_NAME: BasicSR入门文档
@@ -26,8 +25,7 @@ jobs:
     needs: [setup]
     runs-on: ubuntu-latest
     env:
-      # PACKAGENAME: ${{ needs.setup.outputs.APPNAME }}-${{ needs.setup.outputs.VERSION }}.pdf
-      PACKAGENAME: ${{ needs.setup.outputs.APPNAME }}-debug.pdf
+      PACKAGENAME: ${{ needs.setup.outputs.APPNAME }}-${{ needs.setup.outputs.VERSION }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -41,51 +39,41 @@ jobs:
       run: |
         cd latex
         ls
-        mv main.pdf ../${{ env.PACKAGENAME }}
+        mv main.pdf ../${{ env.PACKAGENAME }}.pdf
     - name: upload
       uses: actions/upload-artifact@v2
       with:
         name: ${{ env.PACKAGENAME }}
-        path: ${{ env.PACKAGENAME }}
+        path: ${{ env.PACKAGENAME }}.pdf
 
-  # release:
-  #   needs: [setup, windows, macos]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: download
-  #     uses: actions/download-artifact@v2
-  #     with:
-  #       path: artifacts
+  release:
+    needs: [setup, build_latex]
+    runs-on: ubuntu-latest
+    steps:
+    - name: download
+      uses: actions/download-artifact@v2
+      with:
+        path: artifacts
 
-  #   - name: create-release
-  #     id: create_release
-  #     uses: actions/create-release@v1
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     with:
-  #       tag_name: ${{ github.ref }}
-  #       release_name: Release ${{ github.ref }}
-  #       draft: true
-  #       prerelease: false
+    - name: create-release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: true
+        prerelease: false
 
-  #   - name: upload-windows
-  #     uses: actions/upload-release-asset@v1
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       PACKAGENAME: ${{ needs.setup.outputs.APPNAME }}-${{ needs.setup.outputs.VERSION }}-windows
-  #     with:
-  #       upload_url: ${{ steps.create_release.outputs.upload_url }}
-  #       asset_path: artifacts/${{ env.PACKAGENAME }}/${{ env.PACKAGENAME }}.zip
-  #       asset_name: ${{ env.PACKAGENAME }}.zip
-  #       asset_content_type: application/zip
+    - name: upload-pdf
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PACKAGENAME: ${{ needs.setup.outputs.APPNAME }}-${{ needs.setup.outputs.VERSION }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: artifacts/${{ env.PACKAGENAME }}/${{ env.PACKAGENAME }}.pdf
+        asset_name: ${{ env.PACKAGENAME }}.pdf
+        asset_content_type: application/pdf
 
-  #   - name: upload-macos
-  #     uses: actions/upload-release-asset@v1
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       PACKAGENAME: ${{ needs.setup.outputs.APPNAME }}-${{ needs.setup.outputs.VERSION }}-macos
-  #     with:
-  #       upload_url: ${{ steps.create_release.outputs.upload_url }}
-  #       asset_path: artifacts/${{ env.PACKAGENAME }}/${{ env.PACKAGENAME }}.dmg
-  #       asset_name: ${{ env.PACKAGENAME }}.dmg
-  #       asset_content_type: application/octet-stream
