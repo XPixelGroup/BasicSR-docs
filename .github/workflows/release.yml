@@ -37,6 +37,10 @@ jobs:
       with:
         working_directory: latex
         root_file: main.tex
+    - name: package
+      run: |
+        ls .
+        ls latex
     - name: upload
       uses: actions/upload-artifact@v2
       with:
