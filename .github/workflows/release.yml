@@ -1,0 +1,98 @@
+name: release
+# on:
+#   push:
+#     tags:
+#       - '*'
+on: push
+
+env:
+  APPLICATION_NAME: BasicSR入门文档
+
+jobs:
+
+  name: Build LaTeX document
+on: [push]
+jobs:
+  build_latex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v1
+
+
+
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      APPNAME: ${{ steps.get_appname.outputs.APPNAME }}
+      VERSION: ${{ steps.get_version.outputs.VERSION }}
+    steps:
+    - name: get-appname
+      id: get_appname
+      run: echo ::set-output name=APPNAME::${APPLICATION_NAME}
+    - name: get-version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
+  build_latex:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    env:
+      # PACKAGENAME: ${{ needs.setup.outputs.APPNAME }}-${{ needs.setup.outputs.VERSION }}.pdf
+      PACKAGENAME: ${{ needs.setup.outputs.APPNAME }}-debug.pdf
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    - name: Compile LaTeX
+      uses: xu-cheng/latex-action@master
+      with:
+        working_directory: latex
+        root_file: main.tex
+    - name: upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.PACKAGENAME }}
+        path: latex/${{ env.PACKAGENAME }}
+
+  # release:
+  #   needs: [setup, windows, macos]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: download
+  #     uses: actions/download-artifact@v2
+  #     with:
+  #       path: artifacts
+
+  #   - name: create-release
+  #     id: create_release
+  #     uses: actions/create-release@v1
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     with:
+  #       tag_name: ${{ github.ref }}
+  #       release_name: Release ${{ github.ref }}
+  #       draft: true
+  #       prerelease: false
+
+  #   - name: upload-windows
+  #     uses: actions/upload-release-asset@v1
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       PACKAGENAME: ${{ needs.setup.outputs.APPNAME }}-${{ needs.setup.outputs.VERSION }}-windows
+  #     with:
+  #       upload_url: ${{ steps.create_release.outputs.upload_url }}
+  #       asset_path: artifacts/${{ env.PACKAGENAME }}/${{ env.PACKAGENAME }}.zip
+  #       asset_name: ${{ env.PACKAGENAME }}.zip
+  #       asset_content_type: application/zip
+
+  #   - name: upload-macos
+  #     uses: actions/upload-release-asset@v1
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       PACKAGENAME: ${{ needs.setup.outputs.APPNAME }}-${{ needs.setup.outputs.VERSION }}-macos
+  #     with:
+  #       upload_url: ${{ steps.create_release.outputs.upload_url }}
+  #       asset_path: artifacts/${{ env.PACKAGENAME }}/${{ env.PACKAGENAME }}.dmg
+  #       asset_name: ${{ env.PACKAGENAME }}.dmg
+  #       asset_content_type: application/octet-stream
