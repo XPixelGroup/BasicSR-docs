@@ -5,7 +5,7 @@ on:
       - '*'
 
 env:
-  APPLICATION_NAME: BasicSR入门文档
+  APPLICATION_NAME: BasicSR-Tutorial
 
 jobs:
   setup:
