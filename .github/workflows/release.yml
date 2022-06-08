@@ -47,6 +47,7 @@ jobs:
         path: ${{ env.PACKAGENAME }}.pdf
 
   release:
+    permissions: write-all
     needs: [setup, build_latex]
     runs-on: ubuntu-latest
     steps:
