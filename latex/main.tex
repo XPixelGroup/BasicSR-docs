@@ -58,7 +58,7 @@
 	\maketitle
 	\thispagestyle{empty}
 
-	\vspace{-14.5cm}
+	\vspace{-15.5cm}
 	\begin{adjustwidth}{0.5cm}{}
 		\hspace{5.5cm}
 		\includegraphics[width=0.3\textwidth]{figures/xpixel-logo.jpg}
@@ -77,9 +77,12 @@
 	\begin{center}
 		\underline{\textbf{\url{https://github.com/XPixelGroup/BasicSR}}}
 	\end{center}
+%	\begin{center}
+%		Version: V0
+%	\end{center}
 
 	% 注释
-	\vspace{2.2cm}
+	\vspace{0.2cm}
 	\begin{center}
 		\textcolor{ChadBlue}{\underline{\textbf{Notes}}}
 	\end{center}
@@ -106,6 +109,7 @@
 
 % 正文
 \begin{CJK}{UTF8}{gbsn}
+{
 %\pagestyle{headings}
 \pagestyle{fancy}
 \fancyhf{}
@@ -115,12 +119,17 @@
 \lhead{第~\thechapter~章: \leftmark}
 
 \subfile{sections/overview.tex}
-\subfile{sections/introduction.tex}
+\subfile{sections/installation.tex}
+\subfile{sections/getting_start.tex}
 \subfile{sections/code_structure.tex}
 \subfile{sections/metrics.tex}
+\subfile{sections/howto.tex}
+\subfile{sections/data_preparation.tex}
+\subfile{sections/others.tex}
+\subfile{sections/scripts.tex}
 \subfile{sections/deploy.tex}
 \subfile{sections/experience.tex}
-
+}
 \end{CJK}
 
 	\clearpage

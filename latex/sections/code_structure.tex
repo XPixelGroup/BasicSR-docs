@@ -2,25 +2,42 @@
 
 \begin{document}
 
-\chapter{代码结构}
+\chapter{代码主体结构}
+\vspace{-2cm}
 
-正文在这里
+简要总结
 
-\textbf{粗体}
+\section{整体框架}
 
-\uline{下划线}
+- 参考 \url{https://github.com/XPixelGroup/BasicSR/blob/master/docs/DesignConvention_CN.md}
 
-xxx
+- 代码接口在 http://basicsr.readthedocs.io/，后续看看能否作为附录存在
 
-%\setlength{\columnsep}{0.7cm}
-\begin{wrapfigure}{r}{0.4\linewidth}
-%\vspace{-0.3cm}
-\centering
-\includegraphics[width=0.4\textwidth]{figures/agentenv.png}
-%\caption{Пример среды с двумя действиями.}
-%\label{fig:env}
-%\vspace{-2.6cm}
-\end{wrapfigure}
+\section{配置(Options)与注册器(Register)}
 
+- 态实例化与REGISTER注册机制
+
+- 约定
+
+- 如何避免重复的类名和函数名
+
+
+\section{数据(Data Loader)}
+
+\section{网络结构(Architecture)}
+
+\section{模型(Model)}
+
+- Base模型
+
+- 其他模型
+
+- 继承关系
+
+\section{损失函数(Loss)}
+
+\section{训练(优化器与学习率调度器)}
+
+\section{算子}
 
 \end{document}
