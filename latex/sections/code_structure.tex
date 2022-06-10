@@ -13,6 +13,20 @@
 
 - 代码接口在 http://basicsr.readthedocs.io/，后续看看能否作为附录存在
 
+%##################################################################################################
+\begin{figure}[t]
+	%\vspace{-0.5cm}
+	\begin{center}
+		%\fbox{\rule{0pt}{2.5in} \rule{0.9\linewidth}{0pt}}
+		\includegraphics[width=\linewidth]{figures/basicsr_logo.png}
+		\vspace{-1cm}
+		\caption{图标题。BasicSR Logo。}
+		\label{fig:logo}
+	\end{center}
+	%\vspace{-0.7cm}
+\end{figure}
+%##################################################################################################
+
 \section{配置(Options)与注册器(Register)}
 
 - 态实例化与REGISTER注册机制
@@ -20,6 +34,74 @@
 - 约定
 
 - 如何避免重复的类名和函数名
+
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+class RepConv(nn.Module):
+    """Re-parameterizable block for RepSR."""
+
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride=1,
+                 padding=0,
+                 dilation=1,
+                 groups=1,
+                 padding_mode='zeros',
+                 deploy=False,
+                 width_multiplier=2,
+                 with_bn=True,
+                 frozen_bn=False):
+        super(RepConv, self).__init__()
+        self.deploy = deploy
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.dilation = dilation
+        self.groups = groups
+        self.with_bn = with_bn
+        self.frozen_bn = frozen_bn
+
+        self.mid_channels = out_channels * width_multiplier
+        self.rep_c1_2 = nn.Conv2d(
+            in_channels=self.mid_channels,
+            out_channels=out_channels,
+            kernel_size=1,
+            stride=stride,
+            padding=0,
+            groups=groups,
+            bias=True)
+
+        # initialization
+        init_list = [
+            self.rep_identity, self.rep_c3_1, self.rep_c1_1, self.rep_c3_2,
+            self.rep_c1_2
+        ]
+        if with_bn:
+            init_list.extend([self.rep_bn_1, self.rep_bn_2])
+        default_init_weights(init_list, scale=0.1)
+
+    def forward(self, inputs, frozen_bn=None):
+        if frozen_bn is None:
+            frozen_bn = self.frozen_bn
+
+        if hasattr(self, 'rep_merge'):
+            return self.rep_merge(inputs)
+        if self.with_bn:
+            id_out = self.rep_identity(inputs)
+            out_1 = self.rep_c1_1(
+                self.rep_bn_1(self.rep_c3_1(inputs), frozen_bn))
+            out_2 = self.rep_c1_2(
+                self.rep_bn_2(self.rep_c3_2(inputs), frozen_bn))
+        else:
+            id_out = self.rep_identity(inputs)
+            out_1 = self.rep_c1_1(self.rep_c3_1(inputs))
+            out_2 = self.rep_c1_2(self.rep_c3_2(inputs))
+
+        return id_out + out_1 + out_2
+\end{minted}
 
 
 \section{数据(Data Loader)}
