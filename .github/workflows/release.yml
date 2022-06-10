@@ -35,6 +35,7 @@ jobs:
       with:
         working_directory: latex
         root_file: main.tex
+        atexmk_shell_escape: true
     - name: package
       run: |
         cd latex
