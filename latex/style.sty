@@ -48,6 +48,7 @@
 
 % Цвета
 \usepackage{xcolor}
+\definecolor{Blue}{rgb}{.3,.1,1}
 \definecolor{ChadBlue}{rgb}{.1,.1,.5}
 \definecolor{ChadRed}{rgb}{.4,0,0}
 \definecolor{ChadPurple}{rgb}{.5,0,.5}
@@ -267,8 +268,9 @@ before upper={\tcbtitle},
 %----------------------------------------------------------------------------------------
 
 % тоже самое, что и для теорем
-\def \examplemacro#1#2{\ifempty{#2}Пример #1\elseПример #1 --- #2\fi}
-\newtcolorbox[auto counter]{exampleBox}[2][]{
+%\def \examplemacro#1#2{\ifempty{#2}实例 #1\else实例 #1 --- #2\fi}
+\def \examplemacro#1#2{#2}
+\newtcolorbox[]{exampleBox}[2][]{
 enhanced jigsaw,
 breakable,
 colback=ChadRed!2,   % цвет фона
@@ -284,7 +286,7 @@ boxrule=0.5pt,        % толщина рамки
 parbox=false,         % лечит проблему с отступом в начале абзацев
 detach title,         % убирает отдельный бокс для заголовка
 fonttitle=\small\sffamily\bfseries\color{ChadRed},
-title={\bfseries\underline{\examplemacro{\thetcbcounter}{#2}}: \,},
+title={\bfseries{\examplemacro{\thetcbcounter}{#2}}: \,},
 before upper={\tcbtitle},
 #1
 }
@@ -304,36 +306,33 @@ before upper={\tcbtitle},
 {\small\bfseries\sffamily}% Theorem head font
 {\;}% Punctuation after theorem head
 {0.25em}% Space after theorem head
-{\underline{\small\sffamily\thmname{#1}\nobreakspace\thmnumber{\@ifnotempty{#1}{}\@upn{#2}}% Theorem text (e.g. Theorem 2.1)
-\thmnote{\nobreakspace\the\thm@notefont\sffamily\bfseries---\nobreakspace#3}}:}% Optional theorem note
+{\small\sffamily\thmname{#1}\nobreakspace\thmnumber{\@ifnotempty{#1}{}\@upn{#2}% Theorem text (e.g. Theorem 2.1)
+\thmnote{\nobreakspace\the\thm@notefont\sffamily\bfseries---\nobreakspace#3}}}% Optional theorem note
 
 % назначаем
 \theoremstyle{blacknumbox}
-\newtheorem{definitionT}{定义}
-\newtheorem{propositionT}{Утверждение}
+\newtheorem*{definitionT}{\faIcon{bell}}  % 使用星号, 去除序号
+\newtheorem*{propositionT}{\faIcon{bookmark}}
 
 % теперь сами коробки
 \RequirePackage[framemethod=default]{mdframed}
 
-% Определения
 \newmdenv[skipabove=7pt,
 skipbelow=7pt,
 rightline=false,
 leftline=true,
 topline=false,
 bottomline=false,
-linecolor=ChadPurple,
+linecolor=Blue,
 innerleftmargin=5pt,
 innerrightmargin=5pt,
-innertopmargin=0pt,
+innertopmargin=7pt,
 leftmargin=0cm,
 rightmargin=0cm,
 linewidth=4pt,
-innerbottommargin=0pt]{dBox}
+innerbottommargin=7pt]{dBox}
 
-%\newenvironment{definition}{\begin{dBox}\begin{definitionT}}{\end{definitionT}\end{dBox}}
-
-\newenvironment{definition}{\begin{dBox}\begin{definitionT}}{\end{definitionT}\end{dBox}}
+\newenvironment{hl}{\begin{pBox}\begin{definitionT}}{\end{definitionT}\end{pBox}}
 
 % proposition box
 \newmdenv[skipabove=7pt,
@@ -342,18 +341,18 @@ rightline=false,
 leftline=true,
 topline=false,
 bottomline=false,
-linecolor=ChadBlue,
+linecolor=ChadPurple,
 backgroundcolor=black!5,
 innerleftmargin=5pt,
 innerrightmargin=5pt,
-innertopmargin=5pt,
+innertopmargin=7pt,
 leftmargin=0cm,
 rightmargin=0cm,
 linewidth=4pt,
-innerbottommargin=5pt]{pBox}
+innerbottommargin=7pt]{pBox}
 
 % назначаем
-\newenvironment{proposition}{\begin{pBox}\begin{propositionT}}{\end{propositionT}\end{pBox}}
+\newenvironment{note}{\begin{dBox}\begin{propositionT}}{\end{propositionT}\end{dBox}}
 
 %----------------------------------------------------------------------------------------
 %	РЕМАРКИ И АЛГОРИТМЫ

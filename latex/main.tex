@@ -6,7 +6,6 @@
 \usepackage[utf8]{inputenc}
 \usepackage{fancyhdr}
 
-
 % ----------- support Chinese -------------
 \usepackage{CJKutf8}
 \usepackage{cmap}
@@ -26,8 +25,16 @@
 % ----------- End: support table and shline -------------
 
 \usepackage{fontawesome5}  % for icons used in the Author page
+\usepackage{dirtree}  % for folder structure
+\renewcommand*\DTstylecomment{\rmfamily\color{blue}}
+\renewcommand*\DTstyle{\ttfamily\textcolor{red}}
 
+%\newcommand{\todo}[1]{{\color{red}{#1}}} % need to fill
 
+\DisemulatePackage{setspace}
+\usepackage{setspace}
+\setstretch{1.1}
+\setlength{\parskip}{5pt}
 
 %\usepackage{import}
 \usepackage{subfiles}
@@ -79,7 +86,9 @@
 	\vspace{0.5cm}
 	\begin{CJK}{UTF8}{gbsn}
 
-		本文档的最新版可从 \url{https://github.com/XPixelGroup/BasicSR} 下载。
+		本文档的最新版可以从 \url{https://github.com/XPixelGroup/BasicSR-docs/releases} 下载。
+
+		欢迎大家一起来帮助查找文档中的错误，完善文档。
 	\end{CJK}
 
 	%\vspace{0.3cm}
@@ -105,11 +114,13 @@
 \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
 \lhead{第~\thechapter~章: \leftmark}
 
+\subfile{sections/overview.tex}
 \subfile{sections/introduction.tex}
 \subfile{sections/code_structure.tex}
 \subfile{sections/metrics.tex}
 \subfile{sections/deploy.tex}
 \subfile{sections/experience.tex}
+
 \end{CJK}
 
 	\clearpage
