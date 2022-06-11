@@ -6,73 +6,110 @@
 \chapter{概述}
 \vspace{-2cm}
 
-简要总结
+本章节对本文档、BasicSR 以及使用方式与场景做一个简略的概述。
+
+\section{本文档说明}
+
+本文档旨在完整地介绍 BasicSR 的设计和框架，为入门者提供一份上手指南，为使用者提供一份日常参考。
+
+本文档不涉及具体函数和代码的介绍。如果需要具体函数和代码的介绍，请查阅 BasicSR 的在线 API 文档。我们更推荐读者直接查看代码，这样可以更加完整、细致的了解实现细节。
+
+\begin{hl} % ---------------- Highlight block ---------------- %
+	\textbf{BasicSR API 文档}
+	
+	BasicSR 的 API 文档是实时更新的，并且发布在 readthedocs.io 网站上：
+	
+	\url{https://basicsr.readthedocs.io/en/latest/}
+	
+	国内可能访问速度缓慢，后续我们会考虑导出 PDF 文档作为附录。
+\end{hl}
+
+本文档也不涉及超分和复原的专业入门。我们先挖一个大坑：后面我们会推出超分复原入门与经典工作解读的文档。
 
 \section{BasicSR 介绍}
 
-- Repo 目的
+BasicSR 是一个开源项目，旨在提供一个方便易用的图像、视频的超分、复原、增强的工具箱。我们希望它能够：
 
-- XPixel 介绍，加入XPixel后的发展
+\centerline{使入门者更快上手；}
+\centerline{使研究者更方便实验；}
+\centerline{使更多人更容易使用更先进的算法。}
 
-- 主要对象
+BasicSR 代码库从2018年4月20日开始第一个提交，然后随着做研究、打比赛、发论文，逐渐发展与完善起来。它从最开始的针对超分辨率算法到后来拓展到其他更多复原增强相关的算法，因此，BasicSR 中 SR 的涵义也从 Super-Resolution 延拓到 Super-Restoration。
 
-\textbf{参考：\url{https://zhuanlan.zhihu.com/p/261223409} 。 需要修改}
+2022年5月9日，BasicSR 迎来新的里程碑，它加入到 XPixel 大家庭中，和更多的小伙伴们一起致力于把 BasicSR 建设得更好！
 
-\textbf{粗体}
-
-\uline{下划线}
-\newline
-
-
-
-\begin{hl} % ---------------- Highlight block ---------------- %
-	\textbf{重要信息可以这么用, 这是总起句}
+\begin{exampleBox}[]{XPixel 团队介绍}
 	
-	正常 Latex 使用
-	\begin{itemize}
-		\item $\St$ --- zzzz.
-		\item $\Trans$ --- yyy $\{p(s_{t+1} \HM\mid s_t) \HM\mid t \HM\in \{0, 1, \dots \}, s_t, s_{t+1} \HM\in \St\}$.
-	\end{itemize}
-\end{hl}
-
-\begin{note} % ---------------- Note block ---------------- %
-	\textbf{Note 信息可以这么用，这是总起句}
+	XPixel 团队是...，它的愿景是让世界看得更清晰、更美好 （Make the world look clearer and better!）\todo{需要添加与完善}
 	
-	正常 Latex 使用
-	
-	\href{http://xxx.com}{这是 URL。}
-\end{note}
-
-\begin{exampleBox}[righthand ratio=0.35, sidebyside, sidebyside align=center, lower separated=false]{题目}
-	
-	示例box，可以放什么东西呢，还没有想好
-	
-	等后面再看看
+	官网地址：\url{https://xpixel.group/}
 \end{exampleBox}
 
-\section{使用场景}
+\section{使用方式与场景}
 
-- 直接使用
+BasicSR 主要有两种使用方式：
 
-- 当作 package 使用
+\subsection{本地克隆仓库}
 
-参考：
+在这个方式下，我们把整个 BasicSR 的代码都 copy/clone 下来，也就可以方便地查看 BasicSR 的完整代码，修改并使用。
 
-- \url{https://mp.weixin.qq.com/s/qNX7-1qmKoOFnj9-OprUQg}
+当我们尝试复现、开发方法的时候，我们比较推荐这个方式，因为可以更好地看到代码全貌，方便调试。
 
-- \url{https://github.com/xinntao/BasicSR-examples/blob/master/README_CN.md}
+它的弱点是：
 
-- 有缺点，比较难以修改。有些核心部分在 BasicSR package 里面
+\begin{enumerate}
+	\item 整个仓库中有很多不需要使用的代码。因为 BasicSR 提供了很多方法的实现，在你自己的实验中，大部分的代码并不需要。但是，当你了解完 BasicSR 的代码框架后，你就放心地知道，它们并不影响。它们基本都是独立存在的。
+	\item 当你 release 你自己新开发的方法 (假设叫 NBCNN) 的代码时，会遇到麻烦：你必须要 release 包含整个 BasicSR 的代码，而不能专注于 NBCNN 的核心代码。遇到这种情况，我们就可以用下面的使用场景：把 basicsr 当作一个 Python package。
+\end{enumerate}
 
-%\setlength{\columnsep}{0.7cm}
-\begin{wrapfigure}{r}{0.4\linewidth}
-	%\vspace{-0.3cm}
-	\centering
-	\includegraphics[width=0.4\textwidth]{figures/agentenv.png}
-	\vspace{-0.6cm}
-	\caption{图标题。}
-	\label{fig:env}
-	%\vspace{-2.6cm}
-\end{wrapfigure}
+\begin{note} % ---------------- Note block ---------------- %
+	\textbf{本地克隆仓库的安装方法}
+		
+	参见章节\ref{installation:local-clone}：\nameref{installation:local-clone}。
+\end{note}
+
+
+\subsection{把 basicsr 当作一个 Python package}
+
+BasicSR 也有一个单独的 Python package --- basicsr，发布在 \href{https://pypi.org/project/basicsr}{pypi} 上。
+它可以通过 pip 安装，提供了训练框架、流程、BasicSR 中已有的函数和功能。你可以基于 basicsr 方便地搭建你自己的项目基。例如，
+
+\centerline{基于 basicsr 搭建的 \href{https://github.com/xinntao/Real-ESRGAN}{Real-ESRGAN}；}
+\centerline{基于 basicsr 搭建的 \href{https://github.com/TencentARC/GFPGAN}{GFPGAN}。}
+
+它们都使用了 basicsr 里面已有的函数和功能，因此只要专注于新方法的功能即可。
+
+一般来说，深度学习项目都可以分为以下几个部分：
+\begin{itemize}
+	\item data: 定义了训练数据，来喂给模型的训练
+	\item arch (architecture): 定义了网络结构和forward的步骤
+	\item model: 定义了在训练中必要的组件（比如 loss） 和 一次完整的训练过程（包括前向传播，反向传播，梯度优化等），还有其他功能，比如 validation 等
+	\item training pipeline: 定义了训练的流程，即把数据 dataloader，模型，validation，保存 checkpoints 等等串联起来
+\end{itemize}
+
+我们开发一个新的方法时，我们往往在改进 data, arch, model 这几块内容。而很多流程、基础的功能其实是共用的。
+
+BasicSR 就把很多相似的功能都独立出来，我们只要关心 data, arch, model 的开发即可。而 basicsr 这个 Python package，则可以进一步将已有函数和功能封装起来，我们只要关心新方法的开发即可。
+
+
+\begin{note} % ---------------- Note block ---------------- %
+	\textbf{把 basicsr 当作一个 Python package 的安装方法}
+	
+	参见章节\ref{installation:pip}：\nameref{installation:pip}。
+\end{note}
+
+\textbf{}
+
+\begin{note} % ---------------- Note block ---------------- %
+	\textbf{如何基于 basicsr Python package 来开发呢？}
+	
+	我们建立了一个模板：\href{https://github.com/xinntao/BasicSR-examples}{BasicSR-examples}.
+	
+	开发方法参见： \url{https://github.com/xinntao/BasicSR-examples/blob/master/README_CN.md}。
+\end{note}
+
+当然，直接使用 basicsr Python package 也有缺点：它会调用 BasicSR 里面的函数，如果里面的函数不能满足需求，或者有 bug 的情况，我们往往难以修改。（需要进入安装 pip package 的地方进行修改）。
+
+为了应对这种情况，我们一般是在本地克隆仓库的情况下开发，然后等到 release 新方法的时候，再基于 \href{https://github.com/xinntao/BasicSR-examples}{BasicSR-examples} 新建一个仓库，使用 basicsr 的 pip package。
 
 \end{document}
