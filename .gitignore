@@ -8,6 +8,8 @@ resources
 
 *.synctex.gz
 *.brf
+*.fdb_latexmk
+*.fls
 *.log
 *.aux
 *.cfg
