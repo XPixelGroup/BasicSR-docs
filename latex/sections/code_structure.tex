@@ -35,86 +35,211 @@
 
 - 如何避免重复的类名和函数名
 
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
-class RepConv(nn.Module):
-    """Re-parameterizable block for RepSR."""
+% \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+% class RepConv(nn.Module):
+%     """Re-parameterizable block for RepSR."""
 
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride=1,
-                 padding=0,
-                 dilation=1,
-                 groups=1,
-                 padding_mode='zeros',
-                 deploy=False,
-                 width_multiplier=2,
-                 with_bn=True,
-                 frozen_bn=False):
-        super(RepConv, self).__init__()
-        self.deploy = deploy
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.kernel_size = kernel_size
-        self.stride = stride
-        self.padding = padding
-        self.dilation = dilation
-        self.groups = groups
-        self.with_bn = with_bn
-        self.frozen_bn = frozen_bn
+%     def __init__(self,
+%                  in_channels,
+%                  out_channels,
+%                  kernel_size,
+%                  stride=1,
+%                  padding=0,
+%                  dilation=1,
+%                  groups=1,
+%                  padding_mode='zeros',
+%                  deploy=False,
+%                  width_multiplier=2,
+%                  with_bn=True,
+%                  frozen_bn=False):
+%         super(RepConv, self).__init__()
+%         self.deploy = deploy
+%         self.in_channels = in_channels
+%         self.out_channels = out_channels
+%         self.kernel_size = kernel_size
+%         self.stride = stride
+%         self.padding = padding
+%         self.dilation = dilation
+%         self.groups = groups
+%         self.with_bn = with_bn
+%         self.frozen_bn = frozen_bn
 
-        self.mid_channels = out_channels * width_multiplier
-        self.rep_c1_2 = nn.Conv2d(
-            in_channels=self.mid_channels,
-            out_channels=out_channels,
-            kernel_size=1,
-            stride=stride,
-            padding=0,
-            groups=groups,
-            bias=True)
+%         self.mid_channels = out_channels * width_multiplier
+%         self.rep_c1_2 = nn.Conv2d(
+%             in_channels=self.mid_channels,
+%             out_channels=out_channels,
+%             kernel_size=1,
+%             stride=stride,
+%             padding=0,
+%             groups=groups,
+%             bias=True)
 
-        # initialization
-        init_list = [
-            self.rep_identity, self.rep_c3_1, self.rep_c1_1, self.rep_c3_2,
-            self.rep_c1_2
-        ]
-        if with_bn:
-            init_list.extend([self.rep_bn_1, self.rep_bn_2])
-        default_init_weights(init_list, scale=0.1)
+%         # initialization
+%         init_list = [
+%             self.rep_identity, self.rep_c3_1, self.rep_c1_1, self.rep_c3_2,
+%             self.rep_c1_2
+%         ]
+%         if with_bn:
+%             init_list.extend([self.rep_bn_1, self.rep_bn_2])
+%         default_init_weights(init_list, scale=0.1)
 
-    def forward(self, inputs, frozen_bn=None):
-        if frozen_bn is None:
-            frozen_bn = self.frozen_bn
+%     def forward(self, inputs, frozen_bn=None):
+%         if frozen_bn is None:
+%             frozen_bn = self.frozen_bn
 
-        if hasattr(self, 'rep_merge'):
-            return self.rep_merge(inputs)
-        if self.with_bn:
-            id_out = self.rep_identity(inputs)
-            out_1 = self.rep_c1_1(
-                self.rep_bn_1(self.rep_c3_1(inputs), frozen_bn))
-            out_2 = self.rep_c1_2(
-                self.rep_bn_2(self.rep_c3_2(inputs), frozen_bn))
-        else:
-            id_out = self.rep_identity(inputs)
-            out_1 = self.rep_c1_1(self.rep_c3_1(inputs))
-            out_2 = self.rep_c1_2(self.rep_c3_2(inputs))
+%         if hasattr(self, 'rep_merge'):
+%             return self.rep_merge(inputs)
+%         if self.with_bn:
+%             id_out = self.rep_identity(inputs)
+%             out_1 = self.rep_c1_1(
+%                 self.rep_bn_1(self.rep_c3_1(inputs), frozen_bn))
+%             out_2 = self.rep_c1_2(
+%                 self.rep_bn_2(self.rep_c3_2(inputs), frozen_bn))
+%         else:
+%             id_out = self.rep_identity(inputs)
+%             out_1 = self.rep_c1_1(self.rep_c3_1(inputs))
+%             out_2 = self.rep_c1_2(self.rep_c3_2(inputs))
 
-        return id_out + out_1 + out_2
-\end{minted}
+%         return id_out + out_1 + out_2
+% \end{minted}
 
 
 \section{数据(Data Loader)}
 
 \section{网络结构(Architecture)}
 
+
+本文档旨在完整地介绍 BasicSR 的设计和框架，为入门者提供一份上手指南，为使用者提供一份日常参考。
+
+本文档不涉及具体函数和代码的介绍。如果需要具体函数和代码的介绍，请查阅 BasicSR 的在线 API 文档。我们更推荐读者直接查看代码，这样可以更加完整、细致的了解实现细节。
+
+\begin{hl} % ---------------- Highlight block ---------------- %
+	\textbf{BasicSR API 文档}
+
+	BasicSR 的 API 文档是实时更新的，并且发布在 readthedocs.io 网站上：
+
+	\url{https://basicsr.readthedocs.io/en/latest/}
+
+	国内可能访问速度缓慢，后续我们会考虑导出 PDF 文档作为附录。
+\end{hl}
+
 \section{模型(Model)}
 
-- Base模型
+模型部分定义了许多模型级别的操作，比如训练设置、训练数据如何送入模型、优化器的选择、损失函数计算、模型参数更新、训练中验证、测试过程等。模型部分定义在：
 
-- 其他模型
+\dirtree{%
+	.1 BasicSR.
+	.2 basicsr.
+	.3 models.
+}
 
-- 继承关系
+目前BasicSR支持的模型有：
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{类}     & \textbf{描述}    & \textbf{支持的算法}                            \\ \hline
+Base\_Model      & 抽象基类, 定义了共有的函数 &                                           \\ \hline
+SR\_Model        & 基础图像超分类        &  \begin{tabular}[c]{@{}l@{}}SRCNN, EDSR, SRResNet, \\ RCAN, RRDBNet, etc\end{tabular} \\ \hline
+SRGANModel     & SRGAN图像超分类     & SRGAN                                     \\ \hline
+ESRGAN\_Model    & ESRGAN图像超分类    & ESRGAN                                    \\ \hline
+VideoBase\_Model & 基础视频超分类        &                                           \\ \hline
+EDVR\_Model      & EDVR视频超分类      & EDVR                                      \\ \hline
+StyleGAN2\_Model & StyleGAN2图像生成类 & StyleGAN2                                 \\ \hline
+\end{tabular}
+\end{center}
+\caption{支持的模型。}
+      %
+\end{table}
+
+
+为增加模型间的复用, 我们大量使用了继承, 以下为各个模型之间的继承关系:
+\newline
+\dirtree{%
+	.1 Base\_Model.
+	.2 SR\_Model.
+	.3 ESRGAN\_Model.
+	.2 VideoBase\_Model.
+	.3 EDVR\_Model.
+	.2 StyleGAN2\_Model.
+}
+
+
+下面具体介绍一些重要模型及其功能，以及如何按照自己的需求自定义新的模型。
+
+\subsection{Base Model}
+Base Model是所有模型的基类，定义一些共同操作。比如：
+
+输出网络信息：
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+print_network(self, net)
+\end{minted}
+
+保存模型、训练状态、加载模型：
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+save_network(self, net, net_label, current_iter, param_key='params')
+save_training_state(self, epoch, current_iter)
+load_network(self, net, load_path, strict=True, param_key='params')
+\end{minted}
+
+定义初始学习率、学习率更新：
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+_get_init_lr(self)
+update_learning_rate(self, current_iter, warmup_iter=-1)
+\end{minted}
+
+\begin{hl} % ---------------- Highlight block ---------------- %
+Base Model的很多函数，可以在继承后的模型中根据要求来重写，比如不同模型读取数据的方式不同，则会重写不同的 feed\_data() 函数。
+\end{hl}
+
+\subsection{其他模型，以SR Model为例}\label{Model:SR Model}
+
+SR Model是图像超分辨率模型的类，定义了基础的单张图像超分辨率模型。下面从一个模型的训练角度展示其中重要的函数：
+
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+init_training_settings(self)
+\end{minted}
+
+初始化训练设置。包括优化器、损失函数的定义，学习率的初始化等。
+
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+feed_data(self, data)
+\end{minted}
+
+把训练数据送入模型。这里是从dataloader中取出数据，用于训练或测试。在SR Model中，每次取用一个batch(n,c,h,w)数量的LR和GT图像。
+
+其他模型对batch做不同操作时，经常会改写这个函数。比如只读取GT、读取额外label、读取图像路径、对读取的数据增加degradation等操作，都通过修改feed\_data来实现。
+
+
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+optimize_parameters(self, current_iter)
+\end{minted}
+
+更新模型参数。在这个函数中，会实际调用模型跑出SR图像，再将SR与GT代入损失函数计算loss，并且进行loss的回传和参数的更新。当有多个loss或需要自己添加loss时，或者需要特殊的更新步骤时，修改这里。
+
+比如在GAN系列的Model中，这个函数就是SR图像与GT一起输入Discriminator来得到loss，再将不同的loss进行加权组合。并且Generator和Discriminator的参数都需要更新。
+
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+nondist_validation(self, dataloader, current_iter, tb_logger, save_img)
+\end{minted}
+
+训练中进行验证。会停止训练，调用test()，进行验证并记录指标、保存结果图，然后继续训练。
+
+其他model的思想与SR Model大同小异，都是相互继承公用的函数，单独改写有特别需求的函数，完成一个模型包括获得数据、更新参数、验证等步骤的训练过程。
+
+
+\subsection{自定义模型，以SRGAN Model为例}
+
+当需要自定义某个模型的时候，首先在/basicsr/models下新建XXX\_model.py文件，根据需要继承Base Model或其他model，然后根据自己的需求改写主要函数即可。
+
+比如SRGAN\_Model继承了绝大多数SR\_Model的函数，但是改写了optimize\_parameters()。而RealSRGAN\_Model又继承了SRGAN\_Model，改写了feed\_data()以在线生成带有不同degradation的训练数据。
+
+\begin{note} % ---------------- Note block ---------------- %
+	上述被改写函数的介绍，参见章节\ref{Model:SR Model}。
+\end{note}
+
+
 
 \section{损失函数(Loss)}
 
