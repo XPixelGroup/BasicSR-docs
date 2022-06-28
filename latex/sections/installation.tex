@@ -6,23 +6,251 @@
 \chapter{安装}
 \vspace{-2cm}
 
-简要总结
-
-参考：
-
-- \url{https://github.com/XPixelGroup/BasicSR/blob/master/INSTALL.md}
+本章节介绍了两种不同的安装 BasicSR 方式：本地 clone 和通过 pip 安装；除此之外，我们将安装过程中有可能会遇到的一些问题进行了汇总。
 
 \section{环境要求}
 
+\begin{enumerate}
+    \item Python 版本 >= 3.7 (推荐使用\href{https://www.anaconda.com/products/distribution#linux}{Anaconda}或者\href{https://docs.conda.io/en/latest/miniconda.html}{Miniconda})
+    \item \href{https://pytorch.org/}{PyTorch 版本 >= 1.7}
+    \item NVIDIA GPU + \href{https://developer.nvidia.com/cuda-downloads}{CUDA}
+    \item \href{https://pytorch.org/}{Torchvision 版本 >= 0.9.0} (推荐)
+\end{enumerate}
 
-\section{推荐安装: 本地 Clone}\label{installation:local-clone}
+\section{BASICSR\_EXT 和 BASICSR\_JIT 环境变量介绍}
+\label{section:env}
 
-- BASICSR\_EXT and BASICSR\_JIT 环境变量
+如果项目中不需要使用以下的 PyTorch C++ 扩展，则此小节可以跳过：
 
-- Windows 下环境变量
+\begin{itemize}
+    \item 可变性卷积 (如果安装的 Torchvision 版本 >= 0.9.0，可跳过)：\href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/ops}{EDVR 中的 DCN}
 
-\section{pip 安装}\label{installation:pip}
+    \item StyleGAN 中的特定的算子：\href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/ops}{upfirdn2d, fused\_act}
+\end{itemize}
+
+如果需要使用 PyTorch C++ 扩展，可参考以下两种方式中的任意一种：
+
+\begin{enumerate}
+    \item \textbf{安装}的时候对 PyTorch C++ 扩展进行编译；
+    \item 或者\textbf{每次在跑程序}的时候\textbf{即时加载 (JIT)} PyTorch C++ 扩展。
+\end{enumerate}
+
+
+这两种不同选择的对比如表\ref{tab:env}所示：
+
+\begin{table}[h]
+\centering
+\footnotesize
+\begin{tabular}{|c|c|c|c|c|}
+%   \hline
+%   \multicolumn{5}{|c|}{BASICSR\_EXT和BASICSR\_JIT环境变量的对比} \\
+  \hline
+  选项                     & 优点                  & 缺点                            & 适用场景         & 具体安装指令 \\
+  \hline
+  编译C++扩展 & \makecell[c]{运行代码的时候, \\ 能够快速加载扩展} & \makecell*[c]{配置环境的时候, \\ 需要更多的依赖，\\碰到的问题可能更多} & \makecell[c]{需要多次训练 \\ 或者测试模型} & \makecell[c]{在安装的时候，设置 \\BASICSR\_EXT=True}\\
+  \hline
+  即时加载C++扩展 & \makecell[c]{有着更少的依赖，\\碰到的问题可能更少} & \makecell[c]{每次运行代码的时候，\\都需要花费几分钟\\重新加载扩展} & 仅仅是进行测试 & \makecell[c]{在跑程序的时候，设置 \\BASICSR\_JIT=True} \\
+  \hline
+\end{tabular}
+\caption{\label{tab:env}BASICSR\_EXT和BASICSR\_JIT环境变量的对比.}
+\end{table}
+
+
+\begin{note} % ---------------- Note block ---------------- %
+	\textbf{注意}
+
+	\begin{enumerate}
+	    \item 对于需要在安装的时候就编译 PyTorch C++ 扩展，需要确保：gcc 和 g++ 版本 >= 5。
+	    \item BasicSR\_JIT 有最高的优先级。即使在安装的时候已经成功编译了 C++ 扩展，如果在运行代码指令中设置了 BasicSR\_JIT=True，此时代码会即时加载 C++ 扩展。
+	    \item 在\textbf{安装}的时候，不能设置 BasicSR\_JIT=True。
+	\end{enumerate}
+\end{note}
+
+
+\section{BasicSR 安装}
+
+
+\begin{hl} % ---------------- Highlight block ---------------- %
+	\textbf{BasicSR 安装选项}
+
+	根据不同的需求，我们提供了两种不同的安装 BasicSR 的方式。
+	\begin{itemize}
+		\item 如果希望去\textbf{探究 BasicSR 中的细节}或者需要对其进行\textbf{修改}，推荐从本地 clone 进行安装。
+		\item 如果仅仅是将 BasicSR 作为一个\textbf{功能包}进行使用 (如\href{https://github.com/TencentARC/GFPGAN}{GFPGAN}，\href{https://github.com/xinntao/Real-ESRGAN}{Real-ESRGAN})，推荐直接从 PyPI 安装 BasicSR，这样可以使得自身项目的代码结构更加简洁。
+	\end{itemize}
+\end{hl}
+
+\subsection{本地 clone}
+
+要通过本地 clone 安装 BasicSR，需要依次进行以下3个步骤。
+
+\begin{enumerate}
+    \item 克隆项目：
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+git clone https://github.com/XPixelGroup/BasicSR.git
+    \end{minted}
+
+    \item 安装依赖包：
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+cd BasicSR
+pip install -r requirements.txt
+    \end{minted}
+
+    \item 安装 BasicSR (我们提供了以下三种安装选项)
+
+    \begin{enumerate}
+    \item 如果不需要使用 PyTorch C++ 扩展：(参考\ref{section:env})
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+
+python setup.py develop
+
+    \end{minted}
+
+    \item 如果仅仅希望即时加载 PyTorch C++ 扩展 ：
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+
+python setup.py develop
+
+    \end{minted}
+    \item 如果在安装的时候希望编译 PyTorch C++ 扩展，此时需要设置环境变量：
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+
+BASICSR_EXT=True python setup.py develop
+
+    \end{minted}
+\end{enumerate}
+
+
+\end{enumerate}
+
+\label{section:clone}
+
+
+
+如果希望安装的时候指定 CUDA 路径，可以输入如下指令：
+
+\begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+
+CUDA_HOME=/usr/local/cuda \
+CUDNN_INCLUDE_DIR=/usr/local/cuda \
+CUDNN_LIB_DIR=/usr/local/cuda \
+(BASICSR_EXT=True) python setup.py develop
+
+\end{minted}
+
+\subsection{pip 安装}
+对于使用 pip 安装 BasicSR，我们提供了以下三种安装选项。
+
+\begin{enumerate}
+    \item 如果项目中不涉及 PyTorch C++ 扩展：
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+
+pip install basicsr
+
+    \end{minted}
+
+    \item 如果仅仅希望即时加载 PyTorch C++ 扩展： (参考\ref{section:env})
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+
+pip install basicsr
+
+    \end{minted}
+
+    \item 如果在安装的时候希望编译 PyTorch C++ 扩展，此时需要设置环境变量：
+
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+
+BASICSR_EXT=True pip install basicsr
+
+    \end{minted}
+
+    \begin{note} % ---------------- Note block ---------------- %
+    	\textbf{注意}
+
+    	如果安装失败，报错信息为 \textit{ImportError: cannot import name 'deform\_conv\_ext', 'fused\_act\_ext', 'upfirdn2d\_ext'}，此时需要重新安装，并输入以下指令从而在安装的时候获取详尽的日志：
+
+    	\begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+
+BASICSR_EXT=True pip install basicsr -vvv
+
+        \end{minted}
+
+    \end{note}
+
+\end{enumerate}
+
+
+如果希望安装的时候指定 CUDA 路径，可以输入如下指令：
+
+\begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+
+CUDA_HOME=/usr/local/cuda \
+CUDNN_INCLUDE_DIR=/usr/local/cuda \
+CUDNN_LIB_DIR=/usr/local/cuda \
+(BASICSR_EXT=True) pip install basicsr
+
+\end{minted}
+
+
+
 
 \section{常见问题}
+
+
+\begin{enumerate}
+    \item \textbf{Q1: Windows 下是否可以使用？}
+
+    经过验证，Windows 下可以通过上述的两种安装方式安装 BasicSR 的 CPU 版本。如果需要使用 CUDA，需要指定 CUDA 路径。由于 BasicSR 项目是在 Linux 环境下进行开发的，因此推荐在 Linux 环境下基于 BasicSR 进行项目的开发。
+
+    \item \textbf{Q2: BASICSR\_EXT 和 BASICSR\_JIT 在什么环境下才能执行？}
+
+    如果在加入 BASICSR\_EXT 和 BASICSR\_JIT 环境变量之后运行报错，此时需要检测 gcc 版本。BasicSR 在已被验证在 gcc5 $\sim$ gcc7 版本下可以成功编译 C++ 扩展。
+
+    \item \textbf{Q3: 是否可以同时使用上面提到的两种方式 (clone 和 pip) 安装了 BasicSR？}
+
+    上述两种安装方式只能选择一种进行安装，安装两个会存在路径混淆问题，并有可能会出现问题如\ref{fig:install}所示
+
+\begin{figure}[H]
+	%\vspace{-0.5cm}
+	\begin{center}
+		%\fbox{\rule{0pt}{2.5in} \rule{0.9\linewidth}{0pt}}
+		\includegraphics[width=0.8\linewidth]{figures/section2_install.jpg}
+		\caption{安装了多个 BasicSR 导致冲突}
+		\label{fig:install}
+	\end{center}
+	\vspace{-0.5cm}
+\end{figure}
+    此时需要执行指令：
+\begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+
+pip uninstall basicsr
+
+\end{minted}
+
+    先将安装的 BasicSR 进行卸载，随后再根据项目的需要重新选择一种方式安装 BasicSR 。
+
+    \item \textbf{Q4: 如何确定当前是使用了哪种方式安装 BasicSR ？}
+
+可以在命令终端输入下面的指令进行查看：
+\begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+
+pip list
+
+\end{minted}
+
+    如果 basicsr 对应的地址指向的是本地的 BasicSR 项目，那就说明是通过 clone 进行安装。
+
+    \item \textbf{Q5: 如何更新最新版本的 BasicSR？}
+
+\begin{enumerate}
+    \item 对于 clone 安装，需要将本地的 BasicSR 项目代码与\href{https://github.com/XPixelGroup/BasicSR}{远端的 BasicSR 项目代码}进行同步。
+    \item 对于 pip 安装，需要先卸载当前版本的 BasicSR，再重新使用 pip 安装最新版本的 BasicSR。
+\end{enumerate}
+
+    % \item \textbf{Q6: 如何解决运行代码时出现的 version 问题？}
+
+
+\end{enumerate}
+
 
 \end{document}
