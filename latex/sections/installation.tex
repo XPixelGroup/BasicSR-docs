@@ -206,19 +206,19 @@ set BASICSR_EXT=True
     具体而言，如果我们先通过 pip 安装了 BasicSR，如果我们随后又使用本地 clone 的方式进行安装，此时项目中调用的 BasicSR 路径还是 pip 安装的 BasicSR；反过来，如果先使用本地 clone 的方式进行安装，随后又使用 pip 安装，此时项目中调用的 BasicSR 路径还是本地 clone 下的BasicSR (如图\ref{fig:false-clone-install}和图\ref{fig:false-pip-install})。
 
 \begin{enumerate}
-    \item 我们通过本地 clone 正常安装的时候，此时使用 \texttt{pip list} 命令查看 basicsr 路径：
+    \item 我们通过本地 clone 安装成功的时候，此时使用 \texttt{pip list} 命令查看 basicsr 路径：
     \begin{figure}[H]
     %\vspace{-0.5cm}
     \begin{center}
         %\fbox{\rule{0pt}{2.5in} \rule{0.9\linewidth}{0pt}}
         \includegraphics[width=0.7\linewidth]{figures/installation_clone_install_location.jpg}
-        \caption{本地 clone 代码安装成功时的 basicsr 路径显示}
+        \caption{本地 clone 安装成功时的 basicsr 路径显示}
         \label{fig:correct-clone-install}
     \end{center}
     \vspace{-0.5cm}
     \end{figure}
 
-    \item 我们通过 pip 安装正常的时候，此时使用 \texttt{pip list} 命令查看 basicsr 路径：
+    \item 我们通过 pip 安装成功的时候，此时使用 \texttt{pip list} 命令查看 basicsr 路径：
     \begin{figure}[H]
     %\vspace{-0.5cm}
     \begin{center}
@@ -263,8 +263,8 @@ pip uninstall basicsr
     \item \textbf{Q4: 如何更新最新版本的 BasicSR？}
 
 \begin{enumerate}
-    \item 对于本地 clone 代码安装，需要将本地的 BasicSR 项目代码与\href{https://github.com/XPixelGroup/BasicSR}{远端的 BasicSR 项目代码}进行同步。
-    \item 对于 pip 安装，
+    \item 对于通过本地 clone 进行安装的方式，需要将本地的 BasicSR 项目代码与\href{https://github.com/XPixelGroup/BasicSR}{远端的 BasicSR 项目代码}进行同步。
+    \item 对于通过 pip 安装的方式，
     \begin{minted}[xleftmargin=20pt,bgcolor=bg]{bash}
 pip install basicsr --upgrade
     \end{minted}
