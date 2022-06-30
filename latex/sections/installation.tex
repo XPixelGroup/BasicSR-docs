@@ -203,10 +203,10 @@ set BASICSR_EXT=True
 
     很多问题都是由于安装路径混淆，其主要原因是本地 clone 代码和 pip 安装包两个方式被同时执行。
 
-    具体而言，如果我们先通过 pip 安装了 BasicSR，如果我们随后又使用本地 clone 的方式进行安装，此时项目中调用的 BasicSR 路径还是 pip 安装的 BasicSR；反过来，如果先使用本地 clone 的方式进行安装，随后又使用 pip 安装，此时项目中调用的 BasicSR 路径还是本地 clone 下的BasicSR (如图\ref{fig:false-clone-install}和图\ref{fig:false-pip-install})。
+    具体而言，如果先通过 pip 安装了 BasicSR，随后又使用本地 clone 的方式进行安装，此时项目中调用的 BasicSR 路径还是 pip 安装的 BasicSR；反过来，如果先使用本地 clone 的方式进行安装，随后又使用 pip 安装，此时项目中调用的 BasicSR 路径还是本地 clone 下的BasicSR (分别如图\ref{fig:false-clone-install}和图\ref{fig:false-pip-install}所示)。
 
 \begin{enumerate}
-    \item 我们通过本地 clone 安装成功的时候，此时使用 \texttt{pip list} 命令查看 basicsr 路径：
+    \item 通过本地 clone 安装成功的时候，此时使用 \texttt{pip list} 命令查看 basicsr 路径：
     \begin{figure}[H]
     %\vspace{-0.5cm}
     \begin{center}
@@ -218,7 +218,7 @@ set BASICSR_EXT=True
     \vspace{-0.5cm}
     \end{figure}
 
-    \item 我们通过 pip 安装成功的时候，此时使用 \texttt{pip list} 命令查看 basicsr 路径：
+    \item 通过 pip 安装成功的时候，此时使用 \texttt{pip list} 命令查看 basicsr 路径：
     \begin{figure}[H]
     %\vspace{-0.5cm}
     \begin{center}
