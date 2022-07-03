@@ -46,36 +46,45 @@
     .2 \textcolor{blue}{setup.py}\DTcomment{\textcolor{blue}{安装文件}}.
 }
 
-\vspace{1cm}
+\vspace{0.5cm}
 
-在 BasicSR 仓库中，核心代码在 basicsr 这个文件夹中。这个部分主要为深度学习模型常用的代码文件，比如网络结构，损失函数和数据加载等，具体目录如下：
+在 BasicSR 仓库中，核心代码在 basicsr 这个文件夹中。这个部分主要为深度学习模型常用的代码文件，比如网络结构，损失函数和数据加载等，具体目录如下。
+
+其中，\textcolor{red}{红色} 表示我们在开发中主要修改的文件。
+
+\vspace{0.5cm}
 \dirtree{%
-    .1 \textcolor{red}{basicsr}.
-    .2 \textcolor{red}{archs}\DTcomment{定义网络结构}.
-    .2 \textcolor{red}{data}\DTcomment{定义训练数据（Dataloader）}.
-    .2 \textcolor{red}{losses}\DTcomment{定义损失函数}.
-    .2 metrics\DTcomment{定义评价指标}.
-    .2 \textcolor{red}{models}\DTcomment{定义训练过程（前向，反向传播，梯度优化，测试等）}.
-    .2 ops\DTcomment{定义训练中的组件，例如styleGAN的算子}.
-    .2 utils\DTcomment{定义基础工具，例如file client和registry等}.
-    .2 \textcolor{red}{test.py}\DTcomment{定义测试流程}.
-    .2 \textcolor{red}{train.py}\DTcomment{定义训练流程}.
+    .1 \textcolor{orange}{basicsr}.
+    .2 \textcolor{red}{archs}\DTcomment{\textcolor{red}{定义网络结构和 forward 的步骤}}.
+    .2 \textcolor{red}{data}\DTcomment{\textcolor{red}{定义 Dataset 来喂给模型的训练，Dataloader 的定义也在这里}}.
+    .2 losses\DTcomment{定义损失函数}.
+    .2 metrics\DTcomment{定义评价指标，比如 PSNR，SSIM，NIQE 等}.
+    .2 \textcolor{red}{models}\DTcomment{\textcolor{red}{定义一次完整训练，比如前向、反向传播，梯度优化，Validation等}}.
+    .2 ops\DTcomment{定义需要编译的算子，例如 StyleGAN 中用到的算子等}.
+    .2 utils\DTcomment{定义基础工具，例如 file client，logger，registry，image process，matlab function等}.
+    .2 \textcolor{blue}{test.py}\DTcomment{\textcolor{blue}{定义测试流程，是测试文件的主文件、入口}}.
+    .2 \textcolor{blue}{train.py}\DTcomment{\textcolor{blue}{定义训练流程，是训练文件的主文件、入口}}.
 }
 
-由于在算法设计和开发中数据的预处理和测试等是必备的操作，相关的文件位于scripts，目录如下：
+\vspace{0.5cm}
+
+由于在算法设计和开发中，还需要用到一些脚本，比如数据的预处理、指标计算等，相关的文件位于scripts，目录如下：
+\vspace{0.5cm}
+
 \dirtree{%
-    .1 \textcolor{red}{scripts}.
-    .2 \textcolor{red}{data\_preparation}\DTcomment{准备数据}.
-    .2 matlab\_scripts\DTcomment{MATLAB语言的数据处理脚本}.
-    .2 metrics\DTcomment{评价指标，例如PSNR,SSIM和NIQE等}.
-    .2 model\_conversion\DTcomment{xx.pth模型的key转换脚本}.
-    .2 dist\_test.sh\DTcomment{分布式测试启动脚本}.
-    .2 dist\_train.sh\DTcomment{分布式训练启动脚本}.
-    .2 download\_gdrive.py\DTcomment{从Google Drive下载文件}.
-    .2 download\_pretrained\_models.py\DTcomment{从Google Drive批量下载预训练模型}.
-    .2 publish\_models\DTcomment{定义测试流程}.
+    .1 \textcolor{orange}{scripts}.
+    .2 data\_preparation\DTcomment{准备数据}.
+    .2 matlab\_scripts\DTcomment{基于 MATLAB 语言的数据处理脚本}.
+    .2 metrics\DTcomment{计算指标的脚本，例如 PSNR，SSIM，NIQE等}.
+    .2 model\_conversion\DTcomment{模型转换的脚本，主要是 .pth 文件的 keys 转换}.
+    .2 dist\_test.sh\DTcomment{方便的分布式测试启动脚本}.
+    .2 dist\_train.sh\DTcomment{方便的分布式训练启动脚本}.
+    .2 download\_gdrive.py\DTcomment{从 Google Drive 下载文件的脚本}.
+    .2 download\_pretrained\_models.py\DTcomment{从 Google Drive 批量下载预训练模型的脚本}.
+    .2 publish\_models\DTcomment{发布模型的脚本，包括添加 SHA 等}.
 }
 
+至此，我们对 BasicSR 的整体框架便有了一定的了解啦 $\sim$
 
 \section{训练流程}
 
