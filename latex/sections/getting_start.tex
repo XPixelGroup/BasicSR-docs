@@ -88,8 +88,16 @@
 
 \section{训练流程}
 
-在对目录结构有了初步的了解之后就可以进行训练了，本节主要是对训练流程对一些主要步骤进行介绍，比如训练对命令行以及相关参数和训练的主文件的代码块的功能逻辑。本节的目的是希望能够初步的让读者了解到训练的基本流程和代码逻辑流，具体的细节我们会采用引用的方式来供读者查阅。
+在对目录结构有了初步的了解之后就可以进行训练了。
 
+我们希望 BasicSR 即方便使用，又清晰易懂，降低使用者的门槛。但随着 BasicSR 代码库逐渐抽象、复杂起来，很多刚接触的同学不知道程序入口在哪里，数据、模型和网络是在哪里定义的，流程又是在哪里控制的......那么我们就通过一个例子简要地说一下。
+
+本节的目的是希望能够初步地让读者了解到训练的基本流程和代码逻辑流，具体的细节我们会采用引用的方式来供读者查阅。
+
+如果你已经熟悉 BasicSR 的主要框架和流程，可以跳过这一章节。
+
+\subsection{代码的入口和训练的准备工作}
+我们以训练超分辨率模型 MSRResNet 为例，训练的命令是：
 
 \begin{enumerate}
     \item 首先需要在终端输入命令来开始训练：
@@ -98,7 +106,7 @@
 python basicsr/train.py -opt options/train/SRResNet_SRGAN/train_MSRResNet_x4.yml
 \end{minted}
 
-    其中train\_MSRResNet\_x4为yml配置文件，主要设置实验相关的超参数和相关的一些配置参数。
+    其中 train\_MSRResNet\_x4.yml 为 yml 配置文件，设置所有与实验相关的配置参数。
 
     对于一些大型模型，可能需要采用分布式来进行训练，相关的命令可参考：
     \href{https://github.com/XPixelGroup/BasicSR/blob/master/docs/TrainTest.md}{分布式训练和测试命令}
@@ -159,6 +167,12 @@ def train_pipeline(root_path):
 # 根据配置需要，初始化tensorboard和wandb的logger
 
 \end{minted}
+\end{enumerate}
+
+\subsection{Data 和 Model 的创建}
+
+
+\begin{enumerate}
 
 \item 数据和模型等的初始化
 
@@ -193,8 +207,11 @@ else:
     Supported ones are: None, 'cuda', 'cpu'.")
 
 \end{minted}
+\end{enumerate}
 
+\subsection{训练过程}
 
+\begin{enumerate}
 \item 训练流程
 本小节是训练过程中对主要代码块，在经过了训练参数的初始化，数据和模型的初始化了之后，程序就从start\_epoch开始训练只至total\_epochs+1训练结束。其中主要的功能逻辑流为:
 
