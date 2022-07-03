@@ -375,10 +375,48 @@ def setup_schedulers(self):
 
 
 
-\section{算子}
+\section{算子 (Operator)}
 
-算子部分是某些c++代码的源码，在使用之前需要编译，详情参阅安装部分。
-EDVR用到了deformable convolution，StyleGAN2用到了 upfirdn2d and fused\_act。
+\subsection{什么是算子？}
+
+当使用pytorch时，绝大多数操作为张量 (Tensor) 的运算。张量计算的种类有很多，比如加法、乘法、矩阵相乘、矩阵转置等，这些计算被称为算子 (Operator)，它们是PyTorch的核心组件。
+
+一般情况下，pytorch推荐使用python层的前端语言来构建新的算子。但是有时候出于一些其他方面的考虑，会需要增加底层算子。例如有时候对性能要求很高，python不满足需求，又或者是需要链接其他的动态库(blas，mkl等)，因此pytorch也提供了直接扩展底层C++算子的能力。
+
+\subsection{BasicSR 中的自定义算子}
+
+BasicSR中所用的自定义算子代码在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/ops}{BasicSR/basicsr/ops} 中。采用C++ extension的方式添加。它与pytorch的相互解耦，分开编译，所以增加算子不需要修改pytorh的源码。它的原理其实就是通过pybind11，将C++编译为pytroch的一个模块，这样就可以在pytorch中通过这个新的模块来执行新的操作了。添加方法详情参阅 \href{https://pytorch.org/tutorials/advanced/cpp_extension.html#writing-a-mixed-c-cuda-extension}{pytorch官方文档} 。
+
+BasicSR中的自定义算子主要有deform\_conv，upfirdn2d，fused\_act三大类。deform\_conv主要用在各个视频恢复的模型上，是一种隐式的对齐方式。upfirdn2d，fused\_act，用在stylegan2中。
+
+\subsection{BasicSR 中算子的编译、安装、使用}
+
+\begin{note} % ---------------- Note block ---------------- %
+	编译和安装的过程参见\ref{Register}。
+\end{note}
+
+当算子成功编译之后，调用自定义算子就像调用pytorch原生算子一样。
+
+
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+# 调用pytorch原生算子
+from torch import nn
+
+Class xxx():
+    def __init__():
+        conv1 = nn.Conv2d(……)
+
+    def forward():
+        out = conv1(……)
+
+# 调用自定义算子，可以直接在forward中使用
+from basicsr.ops.upfirdn2d import upfirdn2d
+    
+    def forward():
+        out = upfirdn2d(……)
+
+\end{minted}
+
 
 \section{日志系统 (Logger)}
 
@@ -459,12 +497,21 @@ INFO: Validation validation
 
 \subsection{tb\_logger 记录及解读}
 
-除了上述的 log 文件外，BasicSR 还会生成可以用 tensorboard 打开的 tb\_logger 文件。一般保存在 BasicSR/experiments/tb\_logger/ 实验名。目前 BasicSR 里 tb\_logger 主要记录 validation 结果和训练过程中的 loss。validation 结果会随增加 metric 而增加，不过多赘述，重点介绍如何添加 loss 记录到 tb\_logger 。
+除了上述的 log 文件外，BasicSR 还会生成可以用 tensorboard 打开的 tb\_logger 文件。一般保存在 BasicSR/experiments/tb\_logger/ 实验名。
 
-\begin{hl} % ---------------- Highlight block ---------------- %
-虽说封装的很深，但是实际在框架中使用起来，只需要在 xx\_model.py 计算 loss 之后，把新的 loss， loss\_dict['新的loss'] = 新的loss ，即可同时记录在 tb\_logger 和 los 文件中。
-也可以使用这种方法记录不是 loss 的其他值。
-\end{hl}
+
+开启: 在 yml 配置文件中设置 `use\_tb\_logger: true`:
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+# yml
+    logger:
+      use_tb_logger: true
+\end{minted}
+
+在浏览器中查看：
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+# bash
+    tensorboard --logdir tb_logger --port 5500 --bind_all
+\end{minted}
 
 \begin{figure}[h]
     %\vspace{-0.5cm}
@@ -477,6 +524,13 @@ INFO: Validation validation
     \end{center}
     %\vspace{-0.7cm}
 \end{figure}
+
+目前 BasicSR 里 tb\_logger 主要记录 validation 结果和训练过程中的 loss。validation 结果会随增加 metric 而增加，不过多赘述，重点介绍如何添加 loss 记录到 tb\_logger 。
+
+\begin{hl} % ---------------- Highlight block ---------------- %
+虽说封装的很深，但是实际在框架中使用起来，只需要在 xx\_model.py 计算 loss 之后，把新的 loss， loss\_dict['新的loss'] = 新的loss ，即可同时记录在 tb\_logger 和 los 文件中。
+也可以使用这种方法记录不是 loss 的其他值。
+\end{hl}
 
 下面介绍具体的封装细节，tb\_logger 的初始化和记录代码为：
 
@@ -519,5 +573,26 @@ tb_logger.add_scalar(f'metrics/{metric}', value, current_iter)
     loss_dict['l_pix'] = l_pix
     self.log_dict = self.reduce_loss_dict(loss_dict)
 \end{minted}
+
+
+\subsection{Wandb 记录及解读}
+
+\href{https://www.wandb.com/}{wandb} 类似tensorboard的云端版本, 可以在浏览器方便地查看模型训练的过程和曲线。我们目前只是把tensorboard的内容同步到wandb上, 因此要使用wandb, 必须打开tensorboard logger，参见上一节。\href{https://wandb.ai/xintao/basicsr?workspace=user-}{BasicSR wandb示例}
+
+配置文件如下:
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+yml
+logger:
+  # 是否使用tensorboard logger
+  use_tb_logger: true
+  # 是否使用wandb logger,目前wandb只是同步tensorboard的内容,因此要使用wandb, 必须也同时使用tensorboard
+  wandb:
+    # wandb的project. 默认是 None, 即不使用wandb.
+    # 这里使用了 basicsr wandb project: https://app.wandb.ai/xintao/basicsr project: basicsr
+    # 如果是resume, 可以输入上次的wandb id, 则log可以接起来
+    resume_id: ~
+\end{minted}
+
+
 
 \end{document}
