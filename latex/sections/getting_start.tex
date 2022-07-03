@@ -1,79 +1,83 @@
 \documentclass[../main.tex]{subfiles}
-\usepackage{minted}
 
 \begin{document}
 
 \chapter{入门}
 \vspace{-2cm}
 
-本部分为BasicSR方法的入门部分，主要涉及的有目录解读，核心的工程文件以及其内部运行的逻辑关系，训练，测试和快速推理的流程。这个部分的主要介绍目的是希望读者能够快速的掌握BasicSR的整体结构用于自己开发使用。
+本部分为 BasicSR 方法的入门部分，主要涉及的有目录解读，核心的工程文件以及其内部运行的逻辑关系，训练，测试和快速推理的流程。这个部分的主要介绍目的是希望读者能够快速的掌握BasicSR的整体结构用于自己开发使用。
 
-\section{目录解读}
+\section{目录解读}\label{getting_start:content-overview}
+所谓“看书先看目录”。我们首先来看一下 BasicSR 仓库的基本结构，先来整体地把握一下。根据仓库的目录层级，第一部分为仓库的整体概览。这部分主要包括算法核心文件和代码基础配置文件。具体的目录结构如下。
 
-基本安装和配置完成之后，首先来看一下BasicSR仓库的基本结构，根据仓库的目录层级，第一部分为仓库的整体概览。这部分主要包括代码基础配置文件和算法核心文件。具体的目录结构如下:
+其中，\newline
+\noindent\textcolor{red}{红色} 表示和跑实验直接相关的文件，即我们平时打交道最多的文件；\newline
+\noindent\textcolor{blue}{蓝色} 表示其他与 BasicSR 强相关的代码文件；\newline
+\noindent\textcolor{black}{黑色} 表示配置文件。
 
-% 文件的大致使用类型分为三类，黑色的为代码基础配置文件，蓝色的为算法基础文件，红色的为算法核心文件。
-
-\newline
+\vspace{0.5cm}
 \renewcommand*\DTstyle{\ttfamily\textcolor{black}}
 \dirtree{%
-	.1 \textcolor{black}{BasicSR}.
-	.2 .github/workflows\DTcomment{GitHub的自动workflows,比如PyLint和PyPI Publish等}.
-	.2 .vscode\DTcomment{VSCode配置，用于统一格式}.
-	.2 LICENSE\DTcomment{仓库代码的LICENSE和Acknowledgement}.
-	.2 assets\DTcomment{仓库展示图片}. 
-	.2 \textcolor{red}{basicsr}\DTcomment{BasicSR核心代码包}.
-	.2 colab\DTcomment{Google Colab的Notebook, 提供方便的inference demo}.
-	.2 datasets\DTcomment{数据集存放，推荐soft link}.
-	.2 docs\DTcomment{使用和说明文档}.
-	.2 experiments\DTcomment{实验保存路径}.
-	.3 pretrained\_models\DTcomment{预训练模型保存路径}.
-	.2 inference\DTcomment{快速推理获得结果}.
-	.2 \textcolor{red}{options}\DTcomment{训练和测试配置文件}.
-	.2 \textcolor{red}{scripts}\DTcomment{功能脚本，包含数据集制作，指标测试和数据集下载等}.
-	.2 \textcolor{red}{tests}\DTcomment{简易代码单元测试}.
-	.2 .gitignore\DTcomment{Git忽略文件配置}.
-	.2 .pre-commit-config.yaml\DTcomment{Pre-commit Hook的配置文件}.
-	.2 INSTALL.md\DTcomment{安装指南}.
-	.2 MANIFEST.in\DTcomment{basicsr发布所需的相关文件}.
-	.2 README.md\DTcomment{说明文档}.
-	.2 README\_CN.md\DTcomment{说明文档中文版}.
-	.2 VERSION\DTcomment{版本文件}.
-	.2 requirements.txt\DTcomment{package依赖文件}.
-	.2 setup.cfg\DTcomment{格式配置文件（flake8,yapf和isort）}.
-	.2 \textcolor{red}{setup.py}\DTcomment{安装配置文件}.
+    .1 \textcolor{orange}{BasicSR 根目录}.
+    .2 .github/workflows\DTcomment{GitHub 的自动 workflows,比如 PyLint、PyPI Publish等}.
+    .2 .vscode\DTcomment{VSCode 配置，用于统一格式}.
+    .2 LICENSE\DTcomment{使用的其他代码的 LICENSE 和 Acknowledgement}.
+    .2 assets\DTcomment{存放仓库中展示使用的图片}.
+    .2 \uline{\textcolor{red}{basicsr}}\DTcomment{\textcolor{red}{BasicSR 核心代码}}.
+    .2 \textcolor{blue}{colab}\DTcomment{\textcolor{blue}{Google Colab 的 Notebook, 提供方便的 inference demo}}.
+    .2 \textcolor{red}{datasets}\DTcomment{\textcolor{red}{“存放”使用的数据集，推荐 soft link，做到代码、数据的分离}}.
+    .2 docs\DTcomment{使用和说明文档}.
+    .2 \textcolor{red}{experiments}\DTcomment{\textcolor{red}{实验 checkpoints 保存路径}}.
+    .3 \textcolor{blue}{pretrained\_models}\DTcomment{\textcolor{blue}{预训练模型存放路径}}.
+    .2 \textcolor{red}{inference}\DTcomment{\textcolor{red}{快速推理，主要用于得到 demo 结果}}.
+    .2 \uline{\textcolor{red}{options}}\DTcomment{\textcolor{red}{训练和测试的配置文件}}.
+    .2 \uline{\textcolor{red}{scripts}}\DTcomment{\textcolor{red}{功能脚本，包含数据集制作，指标测试和数据集下载等}}.
+    .2 \textcolor{blue}{test\_scripts}\DTcomment{\textcolor{blue}{一些用于手动单元测试的脚本}}.
+    .2 \textcolor{blue}{tests}\DTcomment{\textcolor{blue}{PyTest 自动单元测试}}.
+    .2 .gitignore\DTcomment{Git 忽略文件的配置}.
+    .2 .pre-commit-config.yaml\DTcomment{Pre-commit Hook 的配置文件}.
+    .2 .readthedocs.yaml\DTcomment{自动触发 basicsr.readthedocs.io 的配置文件}.
+    .2 MANIFEST.in\DTcomment{发布 basicsr 时，额外需要包含进去的文件}.
+    .2 README.md\DTcomment{说明文档}.
+    .2 README\_CN.md\DTcomment{说明文档中文版}.
+    .2 \textcolor{blue}{VERSION}\DTcomment{\textcolor{blue}{版本文件}}.
+    .2 \textcolor{blue}{requirements.txt}\DTcomment{ \textcolor{blue}{安装依赖包文件}}.
+    .2 setup.cfg\DTcomment{格式配置文件，比如 flake8，yapf 和 isort}.
+    .2 \textcolor{blue}{setup.py}\DTcomment{\textcolor{blue}{安装文件}}.
 }
 
-在BasicSR仓库中，核心代码包为basicsr，这个部分主要为深度学习模型常用的代码文件，比如网络结构，损失函数和数据加载等，具体目录如下：
+\vspace{1cm}
+
+在 BasicSR 仓库中，核心代码在 basicsr 这个文件夹中。这个部分主要为深度学习模型常用的代码文件，比如网络结构，损失函数和数据加载等，具体目录如下：
 \dirtree{%
-	.1 \textcolor{red}{basicsr}.
-	.2 \textcolor{red}{archs}\DTcomment{定义网络结构}.
-	.2 \textcolor{red}{data}\DTcomment{定义训练数据（Dataloader）}.
-	.2 \textcolor{red}{losses}\DTcomment{定义损失函数}.
-	.2 metrics\DTcomment{定义评价指标}.
-	.2 \textcolor{red}{models}\DTcomment{定义训练过程（前向，反向传播，梯度优化，测试等）}.
-	.2 ops\DTcomment{定义训练中的组件，例如styleGAN的算子}.
-	.2 utils\DTcomment{定义基础工具，例如file client和registry等}.
-	.2 \textcolor{red}{test.py}\DTcomment{定义测试流程}.
-	.2 \textcolor{red}{train.py}\DTcomment{定义训练流程}.
+    .1 \textcolor{red}{basicsr}.
+    .2 \textcolor{red}{archs}\DTcomment{定义网络结构}.
+    .2 \textcolor{red}{data}\DTcomment{定义训练数据（Dataloader）}.
+    .2 \textcolor{red}{losses}\DTcomment{定义损失函数}.
+    .2 metrics\DTcomment{定义评价指标}.
+    .2 \textcolor{red}{models}\DTcomment{定义训练过程（前向，反向传播，梯度优化，测试等）}.
+    .2 ops\DTcomment{定义训练中的组件，例如styleGAN的算子}.
+    .2 utils\DTcomment{定义基础工具，例如file client和registry等}.
+    .2 \textcolor{red}{test.py}\DTcomment{定义测试流程}.
+    .2 \textcolor{red}{train.py}\DTcomment{定义训练流程}.
 }
 
 由于在算法设计和开发中数据的预处理和测试等是必备的操作，相关的文件位于scripts，目录如下：
 \dirtree{%
-	.1 \textcolor{red}{scripts}.
-	.2 \textcolor{red}{data\_preparation}\DTcomment{准备数据}.
-	.2 matlab\_scripts\DTcomment{MATLAB语言的数据处理脚本}.
-	.2 metrics\DTcomment{评价指标，例如PSNR,SSIM和NIQE等}.
-	.2 model\_conversion\DTcomment{xx.pth模型的key转换脚本}.
-	.2 dist\_test.sh\DTcomment{分布式测试启动脚本}.
-	.2 dist\_train.sh\DTcomment{分布式训练启动脚本}.
-	.2 download\_gdrive.py\DTcomment{从Google Drive下载文件}.
-	.2 download\_pretrained\_models.py\DTcomment{从Google Drive批量下载预训练模型}.
-	.2 publish\_models\DTcomment{定义测试流程}.
+    .1 \textcolor{red}{scripts}.
+    .2 \textcolor{red}{data\_preparation}\DTcomment{准备数据}.
+    .2 matlab\_scripts\DTcomment{MATLAB语言的数据处理脚本}.
+    .2 metrics\DTcomment{评价指标，例如PSNR,SSIM和NIQE等}.
+    .2 model\_conversion\DTcomment{xx.pth模型的key转换脚本}.
+    .2 dist\_test.sh\DTcomment{分布式测试启动脚本}.
+    .2 dist\_train.sh\DTcomment{分布式训练启动脚本}.
+    .2 download\_gdrive.py\DTcomment{从Google Drive下载文件}.
+    .2 download\_pretrained\_models.py\DTcomment{从Google Drive批量下载预训练模型}.
+    .2 publish\_models\DTcomment{定义测试流程}.
 }
 
 
-\section{训练流程} 
+\section{训练流程}
 
 在对目录结构有了初步的了解之后就可以进行训练了，本节主要是对训练流程对一些主要步骤进行介绍，比如训练对命令行以及相关参数和训练的主文件的代码块的功能逻辑。本节的目的是希望能够初步的让读者了解到训练的基本流程和代码逻辑流，具体的细节我们会采用引用的方式来供读者查阅。
 
@@ -84,9 +88,9 @@
 \begin{minted}[xleftmargin=20pt,breaklines,bgcolor=bg]{bash}
 python basicsr/train.py -opt options/train/SRResNet_SRGAN/train_MSRResNet_x4.yml
 \end{minted}
-    
+
     其中train\_MSRResNet\_x4为yml配置文件，主要设置实验相关的超参数和相关的一些配置参数。
-    
+
     对于一些大型模型，可能需要采用分布式来进行训练，相关的命令可参考：
     \href{https://github.com/XPixelGroup/BasicSR/blob/master/docs/TrainTest.md}{分布式训练和测试命令}
 
@@ -126,7 +130,7 @@ def train_pipeline(root_path):
 # 如果有resume指令，则会加载设置的.stat文件
     if resume_state is None:
         make_exp_dirs(opt)
-        if opt['logger'].get('use_tb_logger') and 'debug' 
+        if opt['logger'].get('use_tb_logger') and 'debug'
         not in opt['name'] and opt['rank'] == 0:
             mkdir_and_rename(osp.join(opt['root_path'],
             'tb_logger', opt['name']))
@@ -157,7 +161,7 @@ train_loader, train_sampler, val_loaders, total_epochs, total_iters = result
 model = build_model(opt)
 if resume_state:  # resume training
     model.resume_training(resume_state)  # handle optimizers and schedulers
-    logger.info(f"Resuming training from epoch: {resume_state['epoch']}, 
+    logger.info(f"Resuming training from epoch: {resume_state['epoch']},
     iter: {resume_state['iter']}.")
     start_epoch = resume_state['epoch']
     current_iter = resume_state['iter']
@@ -204,7 +208,7 @@ for epoch in range(start_epoch, total_epochs + 1):
     prefetcher.reset()
     train_data = prefetcher.next()
 # 以epoch为外层循环，但是在yml配置文件中使用的是iteration来进行设置
-    while train_data is not None:  
+    while train_data is not None:
 # 当每一个epoch还有数据，就进入一次iteration的训练
         data_timer.record()
         current_iter += 1
@@ -227,7 +231,7 @@ for epoch in range(start_epoch, total_epochs + 1):
         if current_iter % opt['logger']['print_freq'] == 0:
             log_vars = {'epoch': epoch, 'iter': current_iter}
             log_vars.update({'lrs': model.get_current_learning_rate()})
-            log_vars.update({'time': iter_timer.get_avg_time(), 
+            log_vars.update({'time': iter_timer.get_avg_time(),
             'data_time': data_timer.get_avg_time()})
             log_vars.update(model.get_current_log())
             msg_logger(log_vars)
@@ -242,7 +246,7 @@ for epoch in range(start_epoch, total_epochs + 1):
                 logger.warning('Multiple validation datasets are
                 *only* supported by SRModel.')
             for val_loader in val_loaders:
-                model.validation(val_loader, current_iter, 
+                model.validation(val_loader, current_iter,
                 tb_logger, opt['val']['save_img'])
 # 根据yml设置的参数，进行一次validation
         data_timer.start()
@@ -258,7 +262,7 @@ for epoch in range(start_epoch, total_epochs + 1):
 
 % \begin{enumerate}
 % \item build\_dataset和build\_dataloader
-% \item build\_model 
+% \item build\_model
 % \end{enumerate}
 
 \end{enumerate}
@@ -275,20 +279,20 @@ CUDA_VISIBLE_DEVICES=0 python basicsr/test.py -opt options/test/SRResNet_SRGAN/t
 其中test\_MSRResNet\_x4为yml配置文件，主要设置实验相关的超参数和相关的一些配置参数。
 
 \begin{hl} % ---------------- Highlight block ---------------- %
-    
+
     \textbf{测试注意事项}
-    
+
     如果需要额外添加测试集，需要使用test\_x格式，下划线之后是测试集的编号
-    
+
     路径需要设置为待测模型所在的路径
-    
+
     suffix配置为存储图片的名字后缀，一般设置为这个方法的名字便于对比
-    
+
     metrics里面设置需要的评价指标，PSNR，SSIM和NIQE等
-    
+
     分布式测试命令可参考：
 \href{https://github.com/XPixelGroup/BasicSR/blob/master/docs/TrainTest.md}{分布式训练和测试命令}
-    
+
 \end{hl}
 
 
@@ -346,16 +350,16 @@ CUDA_VISIBLE_DEVICES=0 python basicsr/inference/inference_esrgan.py --input inpu
 \end{minted}
 
 \begin{hl} % ---------------- Highlight block ---------------- %
-    
+
     \textbf{推理注意事项}
-    
+
     需要提前下载好预训练模型放在experiments/pretrained\_models/ 下面，在配置参数中可以详细的对比下载存放的路径和代码中设置的路径
-    
+
     和测试不同，快速推理不涉及到定量评价指标的计算，比如PSNR，SSIM和NIQE等
-    
+
     分布式测试命令可参考：
 \href{https://github.com/XPixelGroup/BasicSR/blob/master/docs/TrainTest.md}{分布式训练和测试命令}
-    
+
 \end{hl}
 
 
@@ -442,7 +446,7 @@ for idx, path in enumerate(sorted(glob.glob(os.path.join(args.input, '*')))):
     .5 train\_MSRResNet\_x4.yml\DTcomment{SRResNet训练配置文件}.
     .3 test\DTcomment{测试配置文件夹}.
     .4 SRResNet\_SRGAN\DTcomment{SRResNet测试配置文件夹}.
-    .5 test\_MSRResNet\_x4.yml\DTcomment{SRResNet测试配置文件}.    
+    .5 test\_MSRResNet\_x4.yml\DTcomment{SRResNet测试配置文件}.
     % .4 train\_MSRResNet_x4.yml\DTcomment{SRResNet配置文件}.
     % .2 \textcolor{red}{scripts}\DTcomment{功能脚本，包含数据集制作，指标测试和数据集下载等}.
 }
@@ -450,16 +454,16 @@ for idx, path in enumerate(sorted(glob.glob(os.path.join(args.input, '*')))):
 \begin{enumerate}
 
 \item 第一步是下载训练所用的数据集，常用的数据集链接可以参考：
-\href{https://github.com/XPixelGroup/BasicSR/blob/master/docs/DatasetPreparation.md#DIV2K}{https://github.com/XPixelGroup/BasicSR/blob/master/docs/DatasetPreparation.md#DIV2K}
+\href{https://github.com/XPixelGroup/BasicSR/blob/master/docs/DatasetPreparation.md#DIV2K}{https://github.com/XPixelGroup/BasicSR/blob/master/docs/DatasetPreparation.md\#DIV2K}
 
 在这里我们采用DIV2K 作为训练数据集，Set5作为验证集
 
 \begin{exampleBox}[]{数据集链接}
 
-DIV2K: 
+DIV2K:
 \href{https://data.vision.ee.ethz.ch/cvl/DIV2K/}{https://data.vision.ee.ethz.ch/cvl/DIV2K/}
 
-Set5和Set14: 
+Set5和Set14:
 \href{https://drive.google.com/drive/folders/1B3DJGQKB6eNdwuQIhdskA64qUuVKLZ9u}{https://drive.google.com/drive/folders/1B3DJGQKB6eNdwuQIhdskA64qUuVKLZ9u}
 
 \end{exampleBox}
@@ -474,14 +478,14 @@ Set5和Set14:
 
     # HR images 这个过程将2K的图像给切成480X480的子图
     # 原始2K图像路径
-    opt['input_folder'] = 'datasets/DIV2K/DIV2K_train_HR' 
+    opt['input_folder'] = 'datasets/DIV2K/DIV2K_train_HR'
     # 子图存放路径
     opt['save_folder'] = 'datasets/DIV2K/DIV2K_train_HR_sub'
     opt['crop_size'] = 480 # 子图的尺寸
     opt['step'] = 240 # 切图的步长
     opt['thresh_size'] = 0
     extract_subimages(opt)
-    
+
     # LRx4 images
     opt['input_folder'] = 'datasets/DIV2K/DIV2K_train_LR_bicubic/X4'
     opt['save_folder'] = 'datasets/DIV2K/DIV2K_train_LR_bicubic/X4_sub'
@@ -519,7 +523,7 @@ python basicsr/train.py -opt options/train/SRResNet_SRGAN/train_MSRResNet_x4.yml
 
 \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{python}
 
-2020-08-21 00:13:08,623 INFO: [001_M..][epoch:  4, iter:1,000,000, lr:(1.000e-07,)] [eta: 0:00:00, time (data): 0.041 (0.000)] l_pix: 2.1622e-02 
+2020-08-21 00:13:08,623 INFO: [001_M..][epoch:  4, iter:1,000,000, lr:(1.000e-07,)] [eta: 0:00:00, time (data): 0.041 (0.000)] l_pix: 2.1622e-02
 2020-08-21 00:13:08,624 INFO: Saving models and training states.
 ... ...
 Test head
@@ -532,15 +536,15 @@ Test woman
 
 同时，我们配置了wandb之后，可以在自己的wandb云端主页上看到训练曲线，wandb的配置见xx
 \begin{figure}[h]
-	\vspace{1cm}
-	\begin{center}
-		%\fbox{\rule{0pt}{2.5in} \rule{0.9\linewidth}{0pt}}
-		\includegraphics[width=\linewidth]{figures/SRResNet_psnr_curve.jpg}
-		%\vspace{-1cm}
-		\caption{SRResNet的PSNR训练曲线}
-		%\label{fig:logo}
-	\end{center}
-	%\vspace{-0.7cm}
+    \vspace{1cm}
+    \begin{center}
+        %\fbox{\rule{0pt}{2.5in} \rule{0.9\linewidth}{0pt}}
+        \includegraphics[width=\linewidth]{figures/SRResNet_psnr_curve.jpg}
+        %\vspace{-1cm}
+        \caption{SRResNet的PSNR训练曲线}
+        %\label{fig:logo}
+    \end{center}
+    %\vspace{-0.7cm}
 \end{figure}
 
 5. 测试过程，我们采用以下命令来对训练好的模型进行测试
