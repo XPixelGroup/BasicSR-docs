@@ -21,12 +21,12 @@
 \newcolumntype{x}[1]{>{\centering\arraybackslash}p{#1pt}}
 \newcommand{\tablestyle}[2]{\setlength{\tabcolsep}{#1}\renewcommand{\arraystretch}{#2}\centering\footnotesize}
 \newlength\savewidth\newcommand\shline{\noalign{\global\savewidth\arrayrulewidth
-		\global\arrayrulewidth 1pt}\hline\noalign{\global\arrayrulewidth\savewidth}}
+        \global\arrayrulewidth 1pt}\hline\noalign{\global\arrayrulewidth\savewidth}}
 % ----------- End: support table and shline -------------
 
 \usepackage{fontawesome5}  % for icons used in the Author page
 \usepackage{dirtree}  % for folder structure
-\renewcommand*\DTstylecomment{\rmfamily\color{blue}}
+\renewcommand*\DTstylecomment{\rmfamily\color{black}}
 \renewcommand*\DTstyle{\ttfamily\textcolor{red}}
 
 \newcommand{\todo}[1]{{\textbf{\color{red}{\emph{#1}}}}} % need to fill
@@ -39,17 +39,21 @@
 \usepackage{minted}
 \definecolor{bg}{rgb}{0.95,0.95,0.95}
 
+\usepackage{makecell}
+
+\usepackage{float}
+
 %\usepackage{import}
 \usepackage{subfiles}
 
 % title
 \title{
-	\vspace{4cm}
-	\normalfont \normalsize
-	\horrule{0.5pt} \\[0.4cm]
-	\huge \begin{CJK}{UTF8}{gbsn} BasicSR: 图像、视频复原增强开源库
-		\\ 解读文档\end{CJK}
-	\horrule{2pt} \\[0.5cm]
+    \vspace{4cm}
+    \normalfont \normalsize
+    \horrule{0.5pt} \\[0.4cm]
+    \huge \begin{CJK}{UTF8}{gbsn} BasicSR: 图像、视频复原增强开源库
+        \\ 解读文档\end{CJK}
+    \horrule{2pt} \\[0.5cm]
 }
 
 %\author{\href{https://github.com/xinntao/BasicSR}}
@@ -63,22 +67,22 @@
 
 \vspace{-15.5cm}
 \begin{adjustwidth}{0.5cm}{}
-	\hspace{5.5cm}
-	\includegraphics[width=0.3\textwidth]{figures/xpixel-logo.jpg}
+    \hspace{5.5cm}
+    \includegraphics[width=0.3\textwidth]{figures/xpixel-logo.jpg}
 \end{adjustwidth}
 \vspace{1.2cm}
 \begin{adjustwidth}{0.5cm}{}
-	\includegraphics[width=0.07\textwidth]{figures/rocket_logo.png}
+    \includegraphics[width=0.07\textwidth]{figures/rocket_logo.png}
 \end{adjustwidth}
 \vspace{5cm}
 
 %\begin{adjustwidth}{7cm}{}
 \begin{center}
-	\includegraphics[width=0.5\textwidth]{figures/basicsr_logo.png}
+    \includegraphics[width=0.5\textwidth]{figures/basicsr_logo.png}
 \end{center}
 %\end{adjustwidth}
 \begin{center}
-	\underline{\textbf{\url{https://github.com/XPixelGroup/BasicSR}}}
+    \underline{\textbf{\url{https://github.com/XPixelGroup/BasicSR}}}
 \end{center}
 %	\begin{center}
 %		Version: V0
@@ -87,14 +91,14 @@
 % 注释
 \vspace{0.2cm}
 \begin{center}
-	\textcolor{ChadBlue}{\underline{\textbf{Notes}}}
+    \textcolor{ChadBlue}{\underline{\textbf{Notes}}}
 \end{center}
 \vspace{0.5cm}
 \begin{CJK}{UTF8}{gbsn}
 
-	本文档的最新版可以从 \url{https://github.com/XPixelGroup/BasicSR-docs/releases} 下载。
+    本文档的最新版可以从 \url{https://github.com/XPixelGroup/BasicSR-docs/releases} 下载。
 
-	欢迎大家一起来帮助查找文档中的错误，完善文档。
+    欢迎大家一起来帮助查找文档中的错误，完善文档。
 \end{CJK}
 
 %\vspace{0.3cm}
@@ -104,45 +108,45 @@
 
 % 作者页、目录
 \begin{CJK}{UTF8}{gbsn}
-	\subfile{sections/authors.tex}
-	\subfile{sections/xpixel_metaverse.tex}
+    \subfile{sections/authors.tex}
+    \subfile{sections/xpixel_metaverse.tex}
 
-	\newpage
-	\tableofcontents*
+    \newpage
+    \tableofcontents*
 \end{CJK}
 
 % 正文
 \begin{CJK}{UTF8}{gbsn}
-	{
-		%\pagestyle{headings}
-		\pagestyle{fancy}
-		\fancyhf{}
-		\rhead{\rightmark}
-		\chead{\thepage}
-		\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
-		\lhead{第~\thechapter~章: \leftmark}
+    {
+        %\pagestyle{headings}
+        \pagestyle{fancy}
+        \fancyhf{}
+        \rhead{\rightmark}
+        \chead{\thepage}
+        \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+        \lhead{第~\thechapter~章: \leftmark}
 
-		\subfile{sections/overview.tex}
-		\subfile{sections/installation.tex}
-		\subfile{sections/getting_start.tex}
-		\subfile{sections/code_structure.tex}
-		\subfile{sections/metrics.tex}
-		\subfile{sections/howto.tex}
-		\subfile{sections/data_preparation.tex}
-		\subfile{sections/others.tex}
-		\subfile{sections/scripts.tex}
-		\subfile{sections/deploy.tex}
-		\subfile{sections/template.tex}
-		\subfile{sections/experience.tex}
-	}
+        \subfile{sections/overview.tex}
+        \subfile{sections/installation.tex}
+        \subfile{sections/getting_start.tex}
+        \subfile{sections/code_structure.tex}
+        \subfile{sections/metrics.tex}
+        \subfile{sections/howto.tex}
+        \subfile{sections/data_preparation.tex}
+        \subfile{sections/others.tex}
+        \subfile{sections/scripts.tex}
+        \subfile{sections/deploy.tex}
+        \subfile{sections/template.tex}
+        \subfile{sections/experience.tex}
+    }
 \end{CJK}
 
 \clearpage
 \newpage
 \thispagestyle{empty}
 \begin{center}
-	\vspace*{5cm}
-	%\includegraphics[width=10cm]{Images/reach.png}
+    \vspace*{5cm}
+    %\includegraphics[width=10cm]{Images/reach.png}
 \end{center}
 
 \newpage
