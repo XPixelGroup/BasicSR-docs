@@ -37,65 +37,97 @@
 \end{note}
 
 \section{配置(Options)与注册器(Register)}\label{code_structure:register}
-在这一小节，我们先来说配置文件。
+在这一小节，我们先来说配置文件。在 BasicSR 中我们使用 \href{https://yaml.org/}{YAML} 来作为配置文件的语言。
 
-在 BasicSR 中我们使用 \href{https://yaml.org/}{YAML} 来作为配置文件的语言。
+\subsection{配置文件简要说明}
+训练的配置文件在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/options/train}{options/train} 中，测试的配置文件在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/options/test}{options/test} 中。通过 option 配置文件，我们可以设置实验名、选择模型、指定 GPU、指定数据路径、选择网络结构、配置训练策略等。
 
-    \subsection{配置文件简要说明}
-    训练的配置文件在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/options/train}{options/train} 中，测试的配置文件在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/options/test}{options/test} 中。通过option文件，我们可以设置实验名、选择模型、指定GPU、指定数据路径、选择网络结构、配置训练策略等。
+\subsubsection{实验命名}
+我们推荐对实验名字进行有意义的命名，方便后续实验以及进行多组实验对比。
 
-    下面，我们以 \href{https://github.com/XPixelGroup/BasicSR/blob/master/options/train/SRResNet_SRGAN/train_MSRResNet_x4.yml}{train\_MSRResNet\_x4.yml} 为例，简单说明配置文件的每个部分。
+我们以 \texttt{001\_MSRResNet\_x4\_f64b16\_DIV2K\_1000k\_B16G1\_wandb} 为例:
 
-    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
-    # general settings
-    name: 001_MSRResNet_x4_f64b16_DIV2K_1000k_B16G1_wandb
-    model_type: SRModel
-    scale: 4
-    num_gpu: 1  # set num_gpu: 0 for cpu mode
-    manual_seed: 0
-    \end{minted}
-    \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{一般性配置}
+\begin{itemize}
+\item 001: 我们一般给实验进行数字打头的标号, 方便进行实验管理
+\item MSRResNet: 模型名称, 这里指代 Modified SRResNet
+\item x4\_f64b16: 重要配置参数, 这里表示放大4倍; 中间feature通道数是64, 使用了16个Residual Block
+\item DIV2K: 训练数据集是DIV2K
+\item 1000k: 训练了1000k iterations
+\item B16G1: Batch size 为16, 使用一卡 GPU 训练
+\item wandb: 使用了 wandb, 训练过程上传到了 wandb 云服务器
+\end{itemize}
 
-    name：自定义的实验名称。
+\begin{hl} % ---------------- Highlight block ---------------- %
+    \textbf{注意}
 
-    model\_type：选择模型，如 SRModel，SRGANModel，EDVRModel 等。
+    如果在实验名字中有 \texttt{debug} 字样, 则会进入 debug 模式, 即程序会更密集地 log 和 validate, 并且不会使用 tensorboard logger 和 wandb logger。
 
-    scale：超分上采样尺度 (upscale factor)。
+    具体参见章节\ref{others:debug_mode}：\nameref{others:debug_mode}。
+\end{hl}
 
-    num\_gpu：指定 GPU。
+\subsubsection{配置文件例子说明}
 
-    manual\_seed：指定随机种子。
-    \end{exampleBox}
+下面，我们以 \href{https://github.com/XPixelGroup/BasicSR/blob/master/options/train/SRResNet_SRGAN/train_MSRResNet_x4.yml}{train\_MSRResNet\_x4.yml} 为例，简单说明配置文件的每个部分。
 
-    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
-    # dataset and data loader settings
-    datasets:
-      train:
-        name: DIV2K
-        type: PairedImageDataset
-        dataroot_gt: datasets/DF2K/DIV2K_train_HR_sub
-        dataroot_lq: datasets/DF2K/DIV2K_train_LR_bicubic_X4_sub
-        meta_info_file: basicsr/data/meta_info/meta_info_DIV2K800sub_GT.txt
+\begin{minted}[xleftmargin=20pt,breaklines,bgcolor=bg]{python}
+# Modified SRResNet w/o BN from:
+# Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network
+
+# ----------- Commands for running
+# ----------- Single GPU with auto_resume
+# PYTHONPATH="./:${PYTHONPATH}"  CUDA_VISIBLE_DEVICES=0 python basicsr/train.py -opt options/train/SRResNet_SRGAN/train_MSRResNet_x4.yml --auto_resume
+
+# general settings
+name: 001_MSRResNet_x4_f64b16_DIV2K_1000k_B16G1_wandb
+model_type: SRModel
+scale: 4
+num_gpu: 1  # set num_gpu: 0 for cpu mode
+manual_seed: 0
+\end{minted}
+\begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{一般性配置}
+
+在配置文件的最开始，会有简单的说明，以及默认的运行命令。运行命令的 \texttt{auso\_resume} 表示自动从断点接着训练 (详见章节\ref{others:auto_resume}：\nameref{others:auto_resume})。接下来是一般性配置，主要说明如下：
+
+name：自定义的实验名称。
+
+model\_type：选择模型，如 SRModel，SRGANModel，EDVRModel 等。
+
+scale：超分上采样尺度 (upscale factor)。
+
+num\_gpu：指定使用的 GPU 卡数。\textbf{0 表示 使用CPU，\texttt{auto} 表示自动从可用 GPU 推断}。
+
+manual\_seed：指定随机种子。
+\end{exampleBox}
+
+\begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
+# dataset and data loader settings
+datasets:
+    train:
+    name: DIV2K
+    type: PairedImageDataset
+    dataroot_gt: datasets/DF2K/DIV2K_train_HR_sub
+    dataroot_lq: datasets/DF2K/DIV2K_train_LR_bicubic_X4_sub
+    meta_info_file: basicsr/data/meta_info/meta_info_DIV2K800sub_GT.txt
+    # (for lmdb)
+    # dataroot_gt: datasets/DIV2K/DIV2K_train_HR_sub.lmdb
+    # dataroot_lq: datasets/DIV2K/DIV2K_train_LR_bicubic_X4_sub.lmdb
+    filename_tmpl: '{}'
+    io_backend:
+        type: disk
         # (for lmdb)
-        # dataroot_gt: datasets/DIV2K/DIV2K_train_HR_sub.lmdb
-        # dataroot_lq: datasets/DIV2K/DIV2K_train_LR_bicubic_X4_sub.lmdb
-        filename_tmpl: '{}'
-        io_backend:
-          type: disk
-          # (for lmdb)
-          # type: lmdb
+        # type: lmdb
 
-        gt_size: 128
-        use_hflip: true
-        use_rot: true
+    gt_size: 128
+    use_hflip: true
+    use_rot: true
 
-        # data loader
-        use_shuffle: true
-        num_worker_per_gpu: 6
-        batch_size_per_gpu: 16
-        dataset_enlarge_ratio: 100
-        prefetch_mode: ~
-    \end{minted}
+    # data loader
+    use_shuffle: true
+    num_worker_per_gpu: 6
+    batch_size_per_gpu: 16
+    dataset_enlarge_ratio: 100
+    prefetch_mode: ~
+\end{minted}
     \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{数据读取相关配置}
 
     name：自定义的数据集名称。
