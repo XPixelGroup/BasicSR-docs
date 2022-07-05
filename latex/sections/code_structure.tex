@@ -2,50 +2,45 @@
 
 \begin{document}
 
-    \chapter{代码主体结构}
-    \vspace{-2cm}
+\chapter{代码主体结构}
+\vspace{-2cm}
 
-    在本章节中，我们将对 BasicSR 代码框架进行一个整体介绍，主要包括以下内容：整体框架、配置与注册器、数据、网络结构、模型、损失函数、训练、算子等。通过阅读本章，你将对 BasicSR 有进一步的认识，理解其模块之间的相互关系、以及模块内部的核心工作原理。
+在本章节中，我们将对 BasicSR 代码框架进行一个整体介绍，主要包括以下内容：整体框架 (第\ref{code_structure:overview}小节)、配置与注册器 (第\ref{code_structure:register}小节)、数据 (第\ref{code_structure:data}小节)、网络结构 (第\ref{code_structure:arch}小节)、模型 (第\ref{code_structure:model}小节)、损失函数 (第\ref{code_structure:loss}小节)、训练 (第\ref{code_structure:training}小节)、算子 (第\ref{code_structure:ops}小节) 等。通过阅读本章，你将对 BasicSR 有进一步的认识，理解其模块之间的相互关系、以及模块内部的核心工作原理。但我们不对具体函数和代码做具体介绍。如果需要具体函数和代码的介绍，请查阅 BasicSR 的在线 API 文档 (\url{https://basicsr.readthedocs.io/en/latest/})。
 
-    %##################################################################################################
-    %\begin{figure}[htbp]
-    %	\begin{center}
-    %		\includegraphics[width=\linewidth]{figures/basicsr_logo.png}
-    %		\vspace{-1cm}
-    %		\caption{图标题。BasicSR Logo。}
-    %		\label{fig:logo}
-    %	\end{center}
-    %\end{figure}
-    %##################################################################################################
+\section{整体框架} \label{code_structure:overview}
+对于基于深度学习的算法框架，其核心的组成部分包括：\textbf{数据、模型、损失函数、训练}。BasicSR 框架也是大致根据以上部分撰写而成的。下图概括了 BasicSR 的整体组成框架：
 
-    \section{整体框架}
-    对于基于深度学习的算法框架，其核心的组成部分包括：数据、模型结构、损失函数、训练策略。BasicSR 框架也是大致根据以上部分撰写而成的。下图概括了 BasicSR 的整体组成框架：
+\begin{figure}[htbp]
+    \begin{center}
+        \includegraphics[width=1\linewidth]{figures/main_framework.pdf}
+    \end{center}
+    \caption{BasicSR 代码整体框架 \todo{把图中 Load data, Apply normalization 这些描述性语言翻译成中文吧。PPT 可以 copy 一页，同时保留中英文的源文件。然后 share 一下 PPT}}
+    \label{fig:main_framework}查询。
+\end{figure}
 
-    \begin{figure}[htbp]
-        \begin{center}
-            \includegraphics[width=1\linewidth]{figures/main_framework.pdf}
-        \end{center}
-        \caption{BasicSR 代码整体框架}
-        \label{fig:main_framework}
+\begin{itemize}
+    \item 数据 (Data)：这个部分主要定义了 Dataset 和 Data Loader 文件, 放在了 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/data}{data} 目录下。Dataset 用于读取和预处理数据，包括图像读取、归一化 (normalization)、数据增强 (augmentation) 以及封装为 PyTorch Tensor 等。同时，我们也提供了一些辅助函数，帮助使用者自定义自己的数据预处理功能，例如图像色彩空间转换、常用 MATLAB 函数的 Python 版本、常用的图像退化模型 (degradation model) 等。详细说明参见章节\ref{code_structure:data}：\nameref{code_structure:data}。
 
-    \end{figure}
+    \item 模型 (Model)：在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/models}{models} 目录下，我们提供了常用的模型文件。这些模型文件主要用于定义网络结构与初始化、输入输出数据、一次 forward 的训练过程、保存加载模型等。在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs}{archs} 目录下，我们提供了常用的网络结构模型文件，包括 SRResNet、ESRGAN、RCAN、SwinIR、EDVR、BasicVSR 等。在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/losses}{losses} 文件夹中，我们提供了常用的损失函数，例如 L1/L2 loss、perceptual loss、GAN loss 等。详细说明参见章节\ref{code_structure:arch}：\nameref{code_structure:arch}、章节\ref{code_structure:model}：\nameref{code_structure:model}、章节\ref{code_structure:loss}：\nameref{code_structure:loss}。
 
+    \item 配置 (Option)：配置文件放到 \href{https://github.com/XPixelGroup/BasicSR/tree/master/options}{option} 目录下。我们提供了常用模型的训练和测试配置文件。我们使用 \href{https://yaml.org/}{YAML} 来作为配置文件的语言。修改这些 yml 文件可以简易地调整训练过程中的各种超参数。详细说明参见章节\ref{code_structure:register}：\nameref{code_structure:register}。
 
+    \item 训练 (Training)：这一部分主要涉及训练的策略和记录训练日志。\href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/train.py}{train.py} 和 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/test.py}{test.py} 是启动模型训练和测试的入口文件，其中定义了训练和测试的 main loop。常见优化器 (optimizer) 的定义可以在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/base_model.py}{models/base\_model.py} 文件中的 \texttt{get\_optimizer} 函数中找到。学习率的调度策略在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/base_model.py}{models/base\_model.py}  文件中的 \texttt{setup\_schedulers} 函数中定义。为了方便追踪记录训练的过程，我们提供了相应的 logger 工具，支持直接 print 到屏幕、Tensorboard、Wandb等多种方式，具体代码可以在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{utils/logger.py} 中找到。详细说明参见章节\ref{code_structure:training}：\nameref{code_structure:training}。\todo{本章节需要添加 training pipeline、logging 使用方式、test pipeline 的介绍。还有比如 logger 怎么用，validation 放在哪里、怎么用的内容。安排：logging 和 validation 放到 4.5 节 模型里面。training/testing pipeline 放到 4.7 节这里，和入门呼应、互补}
 
+    \item 详细的代码接口文档可以在 \url{http://basicsr.readthedocs.io} 查询。
+\end{itemize}
 
-    \begin{itemize}
-        \item[-] 数据 (Data)：这个部分主要定义了 Dataset 文件。Dataset 用于读取和预处理数据，包括图像读取、归一化 (normalization)、简单的数据增强 (augmentation) 以及封装为 PyTorch Tensor 等。同时，我们也提供了一些辅助函数，帮助使用者自定义自己的数据预处理功能，例如图像色彩空间转换、常用 MATLAB 函数的 Python 版本、常用的图像退化模型 (degradation model) 等。
+\begin{note} % ---------------- Note block ---------------- %
+    \textbf{BasicSR 目录说明}
 
-        \item[-] 模型 (Model)：在 models 目录下，我们提供了常用的模型文件。这些模型文件主要用于定义数据流、训练策略、网络初始化等。在 archs 目录下，我们提供了常用的网络结构模型文件，包括 SRResNet、RRDBNet、RCAN、SwinIR、BasicVSR 等。在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/losses/losses.py}{losses/losses.py} 文件中，我们提供了常用的损失函数，例如 L1/L2 loss、perceptual loss、GAN loss 等。
+    你可以在章节\ref{getting_start:content-overview}：\nameref{getting_start:content-overview} 查看到详细的 BasicSR 目录说明。
+\end{note}
 
-        \item[-] 配置 (Option)：在 option 目录下，我们提供了常用模型的训练和测试配置文件，修改这些 yml 文件可以简易地调整网络结构的深度、指定训练参数等。
+\section{配置(Options)与注册器(Register)}\label{code_structure:register}
+在这一小节，我们先来说配置文件。
 
-        \item[-] 训练 (Training)：这一部分主要涉及训练的策略和记录训练日志。\href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/train.py}{train.py} 和 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/test.py}{test.py} 是启动模型训练和测试的入口文件，其中定义了 main loop。优化器 (optimizer) 的定义在各自的模型文件中可以找到。学习率的调度策略在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/base_model.py}{models/base\_model.py}  中定义。为了方便追踪记录训练的过程，我们提供了相应的 logger 工具，支持直接打印、Tensorboard、Wandb等方式，具体代码可以在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{utils/logger.py} 中找到。
+在 BasicSR 中我们使用 \href{https://yaml.org/}{YAML} 来作为配置文件的语言。
 
-        \item[-] 详细的代码接口文档可以在 \url{http://basicsr.readthedocs.io}查询。
-    \end{itemize}
-
-    \section{配置(Options)与注册器(Register)}
     \subsection{配置文件简要说明}
     训练的配置文件在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/options/train}{options/train} 中，测试的配置文件在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/options/test}{options/test} 中。通过option文件，我们可以设置实验名、选择模型、指定GPU、指定数据路径、选择网络结构、配置训练策略等。
 
@@ -498,7 +493,7 @@
 
 
 
-    \section{数据 (Data Loader)}
+\section{数据 (Data Loader)}\label{code_structure:data}
     数据是机器学习的动力来源。这一章节我们介绍 BasicSR 的数据读取和处理机制。在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/data}{basicsr/data/} 目录下，我们提供了常用的 Dataset 文件。
 
     \dirtree{%
@@ -653,7 +648,7 @@
     最后，我们返回一个字典，包括输入的 LQ 图像，作为标签的 GT 图像，以及他们的路径。
 
 
-    \section{网络结构 (Architecture)}
+\section{网络结构 (Architecture)} \label{code_structure:arch}
     在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs}{basicsr/archs/} 目录下，我们提供了若干经典的网络结构。
 
     \begin{table}[h]
@@ -689,18 +684,18 @@
 
 
 
-    \section{模型 (Model)}
+\section{模型 (Model)}\label{code_structure:model}
 
-    - Base模型
+- Base模型
 
-    - 其他模型
+- 其他模型
 
-    - 继承关系
+- 继承关系
 
-    \section{损失函数 (Loss)}
+\section{损失函数 (Loss)}\label{code_structure:loss}
 
-    \section{训练(优化器与学习率调度器)}
+\section{训练(优化器与学习率调度器)}\label{code_structure:training}
 
-    \section{算子}
+\section{算子}\label{code_structure:ops}
 
 \end{document}
