@@ -91,14 +91,21 @@
 {\needspace{10\baselineskip}\color{ChadBlue}\normalfont\Large\bfseries}
 {\underline{\S\color{ChadBlue}\thesection. #1}}{2em}{}
 
-% класс memoir выключает нумеровку подсецкий и их добавление в оглавление: возвращаем
-\setsecnumdepth{subsection}
+% Memoir类禁用子目录编号并将其添加到目录: 返回
+%\setsecnumdepth{subsection}
 \maxtocdepth{subsection}
+\setsecnumdepth{subsubsection}
+%\maxtocdepth{subsubsection}
 
-% формат подсекций
+% subsection format
 \titleformat{\subsection}
 {\needspace{7\baselineskip}\color{ChadBlue}\normalfont\large\bfseries}
 {\color{ChadBlue}\thesubsection. #1}{1em}{}
+
+% subsubsection format
+\titleformat{\subsubsection}
+{\needspace{4\baselineskip}\color{ChadBlue}\normalfont\large\bfseries}
+{\color{ChadBlue}\thesubsubsection. #1}{0.6em}{}
 
 %----------------------------------------------------------------------------------------
 %	ТАБЛИЦЫ
