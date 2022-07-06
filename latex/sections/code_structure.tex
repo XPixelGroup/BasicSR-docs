@@ -14,7 +14,7 @@
     \begin{center}
         \includegraphics[width=1\linewidth]{figures/main_framework.pdf}
     \end{center}
-    \caption{BasicSR 代码整体框架 \todo{把图中 Load data, Apply normalization 这些描述性语言翻译成中文吧。PPT 可以 copy 一页，同时保留中英文的源文件。然后 share 一下 PPT}}
+    \caption{BasicSR 代码整体框架}
     \label{fig:main_framework}查询。
 \end{figure}
 
@@ -76,7 +76,6 @@
 # ----------- Commands for running
 # ----------- Single GPU with auto_resume
 # PYTHONPATH="./:${PYTHONPATH}"  CUDA_VISIBLE_DEVICES=0 python basicsr/train.py -opt options/train/SRResNet_SRGAN/train_MSRResNet_x4.yml --auto_resume
-
 # general settings
 name: 001_MSRResNet_x4_f64b16_DIV2K_1000k_B16G1_wandb
 model_type: SRModel
@@ -85,20 +84,13 @@ num_gpu: 1  # set num_gpu: 0 for cpu mode
 manual_seed: 0
 \end{minted}
 \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{一般性配置}
-
 在配置文件的最开始，会有简单的说明，以及默认的运行命令。运行命令的 \texttt{auso\_resume} 表示自动从断点接着训练 (详见章节\ref{others:auto_resume}：\nameref{others:auto_resume})。接下来是一般性配置，主要说明如下：
-
 name：自定义的实验名称。
-
 model\_type：选择模型，如 SRModel，SRGANModel，EDVRModel 等。
-
 scale：超分上采样尺度 (upscale factor)。
-
 num\_gpu：指定使用的 GPU 卡数。\textbf{0 表示 使用CPU，\texttt{auto} 表示自动从可用 GPU 推断}。
-
 manual\_seed：指定随机种子。
 \end{exampleBox}
-
 \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
 # dataset and data loader settings
 datasets:
@@ -116,11 +108,9 @@ datasets:
       type: disk
       # (for lmdb)
       # type: lmdb
-
     gt_size: 128
     use_hflip: true
     use_rot: true
-
     # data loader
     use_shuffle: true
     num_worker_per_gpu: 6
@@ -130,36 +120,21 @@ datasets:
 \end{minted}
 \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{数据读取相关配置}
 这个部分主要是配置相对应的 dataset 和 data loader 的配置。在这个例子中，这些配置分别用在文件 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/data/paired_image_dataset.py}{PairedImageDataset} 和 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/data/__init__.py}{data loader} 中。
-
 datasets 下的 train 表示这是在设置训练数据集和对应的训练 data loader。
-
 name：自定义的数据集名称。
-
 type：读取数据的 Dataset 类，例如 PairedImageDataset 等。详细说明参见章节\ref{code_structure:data}：\nameref{code_structure:data}。
-
 dataroot\_gt：标签 Ground-Truth 图像存放的根目录。
-
 dataroot\_lq：输入 Input 图像存放的根目录。
-
 meta\_info\_file：预先生成的 meta\_info 文件。细节请参看章节\ref{data_preparation:meta_info}：\nameref{data_preparation:meta_info}。\todo{更新链接}
-
 gt\_size：训练阶段，裁剪 (crop) 的 ground-truth 图像的尺寸大小，即训练的 label 大小。
-
 use\_hflip：是否开启水平方向图像增强 (随机水平翻转图像)。
-
 use\_rot：是否开启旋转图像增强 (随机旋转图像)。
-
 use\_shuffle：训练时是否在每一个 epoch 随机打乱数据顺序。
-
 num\_worker\_per\_gpu：每块 GPU 分配的读取数据线程数。
-
 batch\_size\_per\_gpu: 每块 GPU 上的 batch size。
-
 dataset\_enlarge\_ratio: 放大 dataset 的长度倍数 (默认为1)。可以扩大一个 epoch 所需 iterations，详情参见章节\ref{code_structure:data}：\nameref{code_structure:data}。\todo{这块内容需要补足到 数据 这个章节}
-
-prefetch\_mode: 预先读取数据的方式，\textbf{默认为 None，即 $\sim$。\texttt{cpu} 表示使用 CPU prefetcher。\texttt{cuda} 表示使用 CUDA prefetcher。它会多占用一些GPU显存. 注意: 这个模式下, 一定要设置 \texttt{pin\_memory=True}。}详情参见章节\ref{code_structure:data}：\nameref{code_structure:data}。\todo{这块内容需要补足到 数据 这个章节}
+prefetch\_mode: 预先读取数据的方式，\textbf{默认为 None，即 $\sim$。\texttt{cpu} 表示使用 CPU prefetcher。\texttt{cuda} 表示使用 CUDA prefetcher。它会多占用一些GPU显存。注意: 这个模式下, 一定要设置 \texttt{pin\_memory=True}。}详情参见章节\ref{code_structure:data}：\nameref{code_structure:data}。\todo{这块内容需要补足到 数据 这个章节}
 \end{exampleBox}
-
 \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
   val:
     name: Set5
@@ -168,7 +143,6 @@ prefetch\_mode: 预先读取数据的方式，\textbf{默认为 None，即 $\sim
     dataroot_lq: datasets/Set5/LRbicx4
     io_backend:
       type: disk
-
   val_2:
     name: Set14
     type: PairedImageDataset
@@ -177,12 +151,9 @@ prefetch\_mode: 预先读取数据的方式，\textbf{默认为 None，即 $\sim
     io_backend:
       type: disk
 \end{minted}
-
 \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{validation 配置}
-
 val 部分为训练时 validation 的数据配置。通过定期 validation，我们可以及时观察训练的情况，追踪模型当前的表现。
 \end{exampleBox}
-
     \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
     # network structures
     network_g:
@@ -194,17 +165,11 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
       upscale: 4
     \end{minted}
     \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{网络结构相关配置}
-
     type：选择网络结构模型，例如 MSRResNet，RRDBNet等。
-
     num\_in\_ch：模型输入的图像通道数。
-
     numx\_out\_ch: 模型输出的图像通道数。
-
     num\_feat: 模型内部的 feature map 通道数。
-
     num\_block: 模型内部基础模块的堆叠数。
-
     upscale: 上采样倍数。
     \end{exampleBox}
     \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
@@ -215,11 +180,8 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
       resume_state: ~
     \end{minted}
     \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{模型存储路径相关配置}
-
     pretrain\_network\_g: 测试或者 finetune 时，在这里输入保存的模型权重路径。
-
     strict\_load\_g: 是否严格地根据参数名称一一对应load模型参数。如果选择 false，那么模型对于找不到的参数，会随机初始化；如果选择 true，假如存在不对应的参数，会报错。
-
     resume\_state: 如训练被打断，可以在这里填写保存的状态文件，恢复训练。
     \end{exampleBox}
     \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
@@ -231,16 +193,13 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
         lr: !!float 2e-4
         weight_decay: 0
         betas: [0.9, 0.99]
-
       scheduler:
         type: CosineAnnealingRestartLR
         periods: [250000, 250000, 250000, 250000]
         restart_weights: [1, 1, 1, 1]
         eta_min: !!float 1e-7
-
       total_iter: 1000000
       warmup_iter: -1  # no warm up
-
       # losses
       pixel_opt:
         type: L1Loss
@@ -248,42 +207,26 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
         reduction: mean
     \end{minted}
     \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{训练策略相关配置}
-
     ema\_decay：EMA 参数更新权重。
-
     optim\_g type: 选择优化器，例如 Adam。
-
     lr: 初始学习率。
-
     weight\_decay: 权重衰退参数。
-
     betas: 优化器动量参数。
-
     scheduler type: 选择学习率更新策略，例如 CosineAnnealingRestartLR。
-
     periods: 学习率更新周期。
-
     restart\_weights: 如果选择学习率 restart 机制，在这里可以指定 restart 时的权重。
-
     eta\_min: 学习率衰退的最小值。
-
     total\_iter: 总共进行的训练迭代次数。
-
     warmup\_iter: warm up 的迭代次数。
-
     pixel\_opt type: 选择 loss 函数，例如 L1Loss。
-
     loss\_weight: 指定 loss 的权重。
-
     reduction: 最终的 loss 取平均或者总和。
-
     \end{exampleBox}
     \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
     # validation settings
     val:
       val_freq: !!float 5e3
       save_img: false
-
       metrics:
         psnr: # metric name, can be arbitrary
           type: calculate_psnr
@@ -296,19 +239,12 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
           better: lower  # the lower, the better
     \end{minted}
     \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{validation 相关配置}
-
     val\_freq: 多少次迭代进行一次 validation。
-
     save\_img: 是否保存 validation 的图像。
-
     metrics：validation 时的指标设定。
-
     type: 选择指标，例如 calculate\_psnr，calculate\_niqe。
-
     crop\_border: 计算指标时 crop 图像边界像素范围。
-
     test\_y\_channel: 是否仅在 Y 通道上计算指标。
-
     better: 该指标是越高越好，还是越低越好。选择 higher 或 者lower，默认为 higher。
     \end{exampleBox}
     \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
@@ -322,29 +258,18 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
         resume_id: ~
     \end{minted}
     \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{训练日志相关配置}
-
     print\_freq: 多少次迭代打印一次训练信息。
-
     save\_checkpoint\_freq: 多少次迭代保存一次模型权重。
-
     use\_tb\_logger: 是否开启 Tensorboard。
     \end{exampleBox}
-
     \subsection{动态实例化与 REGISTER 注册机制}
     \textbf{动态实例化}
-
     当我们新写了类 (Class) 或函数时，可直接在配置文件中使用。程序会根据配置文件的类名或函数名，自动查找并实例化。这个过程称为动态实例化 (Dynamic Instantiation)。
-
     具体而言，我们是通过importlib和getattr来实现的。以 data 为例，我们在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/data/__init__.py}{data/\_\_init\_\_.py} 中是如下做的:
-
     1、扫描所有以 \_dataset.py 为结尾的文件 (这是约定)；
-
     2、把这些文件中的类或函数通过 importlib 都 import 进来；
-
     3、根据配置文件中的名称，通过 getattr 实例化。
-
     具体操作的代码如下：
-
     (读者只需知道这个机制即可，以下代码不影响 BasicSR 的直接使用)
     \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
     # automatically scan and import dataset modules
@@ -359,16 +284,13 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
         importlib.import_module(f'basicsr.data.{file_name}')
         for file_name in dataset_filenames
     ]
-
     ...
-
     # dynamic instantiation
     for module in _dataset_modules:
         dataset_cls = getattr(module, dataset_type, None)
         if dataset_cls is not None:
             break
     \end{minted}
-
     我们对以下模块使用了类似的技巧，在使用的时候需要注意文件后缀名称的约定：
     \begin{table}[h]
     \centering
@@ -381,15 +303,11 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
     \end{tabular}
     \caption{动态实例化文件命名约定}
     \end{table}
-
     \begin{hl} % ---------------- Highlight block ---------------- %
     \textbf{注意}
-
     1、上面的文件后缀只用在需要的文件中，其他文件命名尽量避免使用以上的后缀。
-
     2、类名或函数名不能重复。
     \end{hl}
-
     另外，对 losses 和 metrics，我们也使用了 importlib 和 getattr，但是和上面不一样的是，对于 losses 和 metrics，由于文件数量比较少，改动也少，因此我们不采用扫描文件的方式，而是在新增加类/函数后，需要在相应的 \_\_init\_\_.py 中增加类/函数名称。
     \begin{table}[h]
     \centering
@@ -402,7 +320,6 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
     \end{tabular}
     \caption{部分类的实例化需要修改对应的 \_\_init\_\_.py 文件}
     \end{table}
-
     在 log 的时候, loss 项使用 l\_ 开头，这样在 Tensorboard 显示的时候，所有 loss 会被组织到一起。比如在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/srgan_model.py}{basicsr/models/srgan\_model.py} 中，使用了 l\_g\_pix，l\_g\_percep，l\_g\_gan 等。在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{basicsr/utils/logger.py} 中，他们会被组织到一起：
     \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
     if k.startswith('l_'):
@@ -410,15 +327,10 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
     else:
         self.tb_logger.add_scalar(k, v, current_iter)
     \end{minted}
-
     \textbf{Register 注册机制}
-
     以上我们介绍了 BasicSR 中的动态实例化机制——代码会根据配置文件指定的Class 名，自动实例化对应的类。这样省去了我们冗余的手动实例化类的操作。
-
     尽管动态实例化机制很方便，但它仍然存在一些缺陷：1、无法避免重名的问题。一旦出现了类名重名，我们可能无法知道是否实例化了自己想要的类。2、该机制会把文件中所有的类、函数都 import 进来，十分冗余，因为很多类和函数都是中间的量。
-
     为了解决以上问题，我们进一步引入了 Register 注册机制。我们参考了 FacebookResearch 的 \href{https://github.com/facebookresearch/fvcore}{fvcore} 仓库的函数，定义了 Registry 类。详细代码可查看 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/registry.py}{basicsr/utils/registry.py}。
-
     它的主要函数有两个：register() 和 get()：
     \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
     def register(self, obj=None, suffix=None):
@@ -433,13 +345,10 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
                 name = func_or_class.__name__
                 self._do_register(name, func_or_class, suffix)
                 return func_or_class
-
             return deco
-
         # used as a function call
         name = obj.__name__
         self._do_register(name, obj, suffix)
-
     def get(self, name, suffix='basicsr'):
         ret = self._obj_map.get(name)
         if ret is None:
@@ -449,13 +358,9 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
             raise KeyError(f"No object named '{name}' found in '{self._name}' registry!")
         return ret
     \end{minted}
-
     它能有效解决上面提到的两个问题：
-
     1、注册的时候，会强制检查有没有重名，减少了 bug 的产生。
-
     2、只有在需要时，才会进行注册类或函数，其他中间量不会被注册。
-
     在 BasicSR 中，我们定义了五个 REGISTER ，相关定义在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/registry.py}{basicsr/utils/registry.py} 中：
     \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
     DATASET_REGISTRY = Registry('dataset')
@@ -464,50 +369,33 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
     LOSS_REGISTRY = Registry('loss')
     METRIC_REGISTRY = Registry('metric')
     \end{minted}
-
     需要注册的时候，我们使用了 Python 装饰器，即在类/函数前面加上下面的语句：
     \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
     from basicsr.utils.registry import ARCH_REGISTRY
     from .arch_util import default_init_weights, make_layer, pixel_unshuffle
-
     @ARCH_REGISTRY.register()
     class RRDBNet(nn.Module):
         def __init__(self):
             super(RRDBNet, self).__init__()
             ......
     \end{minted}
-
     于是，上面的 RRDBNet 网络结构就被注册上啦。
-
     其他的 DATASET，ARCH，MODEL，LOSS 都是类似的操作。它们都是注册了类，实例化的时候根据配置的 Class name 进行实例化。
-
     注意，METRIC 稍微有点特殊，它是注册了函数，一样的用法，但是会根据函数名来调用相对应的函数。后面介绍 METRIC 的时候，再具体展开。
-
     值得注意的是，即使我们使用了 REGISTER 机制，import 问题还是存在，即 Python 怎么知道你写了某个网络结构文件。
-
     为了尽量少修改文件，我们沿用了动态实例化时候的做法，约定网络结构的文件使用  \_arch.py 结尾，然后自动扫描，import 进来。
-
     其他的几个注册器的约定：
-
     1、DATASET\_REGISTRY：以 \_dataset.py 结尾
-
     2、ARCH\_REGISTRY：以 \_arch.py 结尾
-
     3、MODEL\_REGISTRY：以 \_model.py 结尾
-
     4、LOSS\_REGISTRY：以 \_loss.py 结尾 (目前只有一个文件，所以还没有添加相应的扫描的代码，后面会添加上)
-
     5、METRIC\_REGISTRY: 这个因为改动很少，我们就保留了 在\_\_init\_\_.py 文件中 import 的方式:
     \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
     from copy import deepcopy
-
     from basicsr.utils.registry import METRIC_REGISTRY
     from .niqe import calculate_niqe
     from .psnr_ssim import calculate_psnr, calculate_ssim
-
     __all__ = ['calculate_psnr', 'calculate_ssim', 'calculate_niqe']
-
-
     def calculate_metric(data, opt):
         """Calculate metric from data and options.
         Args:
@@ -519,19 +407,11 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
         metric = METRIC_REGISTRY.get(metric_type)(**data, **opt)
         return metric
     \end{minted}
-
     总结一下，当我们在新开发网络结构的时候，只要做两件事，修改两个文件就好了。BasicSR 背后的动态实例化和 REGISTRY 机制会帮你完成剩下的事。
-
     1、写一个单独的网络结构文件 (以 \_arch.py 结尾)。在写好的 Class 前加上 @ARCH\_REGISTRY.register() 装饰器。
-
     2、在配置文件中指定使用哪一个网络结构，即上面的 Class name。
-
-
-
-
 \section{数据 (Data Loader)}\label{code_structure:data}
     数据是机器学习的动力来源。这一章节我们介绍 BasicSR 的数据读取和处理机制。在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/data}{basicsr/data/} 目录下，我们提供了常用的 Dataset 文件。
-
     \dirtree{%
         .1 ROOT\_DIR.
         .2 BasicSR.
@@ -552,9 +432,7 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
         .5 prefetch\_dataloader.py.
         .5 transforms.py.\DTcomment{提供了常用的数据增强函数}.
     }
-
     BasicSR 提供的常用数据集的 Dataset 文件如下：
-
     \begin{table}[h]
     \centering
     \resizebox{\textwidth}{26mm}{
@@ -573,7 +451,7 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
     }
     \caption{BasicSR 提供的数据处理类}
     \end{table}
-
+    
     下面，我们以 PairedImageDataset 为例，大致讲解 Dataset 文件的内容。
     \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg,breaklines]{python}
     @DATASET_REGISTRY.register()
@@ -587,25 +465,17 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
             self.mean = opt['mean'] if 'mean' in opt else None
             self.std = opt['std'] if 'std' in opt else None
     \end{minted}
-
     在 option 文件中可以指定数据读取方式 (opt['io\_backend'])。
-
     我们支持三种读取数据的模式：
-
     1、直接从 lmdb 格式的文件中读取；
-
     2、若提供了 meta\_info 文件，则直接从该文件中列出的文件路径读取数据；
-
     3、输入文件目录，代码会自动扫描该目录中的文件，然后读取。
-
-
     \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{python}
             self.gt_folder, self.lq_folder = opt['dataroot_gt'], opt['dataroot_lq']
             if 'filename_tmpl' in opt:
                 self.filename_tmpl = opt['filename_tmpl']
             else:
                 self.filename_tmpl = '{}'
-
             if self.io_backend_opt['type'] == 'lmdb':
                 self.io_backend_opt['db_paths'] = [self.lq_folder, self.gt_folder]
                 self.io_backend_opt['client_keys'] = ['lq', 'gt']
@@ -615,24 +485,16 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
             else:
                 self.paths = paired_paths_from_folder([self.lq_folder, self.gt_folder], ['lq', 'gt'], self.filename_tmpl)
     \end{minted}
-
     从 option 文件中读取 GT 图像目录 (opt['dataroot\_gt']) 和输入图像目录 (opt['dataroot\_lq'])。
-
     根据指定的文件读取方式，选择相应的读取函数。
-
     1、lmdb 方式， 选择 paired\_paths\_from\_lmdb 函数;
-
     2、meta\_info\_file 方式，选择 paired\_paths\_from\_meta\_info\_file 函数；
-
     3、一般的文件目录方式，选择 paired\_paths\_from\_folder 函数。
-
     \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{python}
         def __getitem__(self, index):
             if self.file_client is None:
                 self.file_client = FileClient(self.io_backend_opt.pop('type'), **self.io_backend_opt)
-
             scale = self.opt['scale']
-
             # Load gt and lq images. Dimension order: HWC; channel order: BGR;
             # image range: [0, 1], float32.
             gt_path = self.paths[index]['gt_path']
@@ -642,9 +504,7 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
             img_bytes = self.file_client.get(lq_path, 'lq')
             img_lq = imfrombytes(img_bytes, float32=True)
     \end{minted}
-
     \_\_getitem\_\_() 函数是 Dataset 中最关键的函数，定义了每一次迭代时数据是如何读取并处理的。 图像通过 FileClient 读取后，shape 为 HWC， 其中颜色通道的排列顺序为 BGR。图像此时为 [0, 1] 的 float32 格式。
-
     \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{python}
             # augmentation for training
             if self.opt['phase'] == 'train':
@@ -653,40 +513,55 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
                 img_gt, img_lq = paired_random_crop(img_gt, img_lq, gt_size, scale, gt_path)
                 # flip, rotation
                 img_gt, img_lq = augment([img_gt, img_lq], self.opt['use_hflip'], self.opt['use_rot'])
-
             # color space transform
             if 'color' in self.opt and self.opt['color'] == 'y':
                 img_gt = rgb2ycbcr(img_gt, y_only=True)[..., None]
                 img_lq = rgb2ycbcr(img_lq, y_only=True)[..., None]
     \end{minted}
-
     这一部分首先对读取的图像进行 crop 处理 (从原图中随机 crop 出一个 patch)，然后进行随机的水平翻转和旋转，进行数据增强。如果要使用单通道训练 (YCbCR 颜色空间中的 Y 通道)，代码会对 GT 和 input 进行颜色转换。
-
     \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{python}
             # crop the unmatched GT images during validation or testing, especially for SR benchmark datasets
             if self.opt['phase'] != 'train':
                 img_gt = img_gt[0:img_lq.shape[0] * scale, 0:img_lq.shape[1] * scale, :]
-
             # BGR to RGB, HWC to CHW, numpy to tensor
             img_gt, img_lq = img2tensor([img_gt, img_lq], bgr2rgb=True, float32=True)
             # normalize
             if self.mean is not None or self.std is not None:
                 normalize(img_lq, self.mean, self.std, inplace=True)
                 normalize(img_gt, self.mean, self.std, inplace=True)
-
             return {'lq': img_lq, 'gt': img_gt, 'lq_path': lq_path, 'gt_path': gt_path}
     \end{minted}
-
     在测试时，由于上下采样的原因，有时候模型的输出和原始的图像大小会出现不匹配的情况。例如，原始图像大小为 $530 \times 530$，在 $\times 4$  超分中，原图会下采样变成 $132 \times 132$ 的输入，模型会超分后会得到 $528 \times 528$ 的输出，与原图大小不匹配，进而无法直接计算 PSNR 等指标。于是，为了避免这个问题，我们在测试时，会 crop 原始图像多余的像素，使其分辨率和模型输出相同。
-
     另外，我们对图像格式进行一些转换：把 BGR 格式转换为 RGB；把 HWC 的排列，转换为 Pytorch所需的 CHW。如果指定了数据集的均值 (mean) 和标准差 (std)，我们将会进一步对数据进行Z-score标准化操作。
-
     最后，我们返回一个字典，包括输入的 LQ 图像，作为标签的 GT 图像，以及他们的路径。
-
-
+    
+    另外，在训练配置文件中，有一个 dataset\_enlarge\_ratio 参数，代表了手工扩大dataset的倍率。例如，如果训练数据集有15张图，设置 dataset\_enlarge\_ratio 为100，那么程序会重复这些图片100次，这样一个 epoch 下来，便会读取1500张图 (事实上是重复读的)。这个方法经常用来加速 data loader, 因为在有的机器上，一个 epoch 结束，会重启进程，导致拖慢训练。
+    
+    下面，我们介绍一下 \textbf{数据预读取 prefetch} 机制。为了加速数据读取的进程，我们提供了数据预读取机制，具体的实现代码详见 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/data/prefetch_dataloader.py}{data/prefetch\_dataloader.py}。
+    
+    目前我们提供了三种数据预读取方式，可以在训练配置文件中进行设置。
+    
+    1、None模式。默认不使用。如果使用了 LMDB 或者 IO 开销不大，可以不使用 prefetch。
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
+    prefetch_mode: ~
+    \end{minted}
+    
+    2、cuda 模式。使用 CUDA prefetcher，具体介绍可以参考 \href{https://github.com/NVIDIA/apex/issues/304#}{NVIDIA/apex}。这个模式会多占用一些 GPU 显存。注意，如果使用这个模型，一定要设置 pin\_memory=True。
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
+    prefetch_mode: cuda
+    pin_memory: true
+    \end{minted}
+    
+    3、cpu模式。使用 CPU prefetcher，具体介绍可以参考 \href{https://github.com/IgorSusmelj/pytorch-styleguide/issues/5#}{IgorSusmelj/pytorch-styleguide}。目前这个模式还在测试阶段，加速效果可能不明显。
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
+    prefetch_mode: cpu
+    num_prefetch_queue: 1  # 1 by default
+    \end{minted}
+    
+    
+    
 \section{网络结构 (Architecture)} \label{code_structure:arch}
     在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs}{basicsr/archs/} 目录下，我们提供了若干经典的网络结构。
-
     \begin{table}[h]
     \centering
     {
@@ -717,21 +592,11 @@ val 部分为训练时 validation 的数据配置。通过定期 validation，�
     }
     \caption{BasicSR 提供的经典网络结构}
     \end{table}
-
-
-
 \section{模型 (Model)}\label{code_structure:model}
-
 - Base模型
-
 - 其他模型
-
 - 继承关系
-
 \section{损失函数 (Loss)}\label{code_structure:loss}
-
 \section{训练(优化器与学习率调度器)}\label{code_structure:training}
-
 \section{算子}\label{code_structure:ops}
-
 \end{document}
