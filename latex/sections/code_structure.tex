@@ -16,8 +16,8 @@
     \begin{center}
         \includegraphics[width=1\linewidth]{figures/main_framework.pdf}
     \end{center}
-    \caption{BasicSR 代码整体框架 \todo{把图中 Load data, Apply normalization 这些描述性语言翻译成中文吧。PPT 可以 copy 一页，同时保留中英文的源文件。然后 share 一下 PPT}}
-    \label{fig:main_framework}查询。
+    \caption{BasicSR 代码整体框架}
+    \label{fig:main_framework}
 \end{figure}
 
 \begin{itemize}
@@ -78,6 +78,8 @@
 通过 option 配置文件，我们可以设置实验名、选择模型、指定 GPU、指定数据路径、选择网络结构、配置训练策略等。
 
 我们在第\ref{code_structure:train_config}小节介绍训练配置文件例子，在第\ref{code_structure:test_config}小节介绍测试配置文件例子。
+
+\todo{TODO：添加简要代码解析 - 如何从 YAML 文件解析。即分析 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/options.py}{basicsr/utils/options.py}}。
 
 \subsubsection{训练配置文件例子}\label{code_structure:train_config}
 
@@ -195,6 +197,7 @@ network_g:  # 网络 g 的设置
 # path
 path:  # 以下为路径和与训练模型、重启训练的设置
   pretrain_network_g: ~  # 预训练模型的路径, 需要以 pth 结尾的模型
+  param_key_g: params  # 读取的预训练的参数 key。若需要使用 EMA 模型，需要改成 params_ema
   strict_load_g: true  # 是否严格地根据参数名称一一对应 load 模型参数。如果选择 false，那么模型对于找不到的参数，会随机初始化；如果选择 true，假如存在不对应的参数，会报错提示
   resume_state: ~  # 重启训练的 state 路径, 在 experiments/exp_name/training_states 目录下
 \end{minted}
@@ -294,20 +297,96 @@ logger:  # 这块是 logging 的配置
 
 \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
 # dist training settings
-dist_params:  # 以下为 distributed training 的设置, 目前只有在 Slurm 训练下才需要
+dist_params:  # distributed training 的设置, 目前只在 Slurm 训练下才需要
   backend: nccl
   port: 29500
 \end{minted}
 
 至此，我们对于训练的配置文件有了一个初步的理解了。
 
-
 \subsubsection{测试配置文件例子}\label{code_structure:test_config}
+
+我们以 \href{https://github.com/XPixelGroup/BasicSR/blob/master/options/test/SRResNet_SRGAN/test_MSRResNet_x4.yml}{test\_MSRResNet\_x4.yml} 为例，简单说明测试配置文件的每个部分。我们先把配置文件贴出来，在后面附上解释。然后在说明框内会列举相关的要点。为方便说明，整个配置文件会被分散成不同的板块来讲解。
+由于测试配置文件和训练配置文件很类似，我们将简略地进行讲解。
+
+\begin{minted}[xleftmargin=20pt,breaklines,bgcolor=bg]{python}
+# ----------- Commands for running
+# ----------- Single GPU
+# PYTHONPATH="./:${PYTHONPATH}"  CUDA_VISIBLE_DEVICES=0 python basicsr/test.py -opt options/test/SRResNet_SRGAN/test_MSRResNet_x4.yml
+
+# general settings
+name: 001_MSRResNet_x4_f64b16_DIV2K_1000k_B16G1_wandb  # 实验名称
+model_type: SRModel  # 使用的 model 类型
+scale: 4  # 输出比输入的倍数, 在SR中是放大倍数; 若有些任务没有这个配置, 则写1
+num_gpu: 1  # 测试卡数
+manual_seed: 0  # 指定随机种子
+
+# test dataset settings
+datasets:
+  test_1:  # 测试数据集的设置, 后缀1表示第一个测试集
+    name: Set5  # 数据集的名称
+    type: PairedImageDataset  # 读取数据的 Dataset 类
+    # GT 和输入 LQ 的根目录
+    dataroot_gt: datasets/Set5/GTmod12
+    dataroot_lq: datasets/Set5/LRbicx4
+    io_backend:  # IO 读取的 backend
+      type: disk  # disk 表示直接从硬盘读取
+  test_2:  # 测试数据集的设置, 后缀2表示第二个测试集
+    name: Set14
+    type: PairedImageDataset
+    dataroot_gt: datasets/Set14/GTmod12
+    dataroot_lq: datasets/Set14/LRbicx4
+    io_backend:
+      type: disk
+
+# network structures - 网络结构的设置
+network_g:  # 网络 g 的设置
+  type: MSRResNet  # 网络结构 (Architecture) 的类型
+  # 以下是 MSRResNet 的参数设置
+  num_in_ch: 3
+  num_out_ch: 3
+  num_feat: 64
+  num_block: 16
+  upscale: 4
+
+# path
+path:
+  pretrain_network_g: experiments/001_..._wandb/models/net_g_1000000.pth  # 预训练模型的路径, 需要以 pth 结尾的模型
+  param_key_g: params  # 读取的预训练的参数 key。若需要使用 EMA 模型，需要改成 params_ema
+  strict_load_g: true  # 加载预训练模型时, 是否需要网络参数的名称严格对应
+
+# validation settings - 以下为Validation (也是测试)的设置
+val:
+  save_img: true # 是否需要在测试的时候保存图片
+  suffix: ~  # 对保存的图片添加后缀，如果是 None, 则使用 exp name
+
+  metrics:  # 测试时候使用的 metric
+    psnr:  # metric 名字, 这个名字可以是任意的
+      type: calculate_psnr  # 选择指标类型
+      # 以下属性是灵活的, 根据不同 metric 有不同的设置
+      crop_border: 4  # 计算指标时 crop 图像边界像素范围 (不纳入计算范围)
+      test_y_channel: false  # 是否转成在 Y(CbCr) 空间上计算
+      better: higher  # the higher, the better. Default: higher
+    ssim:  # 另外一个指标
+      type: calculate_ssim
+      crop_border: 4
+      test_y_channel: false
+      better: higher
+\end{minted}
+
+\begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{注意}
+\begin{itemize}
+    \item 如果模型训练的时候开启了 EMA，则在测试的时候需要指定 \texttt{param\_key\_g} 为 \texttt{params\_ema}。否则会出现测试和训练过程中 validation 不匹配的问题。
+\end{itemize}
+\end{exampleBox}
+
+至此，我们对于测试的配置文件有了一个初步的理解了。
 
 % ------------------------------------------------------------------------------
 
 \section{动态实例化与 REGISTER 注册机制}\label{code_structure:register}
 
+% ----------------------------------
 \subsection{动态实例化}
 
 当我们新写了类 (Class) 或函数时，可直接在配置文件中使用。程序会根据配置文件的类名或函数名，自动查找并实例化。这个过程称为动态实例化 (Dynamic Instantiation)。
@@ -388,8 +467,8 @@ else:
     self.tb_logger.add_scalar(k, v, current_iter)
 \end{minted}
 
+% ----------------------------------
 \subsection{Register 注册机制}
-
 
 以上我们介绍了 BasicSR 中的动态实例化机制——代码会根据配置文件指定的Class 名，自动实例化对应的类。这样省去了我们冗余的手动实例化类的操作。
 
