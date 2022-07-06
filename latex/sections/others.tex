@@ -5,9 +5,9 @@
 \chapter{其他}
 \vspace{-2cm}
 
-在这个章节中，我们将对 BasicSR 其他的一些常用的设计进行说明，比如 Debug 模式， 自动 Resume， 命令行修改参数等等。 
+在这个章节中，我们将对 BasicSR 其他的一些常用的设计进行说明，比如 Debug 模式， 自动 Resume， 命令行修改参数等等。
 
-\section{Debug 模式}\label{sec:debug_mode}
+\section{Debug 模式}\label{others:debug_mode}
 
 正式训练之前，你可以用 debug 模式检查是否正常运行。在这个模式下：
 \begin{itemize}
@@ -25,7 +25,7 @@
 	\item 在配置文件 yml 文件的 name 中添加 ‘debug’ 字符。只要在实验名字中有 ‘\uline{debug}’ 字样, 则会进入 debug 模式。
 \end{enumerate}
 
-\section{自动 resume}
+\section{自动 resume}\label{others:auto_resume}
 
 当遇到程序中断的时候，我们希望程序能够自动 resume。BasicSR 当然提供了这样的功能啦。
 
@@ -45,9 +45,9 @@ BasicSR 提供了一个简便的命令行参数 ‘\textbf{-{}-force\_yml}’，
 \end{enumerate}
 
 \begin{exampleBox}[]{示例}
-	
-	有如下的配置 yml 文件，我们希望修改：1) random seed 为 1; 2) ema\_decay 为0.5; 3) 名字中体现配置。 
-	
+
+	有如下的配置 yml 文件，我们希望修改：1) random seed 为 1; 2) ema\_decay 为0.5; 3) 名字中体现配置。
+
 	\begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{yaml}
 # general settings
 name: 001_MSRResNet_x4_f64b16_DIV2K_1000k_B16G1_wandb
@@ -60,7 +60,7 @@ manual_seed: 0
 train:
   ema_decay: 0.999
 	\end{minted}
-	
+
 	那么，我们的命令行就变成了:
 	\begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{bash}
 python basicsr/train.py -opt options/train/SRResNet_SRGAN/train_MSRResNet_x4.yml --force_yml manual_seed=1 train:ema_decay=0.5 name=001_MSRResNet_x4_f64b16_DIV2K_1000k_B16G1_rand1_ema_decay0.5
@@ -84,10 +84,10 @@ EMA (Exponential Moving Average)，指数移动平均。
 
 \begin{hl} % ---------------- Highlight block ---------------- %
 	\textbf{如何开启 EMA？}
-	
+
 	在 yml 的配置文件中，我们只要指定 ema\_decay 大于 0，就会开始 EMA。
-	
-	
+
+
 \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{yaml}
 # training settings
 train:
@@ -112,8 +112,8 @@ train:
 
 \begin{hl} % ---------------- Highlight block ---------------- %
 	\textbf{单元测试命令}
-	
-	
+
+
 	\begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{bash}
 python -m pytest tests/
 	\end{minted}
