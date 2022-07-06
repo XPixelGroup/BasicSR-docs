@@ -67,7 +67,7 @@
 
 \subsubsection{配置文件例子说明}
 
-下面，我们以 \href{https://github.com/XPixelGroup/BasicSR/blob/master/options/train/SRResNet_SRGAN/train_MSRResNet_x4.yml}{train\_MSRResNet\_x4.yml} 为例，简单说明配置文件的每个部分。
+下面，我们以 \href{https://github.com/XPixelGroup/BasicSR/blob/master/options/train/SRResNet_SRGAN/train_MSRResNet_x4.yml}{train\_MSRResNet\_x4.yml} 为例，简单说明配置文件的每个部分。我们先把配置文件贴出来，然后在说明框内详细说明每一个参数的含义。为方便说明，整个配置文件会被分散成不同的块来讲解。
 
 \begin{minted}[xleftmargin=20pt,breaklines,bgcolor=bg]{python}
 # Modified SRResNet w/o BN from:
@@ -102,7 +102,7 @@ manual\_seed：指定随机种子。
 \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
 # dataset and data loader settings
 datasets:
-    train:
+  train:
     name: DIV2K
     type: PairedImageDataset
     dataroot_gt: datasets/DF2K/DIV2K_train_HR_sub
@@ -113,9 +113,9 @@ datasets:
     # dataroot_lq: datasets/DIV2K/DIV2K_train_LR_bicubic_X4_sub.lmdb
     filename_tmpl: '{}'
     io_backend:
-        type: disk
-        # (for lmdb)
-        # type: lmdb
+      type: disk
+      # (for lmdb)
+      # type: lmdb
 
     gt_size: 128
     use_hflip: true
@@ -128,58 +128,62 @@ datasets:
     dataset_enlarge_ratio: 100
     prefetch_mode: ~
 \end{minted}
-    \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{数据读取相关配置}
+\begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{数据读取相关配置}
+这个部分主要是配置相对应的 dataset 和 data loader 的配置。在这个例子中，这些配置分别用在文件 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/data/paired_image_dataset.py}{PairedImageDataset} 和 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/data/__init__.py}{data loader} 中。
 
-    name：自定义的数据集名称。
+datasets 下的 train 表示这是在设置训练数据集和对应的训练 data loader。
 
-    type：读取数据的 Dataset 类，例如 PairedImageDataset 等。详细请查看《模型》部分。
+name：自定义的数据集名称。
 
-    dataroot\_gt：标签 Ground-truth 图像存放的目录。
+type：读取数据的 Dataset 类，例如 PairedImageDataset 等。详细说明参见章节\ref{code_structure:data}：\nameref{code_structure:data}。
 
-    dataroot\_lq：输入 Input 图像存放的目录。
+dataroot\_gt：标签 Ground-Truth 图像存放的根目录。
 
-    meta\_info\_file：预先生成的 meta\_info 文件。细节请查看《数据准备》章节。
+dataroot\_lq：输入 Input 图像存放的根目录。
 
-    gt\_size：训练阶段，裁剪 (crop) 的 ground-truth 图像的尺寸大小，即 label 大小。
+meta\_info\_file：预先生成的 meta\_info 文件。细节请参看章节\ref{data_preparation:meta_info}：\nameref{data_preparation:meta_info}。\todo{更新链接}
 
-    use\_hflip：是否开启水平方向图像增强 (随机水平翻转图像)。
+gt\_size：训练阶段，裁剪 (crop) 的 ground-truth 图像的尺寸大小，即训练的 label 大小。
 
-    use\_rot：是否开启旋转图像增强 (随机旋转图像)。
+use\_hflip：是否开启水平方向图像增强 (随机水平翻转图像)。
 
-    use\_shuffle：训练时是否随机打乱数据顺序。
+use\_rot：是否开启旋转图像增强 (随机旋转图像)。
 
-    num\_worker\_per\_gpu：每块 GPU 分配的线程数。
+use\_shuffle：训练时是否在每一个 epoch 随机打乱数据顺序。
 
-    batch\_size\_per\_gpu: 每块 GPU 分配的 batch size。
+num\_worker\_per\_gpu：每块 GPU 分配的读取数据线程数。
 
-    dataset\_enlarge\_ratio: xxx
+batch\_size\_per\_gpu: 每块 GPU 上的 batch size。
 
-    prefetch\_mode: xxx
+dataset\_enlarge\_ratio: 放大 dataset 的长度倍数 (默认为1)。可以扩大一个 epoch 所需 iterations，详情参见章节\ref{code_structure:data}：\nameref{code_structure:data}。\todo{这块内容需要补足到 数据 这个章节}
 
-    \end{exampleBox}
+prefetch\_mode: 预先读取数据的方式，\textbf{默认为 None，即 $\sim$。\texttt{cpu} 表示使用 CPU prefetcher。\texttt{cuda} 表示使用 CUDA prefetcher。它会多占用一些GPU显存. 注意: 这个模式下, 一定要设置 \texttt{pin\_memory=True}。}详情参见章节\ref{code_structure:data}：\nameref{code_structure:data}。\todo{这块内容需要补足到 数据 这个章节}
+\end{exampleBox}
 
-    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
-    val:
-        name: Set5
-        type: PairedImageDataset
-        dataroot_gt: datasets/Set5/GTmod12
-        dataroot_lq: datasets/Set5/LRbicx4
-        io_backend:
-          type: disk
+\begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
+  val:
+    name: Set5
+    type: PairedImageDataset
+    dataroot_gt: datasets/Set5/GTmod12
+    dataroot_lq: datasets/Set5/LRbicx4
+    io_backend:
+      type: disk
 
-      val_2:
-        name: Set14
-        type: PairedImageDataset
-        dataroot_gt: datasets/Set14/GTmod12
-        dataroot_lq: datasets/Set14/LRbicx4
-        io_backend:
-          type: disk
-    \end{minted}
-    \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{validation 配置}
+  val_2:
+    name: Set14
+    type: PairedImageDataset
+    dataroot_gt: datasets/Set14/GTmod12
+    dataroot_lq: datasets/Set14/LRbicx4
+    io_backend:
+      type: disk
+\end{minted}
 
-    val 部分为训练时 validation 的数据配置。通过定期 validation，我们可以及时观察训练的情况，追踪模型当前的表现。
-    \end{exampleBox}
-    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+\begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{validation 配置}
+
+val 部分为训练时 validation 的数据配置。通过定期 validation，我们可以及时观察训练的情况，追踪模型当前的表现。
+\end{exampleBox}
+
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
     # network structures
     network_g:
       type: MSRResNet
@@ -203,7 +207,7 @@ datasets:
 
     upscale: 上采样倍数。
     \end{exampleBox}
-    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
     # path
     path:
       pretrain_network_g: ~
@@ -218,7 +222,7 @@ datasets:
 
     resume\_state: 如训练被打断，可以在这里填写保存的状态文件，恢复训练。
     \end{exampleBox}
-    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
     # training settings
     train:
       ema_decay: 0.999
@@ -274,7 +278,7 @@ datasets:
     reduction: 最终的 loss 取平均或者总和。
 
     \end{exampleBox}
-    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
     # validation settings
     val:
       val_freq: !!float 5e3
@@ -307,7 +311,7 @@ datasets:
 
     better: 该指标是越高越好，还是越低越好。选择 higher 或 者lower，默认为 higher。
     \end{exampleBox}
-    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
     # logging settings
     logger:
       print_freq: 100
@@ -342,7 +346,7 @@ datasets:
     具体操作的代码如下：
 
     (读者只需知道这个机制即可，以下代码不影响 BasicSR 的直接使用)
-    \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+    \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
     # automatically scan and import dataset modules
     # scan all the files under the data folder with '_dataset' in file names
     data_folder = osp.dirname(osp.abspath(__file__))
@@ -400,7 +404,7 @@ datasets:
     \end{table}
 
     在 log 的时候, loss 项使用 l\_ 开头，这样在 Tensorboard 显示的时候，所有 loss 会被组织到一起。比如在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/srgan_model.py}{basicsr/models/srgan\_model.py} 中，使用了 l\_g\_pix，l\_g\_percep，l\_g\_gan 等。在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{basicsr/utils/logger.py} 中，他们会被组织到一起：
-    \begin{minted}[xleftmargin=20pt,bgcolor=bg]{python}
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
     if k.startswith('l_'):
         self.tb_logger.add_scalar(f'losses/{k}', v, current_iter)
     else:
@@ -416,7 +420,7 @@ datasets:
     为了解决以上问题，我们进一步引入了 Register 注册机制。我们参考了 FacebookResearch 的 \href{https://github.com/facebookresearch/fvcore}{fvcore} 仓库的函数，定义了 Registry 类。详细代码可查看 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/registry.py}{basicsr/utils/registry.py}。
 
     它的主要函数有两个：register() 和 get()：
-    \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+    \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
     def register(self, obj=None, suffix=None):
         """
         Register the given object under the the name `obj.__name__`.
@@ -453,7 +457,7 @@ datasets:
     2、只有在需要时，才会进行注册类或函数，其他中间量不会被注册。
 
     在 BasicSR 中，我们定义了五个 REGISTER ，相关定义在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/registry.py}{basicsr/utils/registry.py} 中：
-    \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+    \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
     DATASET_REGISTRY = Registry('dataset')
     ARCH_REGISTRY = Registry('arch')
     MODEL_REGISTRY = Registry('model')
@@ -462,7 +466,7 @@ datasets:
     \end{minted}
 
     需要注册的时候，我们使用了 Python 装饰器，即在类/函数前面加上下面的语句：
-    \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+    \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
     from basicsr.utils.registry import ARCH_REGISTRY
     from .arch_util import default_init_weights, make_layer, pixel_unshuffle
 
@@ -494,7 +498,7 @@ datasets:
     4、LOSS\_REGISTRY：以 \_loss.py 结尾 (目前只有一个文件，所以还没有添加相应的扫描的代码，后面会添加上)
 
     5、METRIC\_REGISTRY: 这个因为改动很少，我们就保留了 在\_\_init\_\_.py 文件中 import 的方式:
-    \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+    \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
     from copy import deepcopy
 
     from basicsr.utils.registry import METRIC_REGISTRY
@@ -571,7 +575,7 @@ datasets:
     \end{table}
 
     下面，我们以 PairedImageDataset 为例，大致讲解 Dataset 文件的内容。
-    \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{python}
+    \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg,breaklines]{python}
     @DATASET_REGISTRY.register()
     class PairedImageDataset(data.Dataset):
         def __init__(self, opt):
