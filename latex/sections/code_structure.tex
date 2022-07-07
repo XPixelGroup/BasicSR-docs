@@ -387,9 +387,151 @@ val:
 \section{动态实例化与 REGISTER 注册机制}\label{code_structure:register}
 
 % ----------------------------------
-\subsection{动态实例化}
+\subsection{REGISTER 注册机制}
 
-当我们新写了类 (Class) 或函数时，可直接在配置文件中使用。程序会根据配置文件的类名或函数名，自动查找并实例化。这个过程称为动态实例化 (Dynamic Instantiation)。
+首先，来看我们的目的：当我们新写了类 (Class) 或函数时，我们希望可直接在配置文件中指定，然后程序会根据配置文件的类名或函数名，自动查找并实例化。
+以开发新的网络结构为例，我们会做以下几件事：
+\begin{enumerate}
+    \item 写具体的网络结构，它往往是一个Class，并且往往是一个单独的文件
+    \item 在配置文件中会指定我们使用哪一个网络结构，往往是通过 Class name 指定
+    \item 在训练过程的某一个地方，程序会根据配置文件指定的 Class name，自动实例化相关的类
+\end{enumerate}
+
+这里说的 REGISTER 注册机制就是来更简洁地实现上面的第三个步骤的。因为其能够根据配置文件动态地实例化所需要的类或函数，因此这个过程被称为动态实例化 (Dynamic Instantiation)。
+
+BasicSR 的 Register 注册机制参考了 FacebookResearch 的 \href{https://github.com/facebookresearch/fvcore}{fvcore} 仓库的函数，定义了 Registry 类。详细代码可查看 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/registry.py}{basicsr/utils/registry.py}。它主要有两个函数：register() 和 get()。
+
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+class Registry():
+    """
+    The registry that provides name -> object mapping, to support third-party users' custom modules.
+    """
+    def __init__(self, name):
+        self._name = name
+        self._obj_map = {}
+
+    def _do_register(self, name, obj, suffix=None):
+        ...
+        self._obj_map[name] = obj
+
+    def register(self, obj=None, suffix=None):
+        # register() 函数主要用来注册一个实现的类或函数
+        if obj is None:
+            # used as a decorator
+            def deco(func_or_class):
+                name = func_or_class.__name__
+                self._do_register(name, func_or_class, suffix)
+                return func_or_class
+
+            return deco
+
+        # used as a function call
+        name = obj.__name__
+        self._do_register(name, obj, suffix)
+
+    def get(self, name, suffix='basicsr'):
+        # get() 函数主要用来根据配置文件中的类名或函数名来查找对应的实例
+        ret = self._obj_map.get(name)
+        if ret is None:
+            ret = self._obj_map.get(name + '_' + suffix)
+        ...
+        return ret
+\end{minted}
+
+\subsubsection{如何注册新的类？}
+
+在 BasicSR 中，我们定义了五个 REGISTER ，相关定义在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/registry.py}{basicsr/utils/registry.py} 中：
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+DATASET_REGISTRY = Registry('dataset')
+ARCH_REGISTRY = Registry('arch')
+MODEL_REGISTRY = Registry('model')
+LOSS_REGISTRY = Registry('loss')
+METRIC_REGISTRY = Registry('metric')
+\end{minted}
+
+需要注册的时候，我们
+\begin{enumerate}
+    \item import 相关的注册器，比如 ARCH\_REGISTRY
+    \item 使用 Python 装饰器，即在类/函数前面加上 \texttt{@ARCH\_REGISTRY.register()}
+\end{enumerate}
+这样 RRDBNet 这个类就被注册上啦。
+
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+from basicsr.utils.registry import ARCH_REGISTRY
+from .arch_util import default_init_weights, make_layer, pixel_unshuffle
+
+@ARCH_REGISTRY.register()
+class RRDBNet(nn.Module):
+    def __init__(self):
+        super(RRDBNet, self).__init__()
+        ...
+\end{minted}
+
+
+
+\subsubsection{如何使用已注册的类？}
+
+当我们需要使用的时候，配置
+它能有效解决上面提到的两个问题：
+
+1、注册的时候，会强制检查有没有重名，减少了 bug 的产生。
+
+2、只有在需要时，才会进行注册类或函数，其他中间量不会被注册。
+
+
+
+
+
+其他的 DATASET，ARCH，MODEL，LOSS 都是类似的操作。它们都是注册了类，实例化的时候根据配置的 Class name 进行实例化。
+
+注意，METRIC 稍微有点特殊，它是注册了函数，一样的用法，但是会根据函数名来调用相对应的函数。后面介绍 METRIC 的时候，再具体展开。
+
+值得注意的是，即使我们使用了 REGISTER 机制，import 问题还是存在，即 Python 怎么知道你写了某个网络结构文件。
+
+为了尽量少修改文件，我们沿用了动态实例化时候的做法，约定网络结构的文件使用  \_arch.py 结尾，然后自动扫描，import 进来。
+
+其他的几个注册器的约定：
+
+1、DATASET\_REGISTRY：以 \_dataset.py 结尾
+
+2、ARCH\_REGISTRY：以 \_arch.py 结尾
+
+3、MODEL\_REGISTRY：以 \_model.py 结尾
+
+4、LOSS\_REGISTRY：以 \_loss.py 结尾 (目前只有一个文件，所以还没有添加相应的扫描的代码，后面会添加上)
+
+5、METRIC\_REGISTRY: 这个因为改动很少，我们就保留了 在\_\_init\_\_.py 文件中 import 的方式:
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+from copy import deepcopy
+
+from basicsr.utils.registry import METRIC_REGISTRY
+from .niqe import calculate_niqe
+from .psnr_ssim import calculate_psnr, calculate_ssim
+
+__all__ = ['calculate_psnr', 'calculate_ssim', 'calculate_niqe']
+
+
+def calculate_metric(data, opt):
+    """Calculate metric from data and options.
+    Args:
+        opt (dict): Configuration. It must contain:
+            type (str): Model type.
+    """
+    opt = deepcopy(opt)
+    metric_type = opt.pop('type')
+    metric = METRIC_REGISTRY.get(metric_type)(**data, **opt)
+    return metric
+\end{minted}
+
+总结一下，当我们在新开发网络结构的时候，只要做两件事，修改两个文件就好了。BasicSR 背后的动态实例化和 REGISTRY 机制会帮你完成剩下的事。
+
+1、写一个单独的网络结构文件 (以 \_arch.py 结尾)。在写好的 Class 前加上 @ARCH\_REGISTRY.register() 装饰器。
+
+2、在配置文件中指定使用哪一个网络结构，即上面的 Class name。
+
+
+
+1、无法避免重名的问题。一旦出现了类名重名，我们可能无法知道是否实例化了自己想要的类。2、该机制会把文件中所有的类、函数都 import 进来，十分冗余，因为很多类和函数都是中间的量。
 
 具体而言，我们是通过importlib和getattr来实现的。以 data 为例，我们在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/data/__init__.py}{data/\_\_init\_\_.py} 中是如下做的:
 
@@ -467,121 +609,9 @@ else:
     self.tb_logger.add_scalar(k, v, current_iter)
 \end{minted}
 
-% ----------------------------------
-\subsection{Register 注册机制}
-
-以上我们介绍了 BasicSR 中的动态实例化机制——代码会根据配置文件指定的Class 名，自动实例化对应的类。这样省去了我们冗余的手动实例化类的操作。
-
-尽管动态实例化机制很方便，但它仍然存在一些缺陷：1、无法避免重名的问题。一旦出现了类名重名，我们可能无法知道是否实例化了自己想要的类。2、该机制会把文件中所有的类、函数都 import 进来，十分冗余，因为很多类和函数都是中间的量。
-
-为了解决以上问题，我们进一步引入了 Register 注册机制。我们参考了 FacebookResearch 的 \href{https://github.com/facebookresearch/fvcore}{fvcore} 仓库的函数，定义了 Registry 类。详细代码可查看 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/registry.py}{basicsr/utils/registry.py}。
-
-它的主要函数有两个：register() 和 get()：
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-def register(self, obj=None, suffix=None):
-    """
-    Register the given object under the the name `obj.__name__`.
-    Can be used as either a decorator or not.
-    See docstring of this class for usage.
-    """
-    if obj is None:
-        # used as a decorator
-        def deco(func_or_class):
-            name = func_or_class.__name__
-            self._do_register(name, func_or_class, suffix)
-            return func_or_class
-
-        return deco
-
-    # used as a function call
-    name = obj.__name__
-    self._do_register(name, obj, suffix)
-
-def get(self, name, suffix='basicsr'):
-    ret = self._obj_map.get(name)
-    if ret is None:
-        ret = self._obj_map.get(name + '_' + suffix)
-        print(f'Name {name} is not found, use name: {name}_{suffix}!')
-    if ret is None:
-        raise KeyError(f"No object named '{name}' found in '{self._name}' registry!")
-    return ret
-\end{minted}
-
-它能有效解决上面提到的两个问题：
-
-1、注册的时候，会强制检查有没有重名，减少了 bug 的产生。
-
-2、只有在需要时，才会进行注册类或函数，其他中间量不会被注册。
-
-在 BasicSR 中，我们定义了五个 REGISTER ，相关定义在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/registry.py}{basicsr/utils/registry.py} 中：
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-DATASET_REGISTRY = Registry('dataset')
-ARCH_REGISTRY = Registry('arch')
-MODEL_REGISTRY = Registry('model')
-LOSS_REGISTRY = Registry('loss')
-METRIC_REGISTRY = Registry('metric')
-\end{minted}
-
-需要注册的时候，我们使用了 Python 装饰器，即在类/函数前面加上下面的语句：
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-from basicsr.utils.registry import ARCH_REGISTRY
-from .arch_util import default_init_weights, make_layer, pixel_unshuffle
-
-@ARCH_REGISTRY.register()
-class RRDBNet(nn.Module):
-    def __init__(self):
-        super(RRDBNet, self).__init__()
-        ......
-\end{minted}
-
-于是，上面的 RRDBNet 网络结构就被注册上啦。
-
-其他的 DATASET，ARCH，MODEL，LOSS 都是类似的操作。它们都是注册了类，实例化的时候根据配置的 Class name 进行实例化。
-
-注意，METRIC 稍微有点特殊，它是注册了函数，一样的用法，但是会根据函数名来调用相对应的函数。后面介绍 METRIC 的时候，再具体展开。
-
-值得注意的是，即使我们使用了 REGISTER 机制，import 问题还是存在，即 Python 怎么知道你写了某个网络结构文件。
-
-为了尽量少修改文件，我们沿用了动态实例化时候的做法，约定网络结构的文件使用  \_arch.py 结尾，然后自动扫描，import 进来。
-
-其他的几个注册器的约定：
-
-1、DATASET\_REGISTRY：以 \_dataset.py 结尾
-
-2、ARCH\_REGISTRY：以 \_arch.py 结尾
-
-3、MODEL\_REGISTRY：以 \_model.py 结尾
-
-4、LOSS\_REGISTRY：以 \_loss.py 结尾 (目前只有一个文件，所以还没有添加相应的扫描的代码，后面会添加上)
-
-5、METRIC\_REGISTRY: 这个因为改动很少，我们就保留了 在\_\_init\_\_.py 文件中 import 的方式:
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-from copy import deepcopy
-
-from basicsr.utils.registry import METRIC_REGISTRY
-from .niqe import calculate_niqe
-from .psnr_ssim import calculate_psnr, calculate_ssim
-
-__all__ = ['calculate_psnr', 'calculate_ssim', 'calculate_niqe']
 
 
-def calculate_metric(data, opt):
-    """Calculate metric from data and options.
-    Args:
-        opt (dict): Configuration. It must contain:
-            type (str): Model type.
-    """
-    opt = deepcopy(opt)
-    metric_type = opt.pop('type')
-    metric = METRIC_REGISTRY.get(metric_type)(**data, **opt)
-    return metric
-\end{minted}
 
-总结一下，当我们在新开发网络结构的时候，只要做两件事，修改两个文件就好了。BasicSR 背后的动态实例化和 REGISTRY 机制会帮你完成剩下的事。
-
-1、写一个单独的网络结构文件 (以 \_arch.py 结尾)。在写好的 Class 前加上 @ARCH\_REGISTRY.register() 装饰器。
-
-2、在配置文件中指定使用哪一个网络结构，即上面的 Class name。
 
 % ------------------------------------------------------------------------------
 
