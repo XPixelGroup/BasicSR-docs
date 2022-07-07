@@ -27,7 +27,6 @@
 
 \section{自动 resume}\label{others:auto_resume}
 
-\todo{Resume 加入第四章节的训练部分}
 当遇到程序中断的时候，我们希望程序能够自动 resume。BasicSR 当然提供了这样的功能啦。
 
 只要在命令行中加入 ‘\textbf{-{}-auto\_resume}’，程序就会找到保存的最近的模型参数和状态，并加载进来，接着训练啦。
@@ -69,7 +68,7 @@ python basicsr/train.py -opt options/train/SRResNet_SRGAN/train_MSRResNet_x4.yml
 \end{exampleBox}
 
 
-\section{EMA 介绍}\label{others:ema}
+\section{EMA 介绍}
 
 EMA (Exponential Moving Average)，指数移动平均。
 它是用来“平均”一个变量在历史上的值。使用怎样的权重平均呢？如名字所示，随着时间，越是过往的时间，以一个指数衰减的权重来平均。
