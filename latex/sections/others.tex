@@ -9,9 +9,9 @@
 
 \section{Debug 模式}\label{others:debug_mode}
 
-正式训练之前，你可以用 debug 模式检查是否正常运行。在这个模式下：
+正式训练之前，你可以用 debug 模式检查是否正常运行。在 debug 模式下：
 \begin{itemize}
-	\item 程序会在每次 iteration 下都打印日志，并且经过8次 iterations 后，便会进入 validation 阶段。这样，程序中如果有 bug，就能够更快地被发现了。
+	\item 程序会在每次 iteration 下都打印日志，并且经过8次 iterations 后，便会进入 validation 阶段。这样可以快速方便地查看代码是否可以正常运行，而不用实际训练。毕竟实际训练可能很慢，等半天后，发现程序崩溃了，而原因是 validation 中有 bug。
 	\item 在 debug 模式中，并不会使用 tensorboard logger 和 wandb logger，以保证日志文件的简洁性。
 \end{itemize}
 
@@ -32,7 +32,7 @@
 
 只要在命令行中加入 ‘\textbf{-{}-auto\_resume}’，程序就会找到保存的最近的模型参数和状态，并加载进来，接着训练啦。
 
-\section{命令行修改配置}
+\section{命令行修改配置}\label{others:yml_modification_with_commands}
 
 BasicSR 使用 yml 文件进行配置。我们也推荐这样的方式，因为这样可以记录并跟踪每一个实验的配置。
 但我们也希望在仅仅修改了一个小配置的情况下 (比如修改 random seed)，不需要麻烦地新建并修改 yml 配置文件。它可以使用原先的 yml 配置文件，而在命令行中对配置做出修改。
