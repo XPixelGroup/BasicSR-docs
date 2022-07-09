@@ -11,18 +11,18 @@
 
 正式训练之前，你可以用 debug 模式检查是否正常运行。在 debug 模式下：
 \begin{itemize}
-	\item 程序会在每次 iteration 下都打印日志，并且经过8次 iterations 后，便会进入 validation 阶段。这样可以快速方便地查看代码是否可以正常运行，而不用实际训练。毕竟实际训练可能很慢，等半天后，发现程序崩溃了，而原因是 validation 中有 bug。
-	\item 在 debug 模式中，并不会使用 tensorboard logger 和 wandb logger，以保证日志文件的简洁性。
+    \item 程序会在每次 iteration 下都打印日志，并且经过8次 iterations 后，便会进入 validation 阶段。这样可以快速方便地查看代码是否可以正常运行，而不用实际训练。毕竟实际训练可能很慢，等半天后，发现程序崩溃了，而原因是 validation 中有 bug。
+    \item 在 debug 模式中，并不会使用 tensorboard logger 和 wandb logger，以保证日志文件的简洁性。
 \end{itemize}
 
 \textbf{如何进入 debug 模式？}
 
 \begin{enumerate}[方式 1.]
-	\item 在命令行最后加入 ‘\textbf{-{}-debug}’。比如：
-	\begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{python}
+    \item 在命令行最后加入 ‘\textbf{-{}-debug}’。比如：
+          \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{python}
  python basicsr/train.py -opt options/train/SRResNet_SRGAN/train_MSRResNet_x4.yml --debug
-	\end{minted}
-	\item 在配置文件 yml 文件的 name 中添加 ‘debug’ 字符。只要在实验名字中有 ‘\uline{debug}’ 字样, 则会进入 debug 模式。
+    \end{minted}
+    \item 在配置文件 yml 文件的 name 中添加 ‘debug’ 字符。只要在实验名字中有 ‘\uline{debug}’ 字样, 则会进入 debug 模式。
 \end{enumerate}
 
 \section{自动 resume}\label{others:auto_resume}
@@ -40,16 +40,16 @@ BasicSR 使用 yml 文件进行配置。我们也推荐这样的方式，因为�
 BasicSR 提供了一个简便的命令行参数 ‘\textbf{-{}-force\_yml}’，在命令行中它的用法如下：
 
 \begin{enumerate}
-	\item ‘-{}-force\_yml’ 后面接如下的字符串，每一个字符串修改一个配置，如果有多个配置需要修改，以空格隔开多个字符串。
-	\item 字符串采用格式：‘train:ema\_decay=0.999’。等号 (=) 前后分别表示 key 和 value。如果有层级结构，使用冒号 (:) 来区分。
-	\item 修改之后记得检查打印的日志是否符合预期哈！
+    \item ‘-{}-force\_yml’ 后面接如下的字符串，每一个字符串修改一个配置，如果有多个配置需要修改，以空格隔开多个字符串。
+    \item 字符串采用格式：‘train:ema\_decay=0.999’。等号 (=) 前后分别表示 key 和 value。如果有层级结构，使用冒号 (:) 来区分。
+    \item 修改之后记得检查打印的日志是否符合预期哈！
 \end{enumerate}
 
 \begin{exampleBox}[]{示例}
 
-	有如下的配置 yml 文件，我们希望修改：1) random seed 为 1; 2) ema\_decay 为0.5; 3) 名字中体现配置。
+    有如下的配置 yml 文件，我们希望修改：1) random seed 为 1; 2) ema\_decay 为0.5; 3) 名字中体现配置。
 
-	\begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{yaml}
+    \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{yaml}
 # general settings
 name: 001_MSRResNet_x4_f64b16_DIV2K_1000k_B16G1_wandb
 model_type: SRModel
@@ -60,12 +60,12 @@ manual_seed: 0
 
 train:
   ema_decay: 0.999
-	\end{minted}
+    \end{minted}
 
-	那么，我们的命令行就变成了:
-	\begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{bash}
+    那么，我们的命令行就变成了:
+    \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{bash}
 python basicsr/train.py -opt options/train/SRResNet_SRGAN/train_MSRResNet_x4.yml --force_yml manual_seed=1 train:ema_decay=0.5 name=001_MSRResNet_x4_f64b16_DIV2K_1000k_B16G1_rand1_ema_decay0.5
-	\end{minted}
+    \end{minted}
 \end{exampleBox}
 
 
@@ -77,19 +77,19 @@ EMA (Exponential Moving Average)，指数移动平均。
 在 BasicSR 里面，EMA 一般作用在模型的参数上。它的效果一般是：
 
 \begin{itemize}
-	\item 稳定训练效果。GAN 训练的结果一般瑕疵更少，视觉效果更好
-	\item 对于以 PSNR 为目的的模型，其 PSNR 一般会更高一些。
+    \item 稳定训练效果。GAN 训练的结果一般瑕疵更少，视觉效果更好
+    \item 对于以 PSNR 为目的的模型，其 PSNR 一般会更高一些。
 \end{itemize}
 
 由于开启 EMA的代价几乎可以不计，所以我们推荐开启 EMA。
 
 \begin{hl} % ---------------- Highlight block ---------------- %
-	\textbf{如何开启 EMA？}
+    \textbf{如何开启 EMA？}
 
-	在 yml 的配置文件中，我们只要指定 ema\_decay 大于 0，就会开始 EMA。
+    在 yml 的配置文件中，我们只要指定 ema\_decay 大于 0，就会开始 EMA。
 
 
-\begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{yaml}
+    \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{yaml}
 # training settings
 train:
   ema_decay: 0.9      # 开启 EMA, 滑动系数为 0.9
@@ -112,12 +112,12 @@ train:
 
 
 \begin{hl} % ---------------- Highlight block ---------------- %
-	\textbf{单元测试命令}
+    \textbf{单元测试命令}
 
 
-	\begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{bash}
+    \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{bash}
 python -m pytest tests/
-	\end{minted}
+    \end{minted}
 \end{hl}
 
 
