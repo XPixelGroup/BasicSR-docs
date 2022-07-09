@@ -381,11 +381,10 @@ val:
 至此，我们对于测试的配置文件有了一个初步的理解了。
 
 % ------------------------------------------------------------------------------
-
 \section{动态实例化与 REGISTER 注册机制}\label{code_structure:register}
 
 % ----------------------------------
-\subsection{REGISTER 注册机制}
+\subsection{REGISTER 注册机制}\label{code_structure:register_intro}
 
 首先，来看我们的目的：当我们新写了类 (Class) 或函数时，我们希望可直接在配置文件中指定，然后程序会根据配置文件的类名或函数名，自动查找并实例化。
 以开发新的网络结构为例，我们会做以下几件事：
@@ -436,7 +435,7 @@ class Registry():
         return ret
 \end{minted}
 
-\subsubsection{如何注册新的类？}
+\subsubsection{如何注册新的类？}\label{code_structure:how_to_register}
 
 在 BasicSR 中，我们定义了五个 REGISTER ，相关定义在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/registry.py}{basicsr/utils/registry.py} 中：
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
@@ -452,205 +451,223 @@ METRIC_REGISTRY = Registry('metric')
     \item import 相关的注册器，比如 ARCH\_REGISTRY
     \item 使用 Python 装饰器，即在类/函数前面加上 \texttt{@ARCH\_REGISTRY.register()}
 \end{enumerate}
-这样 RRDBNet 这个类就被注册上啦。
+以网络结构 RRDBNet 为例：
 
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-from basicsr.utils.registry import ARCH_REGISTRY
+from basicsr.utils.registry import ARCH_REGISTRY  # import 相关的注册器
 from .arch_util import default_init_weights, make_layer, pixel_unshuffle
 
-@ARCH_REGISTRY.register()
+@ARCH_REGISTRY.register()  # 使用 Python 装饰器
 class RRDBNet(nn.Module):
     def __init__(self):
         super(RRDBNet, self).__init__()
         ...
 \end{minted}
 
+这样 RRDB 这个类就被注册上了。
 
+\subsubsection{如何使用已注册的类？}\label{code_structure:how_to_use_registerd}
 
-\subsubsection{如何使用已注册的类？}
+当我们需要使用的时候，只需要在配置文件中配置，相关代码会自动实例化所需的类。
 
-当我们需要使用的时候，配置
-它能有效解决上面提到的两个问题：
+还是以使用 RRDBNet 网络结构为例。我们在配置文件中指定了网络结构的类型为 RRDBNet。
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{yaml}
+# network structures
+network_g:
+  type: RRDBNet
+  num_in_ch: 3
+  num_out_ch: 3
+  num_feat: 64
+  num_block: 23
+\end{minted}
 
-1、注册的时候，会强制检查有没有重名，减少了 bug 的产生。
-
-2、只有在需要时，才会进行注册类或函数，其他中间量不会被注册。
-
-
-
-
-
-其他的 DATASET，ARCH，MODEL，LOSS 都是类似的操作。它们都是注册了类，实例化的时候根据配置的 Class name 进行实例化。
-
-注意，METRIC 稍微有点特殊，它是注册了函数，一样的用法，但是会根据函数名来调用相对应的函数。后面介绍 METRIC 的时候，再具体展开。
-
-值得注意的是，即使我们使用了 REGISTER 机制，import 问题还是存在，即 Python 怎么知道你写了某个网络结构文件。
-
-为了尽量少修改文件，我们沿用了动态实例化时候的做法，约定网络结构的文件使用  \_arch.py 结尾，然后自动扫描，import 进来。
-
-其他的几个注册器的约定：
-
-1、DATASET\_REGISTRY：以 \_dataset.py 结尾
-
-2、ARCH\_REGISTRY：以 \_arch.py 结尾
-
-3、MODEL\_REGISTRY：以 \_model.py 结尾
-
-4、LOSS\_REGISTRY：以 \_loss.py 结尾 (目前只有一个文件，所以还没有添加相应的扫描的代码，后面会添加上)
-
-5、METRIC\_REGISTRY: 这个因为改动很少，我们就保留了 在\_\_init\_\_.py 文件中 import 的方式:
+模型文件 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/sr_model.py}{basicr/models/sr\_models.py} 中的函数 \texttt{build\_network(opt['network\_g'])} 便会根据配置文件 build 网络结构。
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-from copy import deepcopy
+class SRModel(BaseModel):
+    """Base SR model for single image super-resolution."""
 
-from basicsr.utils.registry import METRIC_REGISTRY
-from .niqe import calculate_niqe
-from .psnr_ssim import calculate_psnr, calculate_ssim
+    def __init__(self, opt):
+        super(SRModel, self).__init__(opt)
 
-__all__ = ['calculate_psnr', 'calculate_ssim', 'calculate_niqe']
+        # define network
+        self.net_g = build_network(opt['network_g'])  # 调用建构网络结构的函数
+        self.net_g = self.model_to_device(self.net_g)
+        self.print_network(self.net_g)
+\end{minted}
 
+而 \texttt{build\_network} 函数就会从 ARCH\_REGISTRY 中找到已经被注册的 RRDBNet 进行实例化。 \texttt{build\_network} 函数所在位置 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/archs/\_\_init\_\_.py}{basicsr/archs/\_\_init\_\_.py}
 
-def calculate_metric(data, opt):
-    """Calculate metric from data and options.
-    Args:
-        opt (dict): Configuration. It must contain:
-            type (str): Model type.
-    """
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+def build_network(opt):
     opt = deepcopy(opt)
-    metric_type = opt.pop('type')
-    metric = METRIC_REGISTRY.get(metric_type)(**data, **opt)
-    return metric
+    network_type = opt.pop('type')
+    net = ARCH_REGISTRY.get(network_type)(**opt)  # 实例化的核心函数。从 ARCH_REGISTRY 找到已被注册的类进行实例化
+    logger = get_root_logger()
+    logger.info(f'Network [{net.__class__.__name__}] is created.')
+    return net
 \end{minted}
 
-总结一下，当我们在新开发网络结构的时候，只要做两件事，修改两个文件就好了。BasicSR 背后的动态实例化和 REGISTRY 机制会帮你完成剩下的事。
+% ----------------------------------
+\subsection{自动扫描并 import 注册的类/函数}\label{code_structure:auto_import}
 
-1、写一个单独的网络结构文件 (以 \_arch.py 结尾)。在写好的 Class 前加上 @ARCH\_REGISTRY.register() 装饰器。
+上面讲了 REGISTER 注册机制，但还有一个问题：这个类/函数还需要被 Python 程序感知到。目前的类/函数只是在一个文件中写了，但是 Python 程序并没有 import 进来。
 
-2、在配置文件中指定使用哪一个网络结构，即上面的 Class name。
-
-
-
-1、无法避免重名的问题。一旦出现了类名重名，我们可能无法知道是否实例化了自己想要的类。2、该机制会把文件中所有的类、函数都 import 进来，十分冗余，因为很多类和函数都是中间的量。
-
-具体而言，我们是通过importlib和getattr来实现的。以 data 为例，我们在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/data/__init__.py}{data/\_\_init\_\_.py} 中是如下做的:
-
-1、扫描所有以 \_dataset.py 为结尾的文件 (这是约定)；
-
-2、把这些文件中的类或函数通过 importlib 都 import 进来；
-
-3、根据配置文件中的名称，通过 getattr 实例化。
-
-具体操作的代码如下：
-
-(读者只需知道这个机制即可，以下代码不影响 BasicSR 的直接使用)
+这个问题的解决方法：一般是在 \_\_init\_\_.py 文件中写 import 语句，比如在 mmediting 中定义了网络结构后，还需要在 sr\_backbones/\_\_init\_\_.py 中添加这样的语句：
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-# automatically scan and import dataset modules
-# scan all the files under the data folder with '_dataset' in file names
-data_folder = osp.dirname(osp.abspath(__file__))
-dataset_filenames = [
-    osp.splitext(osp.basename(v))[0] for v in scandir(data_folder)
-    if v.endswith('_dataset.py')
-]
-# import all the dataset modules
-_dataset_modules = [
-    importlib.import_module(f'basicsr.data.{file_name}')
-    for file_name in dataset_filenames
-]
-
-...
-
-# dynamic instantiation
-for module in _dataset_modules:
-    dataset_cls = getattr(module, dataset_type, None)
-    if dataset_cls is not None:
-        break
+from .basicvsr_net import BasicVSRNet
+from .edsr import EDSR
+from .edvr_net import EDVRNet
+from .rrdb_net import RRDBNet
+from .sr_resnet import MSRResNet
 \end{minted}
 
-我们对以下模块使用了类似的技巧，在使用的时候需要注意文件后缀名称的约定：
+它需要在 \_\_init\_\_.py 中把写好的网络结构显示地 import 进来。
+但这样很麻烦：每写一个新的网络结构，我们就要去修改 \_\_init\_\_.py，很多时候容易忘记。
+最早开发 mmediting 的时候就感觉这个很繁琐。
+本着偷懒的原则，在 BasicSR 中就找了一个省事的办法。
+
+但我们新建一个文件，就以 \texttt{\_arch.py} 结尾。通过扫描特定文件的方式来进行自动 import。
+比如，对于网络结构，我们在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/archs/\_\_init\_\_.py}{basicsr/archs/\_\_init\_\_.py} 中定义了：
+
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+# automatically scan and import arch modules for registry
+# scan all the files under the 'archs' folder and collect files ending with '_arch.py'
+arch_folder = osp.dirname(osp.abspath(__file__))
+arch_filenames = [osp.splitext(osp.basename(v))[0] for v in scandir(arch_folder) if v.endswith('_arch.py')]
+# import all the arch modules
+_arch_modules = [importlib.import_module(f'basicsr.archs.{file_name}') for file_name in arch_filenames]
+\end{minted}
+
+我们可以看到，程序会自动扫描以 \texttt{\_arch.py} 的文件，然后 import 相关文件。这样就把所有注册的网络结构类都 import 进去啦。
+
+类似的，DATASET，ARCH，MODEL，LOSS 都在相关的 \_\_init\_\_.py 文件中定义了扫描并自动 import 的操作。
+
+总结一下，当我们在新开发网络结构时 (其他模块也类似)，只要做两件事，修改两个文件就好了。BasicSR 背后的动态实例化和 REGISTRY 机制会帮你完成剩下的事。
+ \begin{enumerate}
+    \item 写一个单独的网络结构文件 (以 \_arch.py 结尾)。在写好的 Class 前加上 @ARCH\_REGISTRY.register() 装饰器
+    \item 在配置文件中指定使用哪一个网络结构，即上面的 Class name
+\end{enumerate}
+
+\subsubsection{文件后缀名的约定}\label{code_structure:file_suffix_convention}
+
 \begin{table}[h]
     \centering
-    \begin{tabular}{|c|c|c|}
+    \begin{tabular}{|c|c|c|c|}
         \hline
-        \textbf{Module} & \textbf{File Suffix} & \textbf{Example}                \\ \hline
-        Data            & \_dataset.py         & data/paired\_image\_dataset.py  \\ \hline
-        Model           & \_model.py           & basicsr/models/sr\_model.py     \\ \hline
-        Archs           & \_arch.py            & basicsr/archs/srresnet\_arch.py \\ \hline
+        \textbf{Model} & \textbf{Register} & \textbf{File Suffix} & \textbf{Example}                       \\ \hline
+        data           & DATASET\_REGISTRY & \_dataset.py         & basicsr/data/paired\_image\_dataset.py \\ \hline
+        arch           & ARCH\_REGISTRY    & \_arch.py            & basicsr/archs/srresnet\_arch.py        \\ \hline
+        model          & MODEL\_REGISTRY   & \_arch.py            & basicsr/models/sr\_model.py            \\ \hline
+        loss           & LOSS\_REGISTRY    & \_loss.py            & basicsr/losses/gan\_loss.py            \\ \hline
     \end{tabular}
-    \caption{动态实例化文件命名约定}
+    \caption{文件后缀名的约定}
 \end{table}
 
 \begin{hl} % ---------------- Highlight block ---------------- %
     \textbf{注意}
 
-    1、上面的文件后缀只用在需要的文件中，其他文件命名尽量避免使用以上的后缀。
-
-    2、类名或函数名不能重复。
+    \begin{enumerate}
+        \item 上面的文件后缀只用在需要的文件中，其他文件命名尽量避免使用以上的后缀
+        \item 注册的类名或函数名不能重复，否则会报错
+    \end{enumerate}
 \end{hl}
 
-另外，对 losses 和 metrics，我们也使用了 importlib 和 getattr，但是和上面不一样的是，对于 losses 和 metrics，由于文件数量比较少，改动也少，因此我们不采用扫描文件的方式，而是在新增加类/函数后，需要在相应的 \_\_init\_\_.py 中增加类/函数名称。
-\begin{table}[h]
-    \centering
-    \begin{tabular}{|c|c|c|}
-        \hline
-        \textbf{Module} & \textbf{Path}         & \textbf{Modify}                       \\ \hline
-        Losses          & basicsr/models/losses & basicsr/models/losses/\_\_init\_\_.py \\ \hline
-        Metrics         & basicsr/metrics       & basicsr/metrics/\_\_init\_\_.py       \\ \hline
-        Archs           & \_arch.py             & basicsr/archs/srresnet\_arch.py       \\ \hline
-    \end{tabular}
-    \caption{部分类的实例化需要修改对应的 \_\_init\_\_.py 文件}
-\end{table}
+\begin{hl} % ---------------- Highlight block ---------------- %
+    \textbf{METRIC 稍有特殊}
 
-在 log 的时候, loss 项使用 l\_ 开头，这样在 Tensorboard 显示的时候，所有 loss 会被组织到一起。比如在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/srgan_model.py}{basicsr/models/srgan\_model.py} 中，使用了 l\_g\_pix，l\_g\_percep，l\_g\_gan 等。在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{basicsr/utils/logger.py} 中，他们会被组织到一起：
-\begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
-if k.startswith('l_'):
-    self.tb_logger.add_scalar(f'losses/{k}', v, current_iter)
-else:
-    self.tb_logger.add_scalar(k, v, current_iter)
+    我们定义了 METRIC\_REGISTRY，它在用法上和其他类一样，但是它是根据\textbf{函数名}来调用相对应的函数。
+
+    因为 metric 我们相对改动少，所以我们没有采用自动扫描文件再 import 的方式，而是保留了在\href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/metrics/\_\_init\_\_.py}{basicsr/metrics/\_\_init\_\_.py} 中 import 的方式
+\end{hl}
+
+\subsubsection{避免类名/函数名出现重名问题}\label{code_structure:avoid_repeated_name}
+
+Register 机制会自动检测出重名的类/函数，然后抛出错误：\texttt{An object named xxx was already registered in yyy registry!}。
+这是特意设计的，以减少 bug 。因为如果重名的类，在实例化的时候，就不能确定程序到底实例化的是哪一个类。
+
+但是有有一种情况下，Register 的重名检查机制反而会掣肘开发。
+
+当我们在 BasicSR 里面定义了一个类，比如 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/data/realesrgan\_dataset.py}{basicsr/data/realesrgan\_dataset.py} 中的 \texttt{RealESRGANDataset} 类。
+而在 \href{https://github.com/xinntao/Real-ESRGAN}{Real-ESRGAN GitHub repo} 中，我们是把 basicsr 当作一个 package 来使用，然后又定义了一遍 \texttt{RealESRGANDataset} 类。这个时候，原来 BasicSR 代码中的类和后面开发的 Real-ESRGAN 代码中的类就有重名了。
+
+这个情况下，我们约定在 BasicSR 对应的类中的注册器中，传入 \texttt{basicsr} 的参数，以指示这个类是 BasicSR 中定义的，以示区分。
+其中这里的 \texttt{basicsr} 是关键词，注意使用其他词是不会被识别的。
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+@DATASET_REGISTRY.register(suffix='basicsr')  # 我们在类名中传入后缀 suffix，以指示这是在 BasicSR repo 中定义的
+class RealESRGANDataset(data.Dataset):
+    """Dataset used for Real-ESRGAN model:
+    """
+    ...
 \end{minted}
+
+这个具体在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/registry.py}{basicsr/utils/registry.py} 的代码如下：
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+def get(self, name, suffix='basicsr'):
+    ret = self._obj_map.get(name)
+    if ret is None:
+        ret = self._obj_map.get(name + '_' + suffix)
+        print(f'Name {name} is not found, use name: {name}_{suffix}!')
+    if ret is None:
+        raise KeyError(f"No object named '{name}' found in '{self._name}' registry!")
+    return ret
+\end{minted}
+它实现的逻辑如下：
+ \begin{enumerate}
+    \item 如果 get 函数指定了 suffix，则会优先找带有 suffix 的类/函数
+    \item 一般我们的 get 函数都不会指定 suffix。这样的情况，程序优先找自己实现的 (比如 Real-ESRGAN 代码库中的) 类/函数
+    \item 如果在自己实现的类/函数中没有找到，则会找 BasicSR 官方库中的实现的相同名字的类
+\end{enumerate}
 
 % ------------------------------------------------------------------------------
 \section{数据 (Data Loader 和 Dataset)}\label{code_structure:data}
 
-\subsection{Data loader 和 Dataset 的创建}\label{code_structure:dataloader_dataset}
+这一小节我们主要介绍 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/data}{basicsr/data} 目录下相关的功能和函数。
 
+在模型训练的过程中，我们需要不断地喂给网络模型数据。这个过程是通过 data loader 实现的。而每个 data loader 中又会把硬盘上的数据处理成训练所需的格式，这个过程是由不同的数据集决定的，PyTorch 里面叫做 \texttt{dataset}。我们一般说的 data loader，其实更多的是指 dataset 处理数据的细节。
 
-\sebsection{Dataset 示例讲解}\label{code_structure:dataset_example}
+\begin{enumerate}
+    \item dataloader：开启多个线程读取并处理数据，定义在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/data/\_\_init\_\_.py}{basicsr/data/\_\_init\_\_.py} 中
+    \item dataset：这是 dataloader 调用的，它把数据 (比如 PNG 图像) 转成模型、网络能够接收的输入 (往往是 PyTorch Tensor 类型)， 它涉及到的流程：
+          \begin{enumerate}
+              \item 读取数据
+              \item 对数据做变换 transforms。比如 crop，数据增强等
+              \item 转换成 PyTorch Tensor
+          \end{enumerate}
+\end{enumerate}
 
-包括文件夹的说明
+% ----------------------------------
+\subsection{data 目录介绍}\label{code_structure:data_contents}
 
-\sebsection{Dataset prefetch 说明}\label{code_structure:dataset_example}
+\href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/data}{basicsr/data} 下面主要的文件有：
 
-IO 加速
-
-其他方法，
-
-LMDB 格式加速，参见
-
-
-
-数据是机器学习的动力来源。这一章节我们介绍 BasicSR 的数据读取和处理机制。在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/data}{basicsr/data/} 目录下，我们提供了常用的 Dataset 文件。
-
+\vspace{0.5cm}
+\renewcommand*\DTstyle{\ttfamily\textcolor{black}}
 \dirtree{%
-    .1 ROOT\_DIR.
-    .2 BasicSR.
-    .3 basicsr.
-    .4 data.
-    .5 \_\_init\_\_.py.
-    .5 paired\_image\_dataset.py.
-    .5 single\_image\_dataset.py.
-    .5 realesrgan\_paired\_dataset.py.
-    .5 realesrgan\_dataset.py.
-    .5 reds\_dataset.py.
-    .5 vimeo90k\_dataset.py.
-    .5 video\_test\_dataset.py.
-    .5 ffhq\_dataset.py.
-    .5 data\_util.py.\DTcomment{提供了数据读取相关的函数}.
-    .5 data\_sampler.py.
-    .5 degradations.py.\DTcomment{提供若干图像退化的合成函数}.
-    .5 prefetch\_dataloader.py.
-    .5 transforms.py.\DTcomment{提供了常用的数据增强函数}.
+    .1 \textcolor{orange}{basicsr}.
+    .2 data.
+    .3 meta\_info.\DTcomment{存放 meta txt 文件}.
+    .3 \textcolor{red}{\_\_init\_\_.py}.\DTcomment{\textcolor{red}{build\_dataset 和 build\_dataloader}}.
+    .3 data\_sampler.py.\DTcomment{distributed training 时的采样策略}.
+    .3 \textcolor{red}{data\_util.py}.\DTcomment{\textcolor{red}{提供了数据读取的工具函数，比如读取文件路径等}}.
+    .3 \textcolor{red}{transforms.py}.\DTcomment{\textcolor{red}{提供常用的数据变换、数据增强函数}}.
+    .3 degradations.py.\DTcomment{提供一些图像退化的合成函数}.
+    .3 prefetch\_dataloader.py..\DTcomment{data prefecth文件，详见第\ref{code_structure:dataset_prefecth}小节}.
+    .3 paired\_image\_dataset.py..\DTcomment{下面是针对不同数据集的读取文件，我们主要也是修改它们。它们都以 \texttt{\_dataset.py} 结尾}.
+    .3 reds\_dataset.py.
+    .3 realesrgan\_dataset.py.
+    .3 vimeo90k\_dataset.py.
+    .3 ffhq\_dataset.py.
+    .3 ....
 }
+\vspace{0.5cm}
 
-BasicSR 提供的常用数据集的 Dataset 文件如下：
+\begin{note} % ---------------- Note block ---------------- %
+    meta\_info 的 txt 文件是可以根据自己的需要创建的。BasicSR 提供了一些约定的 meta\_info 文件，具体参见章节\ref{data_preparation:todo}：\nameref{data_preparation:todo} \todo{待更新}
+
+    我们新建数据集的 dataset 的时候，需要以 \texttt{\_dataset.py} 结尾，这样才能够被程序自动扫描 import。详见
+\end{note}
+
+BasicSR 提供的常用数据集的 Dataset 文件如表\ref{tab:code_structure_dataset}。注意这里之列了一些基本的，更多的 dataset 请参见代码或者在线 API 文档 \url{https://basicsr.readthedocs.io/en/latest/}。
 
 \begin{table}[h]
     \centering
@@ -668,8 +685,29 @@ BasicSR 提供的常用数据集的 Dataset 文件如下：
             FFHQDataset              & 人脸生成      & 训练               & 读取 FFHQ 的训练数据集                                 \\ \hline
         \end{tabular}
     }
-    \caption{BasicSR 提供的数据处理类}
+    \caption{BasicSR 提供的基本 dataset}
+    \label{tab:code_structure_dataset}
 \end{table}
+
+% ----------------------------------
+\subsection{Data loader 和 Dataset 的创建}\label{code_structure:dataloader_dataset}
+
+dataloader 的创建是在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/data/\_\_init\_\_.py}{basicsr/data/\_\_init\_\_.py} 文件中的 \texttt{build\_dataloader} 函数。这里不赘述，请参见代码。
+
+% ----------------------------------
+\subsection{Dataset 示例讲解}\label{code_structure:dataset_example}
+
+包括文件夹的说明
+% ----------------------------------
+\subsection{Dataset prefetch 说明}\label{code_structure:dataset_prefecth}
+
+IO 加速
+
+其他方法，
+
+LMDB 格式加速，参见
+
+
 
 下面，我们以 PairedImageDataset 为例，大致讲解 Dataset 文件的内容。
 \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg,breaklines]{python}
@@ -781,45 +819,21 @@ BasicSR 提供的常用数据集的 Dataset 文件如下：
 最后，我们返回一个字典，包括输入的 LQ 图像，作为标签的 GT 图像，以及他们的路径。
 
 % ------------------------------------------------------------------------------
-
-\section{网络结构 (Architecture)} \label{code_structure:arch}
-在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs}{basicsr/archs/} 目录下，我们提供了若干经典的网络结构。
-
-\begin{table}[h]
-    \centering
-    {
-        \begin{tabular}{|c|c|c|c|}
-            \hline
-            \textbf{网络结构} & \textbf{任务} & \textbf{文件}          & \textbf{描述}                          \\ \hline
-            EDSR              & 图像超分      & edsr\_arch.py          & 论文EDSR结构                           \\ \hline
-            SRResNet          & 图像超分      & srresnet\_arch.py      & 论文SRGAN的Generator                   \\ \hline
-            RRDB              & 图像超分      & rrdbnet\_arch.py       & 论文ESRGAN的Generator                  \\ \hline
-            RCAN              & 图像超分      & rcan\_arch.py          & 论文RCAN的结构                         \\ \hline
-            SwinIR            & 图像超分      & swinir\_arch.py        & 论文SwinIR的结构                       \\ \hline
-            ECBSR             & 图像超分      & ecbsr\_arch.py         & 论文ECBSR的结构                        \\ \hline
-            SRVGG             & 图像超分      & srvgg\_arch.py         & VGG结构改造的SR网络                    \\ \hline
-            EDVR              & 视频超分      & edvr\_arch.py          & 论文EDVR的结构                         \\ \hline
-            BasicVSR          & 视频超分      & basicvsr\_arch.py      & 论文BasicVSR的结构                     \\ \hline
-            BasicVSR++        & 视频超分      & basicvsrpp\_arch.py    & 论文BasicVSR++的结构                   \\ \hline
-            DUF               & 视频超分      & duf\_arch.py           & 论文DUF的结构                          \\ \hline
-            TOF               & 视频超分      & tof\_arch.py           & 论文TOF的结构                          \\ \hline
-            HiFaceGAN         & 人脸生成      & hifacegan\_arch.py     & 论文HiFaceGAN的结构                    \\ \hline
-            DFDNet            & 人脸生成      & dfdnet\_arch.py        & 论文Deep Face Dictionary Network的结构 \\ \hline
-            StyleGAN2         & 人脸生成      & stylegan2\_arch.py     & 论文StyleGAN2的结构                    \\ \hline
-            RIDNet            & 图像去噪      & ridnet\_arch\_arch.py  & 论文RIDNet的结构                       \\ \hline
-            VGG               & 工具结构      & vgg\_arch.py           & 经典VGG结构                            \\ \hline
-            InceptionV3       & 工具结构      & inception.py           & 经典InceptionV3的结构，用于计算FID指标 \\ \hline
-            VGG \& UNet       & 工具结构      & discriminator\_arch.py & 在GAN训练中，常用的Discriminator结构   \\ \hline
-            SpyNet            & 工具结构      & spynet\_arch.py        & 论文SpyNet的结构                       \\ \hline
-        \end{tabular}
-    }
-    \caption{BasicSR 提供的经典网络结构}
-\end{table}
-
-% ------------------------------------------------------------------------------
-
 \section{模型 (Model)}\label{code_structure:model}
+% ----------------------------------
+\subsection{models 目录介绍}\label{code_structure:model_contents}
 
+% ----------------------------------
+\subsection{Model 的创建}\label{code_structure:model_creation}
+
+arch 和loss
+
+% ----------------------------------
+\subsection{Base Model 说明}\label{code_structure:dataset_example}
+
+
+% ----------------------------------
+\subsection{保存模型、训练状态 和 Resume}\label{code_structure:dataset_prefecth}
 
 \todo{添加 resume 和保存文件     训练的时候， checkpoints 会保存两个文件：1）网络参数 .pth 文件；2）包含 optimizer 和 scheduler 的信息 .state 文件。根据这两个文件，则可以 resume 了。 resume 就是把最新的 .pth 和 .resume 文件正确load进来。详细的函数在 basicsr/train.py 的 load\_resume\_state 函数中。我后面也会具体写文章再介绍。下面这个截图就是模型训练过程中会保存的文件 models 和 training\_states  。}
 
@@ -967,6 +981,43 @@ class SRModel(BaseModel):
 \begin{note} % ---------------- Note block ---------------- %
     上述被改写函数的介绍，参见章节\ref{Model:SR Model}。
 \end{note}
+
+% ------------------------------------------------------------------------------
+\section{网络结构 (Architecture)} \label{code_structure:arch}
+在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs}{basicsr/archs/} 目录下，我们提供了若干经典的网络结构。
+
+\begin{table}[h]
+    \centering
+    {
+        \begin{tabular}{|c|c|c|c|}
+            \hline
+            \textbf{网络结构} & \textbf{任务} & \textbf{文件}          & \textbf{描述}                          \\ \hline
+            EDSR              & 图像超分      & edsr\_arch.py          & 论文EDSR结构                           \\ \hline
+            SRResNet          & 图像超分      & srresnet\_arch.py      & 论文SRGAN的Generator                   \\ \hline
+            RRDB              & 图像超分      & rrdbnet\_arch.py       & 论文ESRGAN的Generator                  \\ \hline
+            RCAN              & 图像超分      & rcan\_arch.py          & 论文RCAN的结构                         \\ \hline
+            SwinIR            & 图像超分      & swinir\_arch.py        & 论文SwinIR的结构                       \\ \hline
+            ECBSR             & 图像超分      & ecbsr\_arch.py         & 论文ECBSR的结构                        \\ \hline
+            SRVGG             & 图像超分      & srvgg\_arch.py         & VGG结构改造的SR网络                    \\ \hline
+            EDVR              & 视频超分      & edvr\_arch.py          & 论文EDVR的结构                         \\ \hline
+            BasicVSR          & 视频超分      & basicvsr\_arch.py      & 论文BasicVSR的结构                     \\ \hline
+            BasicVSR++        & 视频超分      & basicvsrpp\_arch.py    & 论文BasicVSR++的结构                   \\ \hline
+            DUF               & 视频超分      & duf\_arch.py           & 论文DUF的结构                          \\ \hline
+            TOF               & 视频超分      & tof\_arch.py           & 论文TOF的结构                          \\ \hline
+            HiFaceGAN         & 人脸生成      & hifacegan\_arch.py     & 论文HiFaceGAN的结构                    \\ \hline
+            DFDNet            & 人脸生成      & dfdnet\_arch.py        & 论文Deep Face Dictionary Network的结构 \\ \hline
+            StyleGAN2         & 人脸生成      & stylegan2\_arch.py     & 论文StyleGAN2的结构                    \\ \hline
+            RIDNet            & 图像去噪      & ridnet\_arch\_arch.py  & 论文RIDNet的结构                       \\ \hline
+            VGG               & 工具结构      & vgg\_arch.py           & 经典VGG结构                            \\ \hline
+            InceptionV3       & 工具结构      & inception.py           & 经典InceptionV3的结构，用于计算FID指标 \\ \hline
+            VGG \& UNet       & 工具结构      & discriminator\_arch.py & 在GAN训练中，常用的Discriminator结构   \\ \hline
+            SpyNet            & 工具结构      & spynet\_arch.py        & 论文SpyNet的结构                       \\ \hline
+        \end{tabular}
+    }
+    \caption{BasicSR 提供的经典网络结构}
+\end{table}
+
+
 
 % ------------------------------------------------------------------------------
 
@@ -1134,6 +1185,16 @@ from basicsr.ops.upfirdn2d import upfirdn2d
 % ------------------------------------------------------------------------------
 
 \section{日志系统 (Logger)} \label{code_structure:logger}
+
+
+
+在 log 的时候, loss 项使用 l\_ 开头，这样在 Tensorboard 显示的时候，所有 loss 会被组织到一起。比如在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/srgan_model.py}{basicsr/models/srgan\_model.py} 中，使用了 l\_g\_pix，l\_g\_percep，l\_g\_gan 等。在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{basicsr/utils/logger.py} 中，他们会被组织到一起：
+\begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
+if k.startswith('l_'):
+    self.tb_logger.add_scalar(f'losses/{k}', v, current_iter)
+else:
+    self.tb_logger.add_scalar(k, v, current_iter)
+\end{minted}
 
 BasicSR 的日志系统主要包括实验过程中1.记录的 log 文件和2.可以通过 tensorboard 可视化的 tb\_logger。
 

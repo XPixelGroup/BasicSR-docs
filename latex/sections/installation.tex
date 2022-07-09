@@ -8,13 +8,13 @@
 本章节首先介绍安装 BasicSR 所需的环境依赖 (第\ref{installation:env-reqirement}小节)，随后介绍安装 BasicSR 的两种方式：本地 clone 源代码安装和 pip 安装 basicsr 包 (第\ref{installation:install}小节)。对于需要在项目中使用 PyTorch C++ 编译算子的情况，我们也提供了相应的安装方式 (第\ref{installation:c++}小节)。
 最后，我们将安装过程中的常见问题进行了汇总 (第\ref{installation:faq}小节)。
 
-\section{环境依赖}
-\label{installation:env-reqirement}
+% ------------------------------------------------------------------------------
+\section{环境依赖}\label{installation:env-reqirement}
 
 由于 BasicSR 是基于 \href{https://www.python.org/}{Python} 语言和 \href{https://pytorch.org/}{PyTorch} 深度学习框架进行开发的，因此在安装 BasicsR 之前，需要在电脑或者服务器上安装 Python 环境以及各种相关的 Python 库；如果想要在 \textbf{GPU} 上运行程序的话，也需要先在电脑上配置相应的 CUDA 环境。以下我们分别对 CUDA 和相应的 Python 库进行简要说明。
 
 \begin{enumerate}
-    \item NVIDIA GPU + \href{https://developer.nvidia.com/cuda-downloads}{CUDA}：GPU (Graphics Processing Unit) 由于其高效的并行能力，目前被广泛用于深度学习的计算中；CUDA (Compute Unified Device Architecture) 是 NVIDIA 推出的可以让 GPU 解决复杂计算问题的运算平台。如果需要训练 BasicSR 中的模型，需要使用 GPU 并配置好相应的 CUDA 环境。
+    \item NVIDIA GPU + \href{https://developer.nvidia.com/cuda-downloads}{CUDA}：GPU (Graphics Processing Unit) 由于其高效的并行能力，目前被广泛用于深度学习的计算中；CUDA (Compute Unified Device Architecture) 是 NVIDIA 推出的可以让 GPU 解决复杂计算问题的运算平台。如果需要训练 BasicSR 中的模型，需要使用 GPU 并配置好相应的 CUDA 环境
     \item Python 和 Python 库 (对于 Python 库，我们提供了相应的安装脚本)：
           \begin{enumerate}
               \item Python >= 3.7 (推荐使用\href{https://www.anaconda.com/products/distribution#linux}{Anaconda}或者\href{https://docs.conda.io/en/latest/miniconda.html}{Miniconda})
@@ -36,8 +36,9 @@ pip install -r requirements.txt
     更多注意事项，参见第\ref{installation:faq}小节 Q1 问题。
 \end{note}
 
-\section{BasicSR 安装}
-\label{installation:install}
+% ------------------------------------------------------------------------------
+\section{BasicSR 安装}\label{installation:install}
+
 在安装好上述的环境依赖后，此时就可以进行 BasicSR 的安装了。
 
 本小节的安装默认不适用 PyTorch C++ 编译算子，若需要，则参考第 \ref{installation:c++} 小节进行安装。
@@ -48,13 +49,14 @@ pip install -r requirements.txt
     根据不同的需求，我们提供了两种安装 BasicSR 方式，{\color{red}\textbf{两种方式只能选择一种安装，否则容易产生冲突}}。
 
     \begin{itemize}
-        \item 如果希望\textbf{查看 BasicSR 中的细节}或者需要对其进行\textbf{修改}，推荐通过本地 clone 代码的方式进行安装。
-        \item 如果仅仅是将 BasicSR 作为一个\textbf{ Python 包}进行使用 (比如 项目 \href{https://github.com/TencentARC/GFPGAN}{GFPGAN} 和 \href{https://github.com/xinntao/Real-ESRGAN}{Real-ESRGAN})，推荐直接从 PyPI 安装 BasicSR，这样可以使得自身项目的代码结构更加简洁。
+        \item 如果希望\textbf{查看 BasicSR 中的细节}或者需要对其进行\textbf{修改}，推荐通过本地 clone 代码的方式进行安装
+        \item 如果仅仅是将 BasicSR 作为一个\textbf{ Python 包}进行使用 (比如 项目 \href{https://github.com/TencentARC/GFPGAN}{GFPGAN} 和 \href{https://github.com/xinntao/Real-ESRGAN}{Real-ESRGAN})，推荐直接从 PyPI 安装 BasicSR，这样可以使得自身项目的代码结构更加简洁
     \end{itemize}
 \end{hl}
 
-\subsection{本地 clone 代码}
-\label{installation:local-clone}
+% ----------------------------------
+\subsection{本地 clone 代码}\label{installation:local-clone}
+
 要通过本地 clone 安装 BasicSR，需要在终端上依次进行以下3个步骤。
 
 \begin{enumerate}
@@ -82,11 +84,11 @@ CUDA_HOME=/usr/local/cuda \
 CUDNN_INCLUDE_DIR=/usr/local/cuda \
 CUDNN_LIB_DIR=/usr/local/cuda \
 python setup.py develop
-
 \end{minted}
 
-\subsection{pip 安装}
-\label{installation:pip-install}
+% ----------------------------------
+\subsection{pip 安装}\label{installation:pip-install}
+
 对于使用 pip 安装 BasicSR，在终端上运行以下指令即可：
 \begin{minted}[xleftmargin=20pt,bgcolor=bg]{bash}
 pip install basicsr
@@ -101,7 +103,8 @@ CUDNN_LIB_DIR=/usr/local/cuda \
 pip install basicsr
 \end{minted}
 
-\subsection{验证 BasicSR 是否安装成功}
+% ----------------------------------
+\subsection{验证 BasicSR 是否安装成功}\label{installation:verify-installation}
 
 当选择了上述两种方式中的一种方式安装 BasicSR 后，我们可以通过图\ref{fig:correct-install}的方式来判断是否成功安装 BasicSR：
 
@@ -117,8 +120,8 @@ pip install basicsr
 
 如果此时没有报错，则说明 BasicSR 安装成功，此时便可以基于 BasicSR 进行开发啦 $\sim \sim \sim$
 
-\section{PyTorch C++ 编译算子}
-\label{installation:c++}
+% ------------------------------------------------------------------------------
+\section{PyTorch C++ 编译算子}\label{installation:c++}
 
 考虑到某些项目中会需要使用 PyTorch C++ 编译算子，我们在这个小节针对这种情况也提供了相应的 BasicSR 安装方式。如果不需要使用相关 C++ 编译算子，则此小节可以跳过。
 
@@ -182,8 +185,8 @@ BASICSR_JIT=True python inference/inference_stylegan2.py
     \end{enumerate}
 \end{note}
 
-\section{常见安装问题}
-\label{installation:faq}
+% ------------------------------------------------------------------------------
+\section{常见安装问题}\label{installation:faq}
 
 \begin{enumerate}
     \item \textbf{Q1: Windows 下是否可以使用？}

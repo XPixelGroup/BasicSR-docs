@@ -112,7 +112,7 @@
     \subfile{sections/xpixel_metaverse.tex}
 
     \newpage
-    \tableofcontents*
+    \tableofcontents*\label{toc}
 \end{CJK}
 
 % 正文
@@ -125,6 +125,7 @@
         \chead{\thepage}
         \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
         \lhead{第~\thechapter~章: \leftmark}
+        \rfoot{\hyperref[toc]{回到主目录}}
 
         \subfile{sections/overview.tex}
         \subfile{sections/installation.tex}
