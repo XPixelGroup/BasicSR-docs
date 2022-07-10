@@ -116,4 +116,21 @@ BasicSR 就把很多相似的功能都独立出来，我们只要关心 data, ar
 
 为了应对这种情况，我们一般是在本地克隆仓库的情况下开发，然后等到 release 新方法的时候，再基于 \href{https://github.com/xinntao/BasicSR-examples}{BasicSR-examples} 新建一个仓库，使用 basicsr 的 pip package。
 
+% ----------------------------------
+\section{单元测试}\label{overview:unit-test}
+
+我们使用单元测试主要保证输入输出 shape 的正确性，以及一些流程的正确定。
+一般来说，我们较少使用。BasicSR为了完备，将单元测试也加入进来。
+
+在 \texttt{tests} 目录的函数会被单元测试执行。
+单元测试需要 GPU CUDA 环境。
+
+\begin{hl} % ---------------- Highlight block ---------------- %
+    \textbf{单元测试命令}
+
+    \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{bash}
+python -m pytest tests/
+    \end{minted}
+\end{hl}
+
 \end{document}

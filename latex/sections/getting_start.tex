@@ -169,10 +169,10 @@ train\_pipeline 函数会做一些基础的事，比如：
           \begin{enumerate}
               \item {-}opt，配置文件的路径，一般采用这个命令配置训练或者测试的 yml 文件。
               \item {-}{-} laucher，用于指定 distibuted training 的，比如 pytorch 或者 slurm。默认是 none，即单卡非 distributed training。
-              \item {-}{-} auto\_resume，是否自动 resume，即自动查找最近的 checkpoint ，然后 resume。详见章节\ref{others:auto_resume}：\nameref{others:auto_resume}。
-              \item {-}{-} debug，能够快速帮助 debug。详见章节\ref{others:debug_mode}：\nameref{others:debug_mode}。
+              \item {-}{-} auto\_resume，是否自动 resume，即自动查找最近的 checkpoint ，然后 resume。详见章节\ref{code_structure:howto_resume}：\nameref{code_structure:howto_resume}。
+              \item {-}{-} debug，能够快速帮助 debug。详见章节\ref{code_structure:debug_mode}：\nameref{code_structure:debug_mode}。
               \item {-}{-} local\_rank，这个不用管，是 distributed training 中程序自动会传入。
-              \item {-}{-} force\_yml，方便在命令行中修改 yml 中的配置文件。详见章节\ref{others:yml_modification_with_commands}：\nameref{others:yml_modification_with_commands}。
+              \item {-}{-} force\_yml，方便在命令行中修改 yml 中的配置文件。详见章节\ref{code_structure:yml_modification_with_commands}：\nameref{code_structure:yml_modification_with_commands}。
           \end{enumerate}
 
 

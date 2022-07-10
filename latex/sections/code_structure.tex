@@ -5,7 +5,7 @@
 \chapter{代码主体结构}
 \vspace{-2cm}
 
-在本章节中，我们将对 BasicSR 代码框架进行一个整体介绍，主要包括以下内容：整体框架 (第\ref{code_structure:overview}小节)、注册器机制 (第\ref{code_structure:register}小节)、配置文件 (第\ref{code_structure:config}小节)、数据 (第\ref{code_structure:data}小节)、模型 (第\ref{code_structure:model}小节)、网络结构 (第\ref{code_structure:arch}小节)、损失函数 (第\ref{code_structure:loss}小节)、训练 (第\ref{code_structure:training}小节)、算子 (第\ref{code_structure:ops}小节) 等。通过阅读本章，你将对 BasicSR 有进一步的认识，理解其模块之间的相互关系、以及模块内部的核心工作原理。但我们不对具体函数和代码做具体介绍。如果需要具体函数和代码的介绍，请查阅 BasicSR 的在线 API 文档 (\url{https://basicsr.readthedocs.io/en/latest/})。
+在本章节中，我们将对 BasicSR 代码框架进行一个整体介绍，主要包括以下内容：整体框架 (第\ref{code_structure:overview}小节)、注册器机制 (第\ref{code_structure:register}小节)、配置文件 (第\ref{code_structure:config}小节)、数据 (第\ref{code_structure:data}小节)、模型 (第\ref{code_structure:model}小节)、网络结构 (第\ref{code_structure:arch}小节)、损失函数 (第\ref{code_structure:loss}小节)、算子 (第\ref{code_structure:ops}小节)、日志系统  (第\ref{code_structure:logger}小节) 等。通过阅读本章，你将对 BasicSR 有进一步的认识，理解其模块之间的相互关系、以及模块内部的核心工作原理。但我们不对具体函数和代码做具体介绍。如果需要具体函数和代码的介绍，请查阅 BasicSR 的在线 API 文档 (\url{https://basicsr.readthedocs.io/en/latest/})。
 
 % ------------------------------------------------------------------------------
 \section{整体框架} \label{code_structure:overview}
@@ -27,7 +27,7 @@
 
     \item 配置 (Option)：配置文件放到 \href{https://github.com/XPixelGroup/BasicSR/tree/master/options}{option} 目录下。我们提供了常用模型的训练和测试配置文件。我们使用 \href{https://yaml.org/}{YAML} 来作为配置文件的语言。修改这些 yml 文件可以简易地调整训练过程中的各种超参数。详细说明参见章节\ref{code_structure:register}：\nameref{code_structure:register}和章节\ref{code_structure:config}：\nameref{code_structure:config}
 
-    \item 训练 (Training)：这一部分主要涉及训练的策略和记录训练日志。\href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/train.py}{basicsr/train.py} 和 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/test.py}{basicsr/test.py} 是启动模型训练和测试的入口文件，其中定义了训练和测试的 main loop。常见优化器 (optimizer) 的定义可以在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/base_model.py}{models/base\_model.py} 文件中的 \texttt{get\_optimizer} 函数中找到。学习率的调度策略在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/base_model.py}{models/base\_model.py}  文件中的 \texttt{setup\_schedulers} 函数中定义。为了方便追踪记录训练的过程，我们提供了相应的 logger 工具，支持直接 print 到屏幕、Tensorboard、Wandb等多种方式，具体代码可以在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{basicsr/utils/logger.py} 中找到。详细说明参见章节\ref{code_structure:training}：\nameref{code_structure:training}
+    \item 训练 (Training)：这一部分主要涉及训练的策略和记录训练日志。\href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/train.py}{basicsr/train.py} 和 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/test.py}{basicsr/test.py} 是启动模型训练和测试的入口文件，其中定义了训练和测试的 main loop。常见优化器 (optimizer) 的定义可以在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/base_model.py}{models/base\_model.py} 文件中的 \texttt{get\_optimizer} 函数中找到。学习率的调度策略在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/base_model.py}{models/base\_model.py}  文件中的 \texttt{setup\_schedulers} 函数中定义。为了方便追踪记录训练的过程，我们提供了相应的 logger 工具，支持直接 print 到屏幕、Tensorboard、Wandb等多种方式，具体代码可以在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{basicsr/utils/logger.py} 中找到。详细说明参见章节\ref{code_structure:logger}：\nameref{code_structure:logger}
 
     \item 详细的代码接口文档可以在 \url{http://basicsr.readthedocs.io} 查询
 \end{itemize}
@@ -281,7 +281,9 @@ def get(self, name, suffix='basicsr'):
 在这个章节，我们先简单介绍一下实验命名的约定 (第\ref{code_structure:name_convention}小节)；然后通过例子介绍训练和测试的配置文件 (第\ref{code_structure:config_example}小节)。
 
 % ----------------------------------
-\subsection{实验命名}\label{code_structure:name_convention}
+\subsection{实验命名与 debug 模式}\label{code_structure:name_convention_debug}
+
+\subsubsection{实验命名}\label{code_structure:name_convention}
 
 我们推荐对实验名字进行有意义的命名，方便后续的实验以及进行多组实验对比。
 
@@ -297,13 +299,23 @@ def get(self, name, suffix='basicsr'):
     \item \texttt{wandb}: 使用了 wandb, 训练过程上传到了 wandb 云服务器
 \end{itemize}
 
-\begin{hl} % ---------------- Highlight block ---------------- %
-    \textbf{注意}
+\subsubsection{Debug 模式}\label{code_structure:debug_mode}
 
-    如果在实验名字中有 \texttt{debug} 字样, 则会进入 debug 模式, 即程序会更密集地 log 和 validate, 并且不会使用 tensorboard logger 和 wandb logger。
+正式训练之前，你可以用 debug 模式检查是否正常运行。在 debug 模式下：
+\begin{itemize}
+    \item 程序会在每次 iteration 下都打印日志，并且经过8次 iterations 后，便会进入 validation 阶段。这样可以快速方便地查看代码是否可以正常运行，而不用实际训练。毕竟实际训练可能很慢，等半天后，发现程序崩溃了，而原因是 validation 中有 bug
+    \item 在 debug 模式中，并不会使用 tensorboard logger 和 wandb logger，以保证日志文件的简洁性
+\end{itemize}
 
-    具体参见章节\ref{others:debug_mode}：\nameref{others:debug_mode}。
-\end{hl}
+\textbf{如何进入 debug 模式？}
+
+\begin{enumerate}[方式 1.]
+    \item 在命令行最后加入 ‘\textbf{-{}-debug}’。比如：
+          \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{python}
+ python basicsr/train.py -opt options/train/SRResNet_SRGAN/train_MSRResNet_x4.yml --debug
+    \end{minted}
+    \item 在配置文件 yml 文件的 name 中添加 ‘debug’ 字符。只要在实验名字中有 ‘\uline{debug}’ 字样, 则会进入 debug 模式。
+\end{enumerate}
 
 % ----------------------------------
 \subsection{配置文件简要说明}\label{code_structure:config_example}
@@ -337,7 +349,7 @@ manual_seed: 0  # 指定随机种子
 
 \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{通用配置}
     \begin{itemize}
-        \item 在配置文件的最开始，会有简单的说明，以及默认的运行命令。运行命令的 \texttt{auso\_resume} 表示自动从断点接着训练 (详见章节\ref{others:auto_resume}：\nameref{others:auto_resume})
+        \item 在配置文件的最开始，会有简单的说明，以及默认的运行命令。运行命令的 \texttt{auso\_resume} 表示自动从断点接着训练 (详见章节\ref{code_structure:howto_resume}：\nameref{code_structure:howto_resume})
         \item 常见模型 (Model) 的定义在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/models}{models} 目录中。详细说明参见章节\ref{code_structure:model}：\nameref{code_structure:model}
         \item \texttt{num\_gpu}：\textbf{0 表示 使用CPU，\texttt{auto} 表示自动从可用 GPU 块数推断}
     \end{itemize}
@@ -439,7 +451,7 @@ path:  # 以下为路径和与训练模型、重启训练的设置
 \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{模型路径相关配置}
     \begin{itemize}
         \item resume\_state设置后, 会覆盖 pretrain\_network\_g 的设定
-        \item ：对于 resume，更多信息可以参考章节\ref{others:auto_resume}：\nameref{others:auto_resume}
+        \item 对于 resume，更多信息可以参考章节\ref{code_structure:howto_resume}：\nameref{code_structure:howto_resume}
     \end{itemize}
 \end{exampleBox}
 
@@ -476,7 +488,7 @@ train:  # 这块是训练策略相关的配置
 
     训练策略相关的配置主要分为优化器，学习率调度器，总共训练 iterations，损失函数等。
     \begin{itemize}
-        \item 关于 EMA，请参考章节\ref{others:ema}：\nameref{others:ema}
+        \item 关于 EMA，请参考章节\ref{code_structure:ema}：\nameref{code_structure:ema}
         \item optim\_g，后缀 \texttt{\_g} 表示和 \texttt{network\_g} 中的 \texttt{\_g} 一一对应起来
         \item \texttt{lr: !!float 2e-4} 中的 \texttt{!!float} 是 YAML 语言语法，表示以 float 解释后面的数字，不然就会以文字来进行解释
         \item 常见优化器 (optimizer) 的定义可以在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/base_model.py}{models/base\_model.py} 文件中的 \texttt{get\_optimizer} 函数中找到
@@ -616,6 +628,43 @@ val:
 
 至此，我们对于测试的配置文件有了一个初步的理解了。
 
+% ----------------------------------
+\subsection{命令行修改配置}\label{code_structure:yml_modification_with_commands}
+
+BasicSR 使用 yml 文件进行配置。我们也推荐这样的方式，因为这样可以记录并跟踪每一个实验的配置。
+但我们也希望在仅仅修改了一个小配置的情况下 (比如修改 random seed)，不需要麻烦地新建并修改 yml 配置文件。它可以使用原先的 yml 配置文件，而在命令行中对配置做出修改。
+
+BasicSR 提供了一个简便的命令行参数 ‘\textbf{-{}-force\_yml}’，在命令行中它的用法如下：
+
+\begin{enumerate}
+    \item ‘-{}-force\_yml’ 后面接如下的字符串，每一个字符串修改一个配置，如果有多个配置需要修改，以空格隔开多个字符串
+    \item 字符串采用格式：‘train:ema\_decay=0.999’。等号 (=) 前后分别表示 key 和 value。如果有层级结构，使用冒号 (:) 来区分
+    \item 修改之后记得检查打印的日志是否符合预期
+\end{enumerate}
+
+\begin{exampleBox}[]{示例}
+
+    有如下的配置 yml 文件，我们希望修改：1) random seed 为 1; 2) ema\_decay 为0.5; 3) 名字中体现配置。
+
+    \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{yaml}
+# general settings
+name: 001_MSRResNet_x4_f64b16_DIV2K_1000k_B16G1_wandb
+model_type: SRModel
+scale: 4
+manual_seed: 0
+
+...
+
+train:
+  ema_decay: 0.999
+    \end{minted}
+
+    那么，我们的命令行就变成了:
+    \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{bash}
+python basicsr/train.py -opt options/train/SRResNet_SRGAN/train_MSRResNet_x4.yml --force_yml manual_seed=1 train:ema_decay=0.5 name=001_MSRResNet_x4_f64b16_DIV2K_1000k_B16G1_rand1_ema_decay0.5
+    \end{minted}
+\end{exampleBox}
+
 % ------------------------------------------------------------------------------
 \section{数据 (Data Loader 和 Dataset)}\label{code_structure:data}
 
@@ -667,7 +716,7 @@ val:
     我们新建数据集的 dataset 的时候，需要以 \texttt{\_dataset.py} 结尾，这样才能够被程序自动扫描 import。
 \end{hl}
 
-BasicSR 提供的常用数据集的 Dataset 文件如表\ref{tab:code_structure_dataset}。注意这里之列了一些基本的，更多的 dataset 请参见代码或者在线 API 文档 \url{https://basicsr.readthedocs.io/en/latest/}。
+BasicSR 提供的常用数据集的 Dataset 文件如表\ref{tab:code_structure_dataset}。注意这里只列了一些基本的，更多的 dataset 请参见代码或者在线 API 文档 \url{https://basicsr.readthedocs.io/en/latest/}。
 
 \begin{table}[h]
     \centering
@@ -833,167 +882,290 @@ num_prefetch_queue: 1  # 1 by default
 
 % ------------------------------------------------------------------------------
 \section{模型 (Model)}\label{code_structure:model}
+
 % ----------------------------------
-\subsection{models 目录介绍}\label{code_structure:model_contents}
+\subsection{basic/models 目录介绍}\label{code_structure:model_contents}
+
+\href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/models}{basicsr/models} 下面主要的文件有：
+
+\vspace{0.5cm}
+\renewcommand*\DTstyle{\ttfamily\textcolor{black}}
+\dirtree{%
+    .1 \textcolor{orange}{basicsr}.
+    .2 models.
+    .3 \textcolor{red}{\_\_init\_\_.py}.\DTcomment{\textcolor{red}{定义 build\_model，扫描所有 models 并注册}}.
+    .3 \textcolor{red}{base\_model.py}\DTcomment{\textcolor{red}{模型的基类，定义模型的共用操作}}.
+    .3 lr\_scheduler.py\DTcomment{自定义的学习率策略}.
+    .3 sr\_model.py\DTcomment{下面是不同的模型，我们主要也是修改它们。它们都以 \texttt{\_model.py} 结尾。 sr\_model 是用于超分的模型}.
+    .3 srgan\_model.py.
+    .3 realesrgan\_model.py.
+    .3 edvr\_model.py.
+    .3 video\_base\_model.py\DTcomment{视频超分基础模型}.
+    .3 video\_gan\_model.py.
+    .3 ....
+}
+\vspace{0.5cm}
+
+\begin{hl} % ---------------- Highlight block ---------------- %
+    我们新建 model 的时候，需要以 \texttt{\_model.py} 结尾，这样才能够被程序自动扫描 import。
+\end{hl}
+
+为增加模型间的复用, 很多模型都是继承的, 以下为主要模型的的继承关系。通过继承，可以精简代码开发，复用功能函数。
+注意这里之列了一些基本的，更多的 model 请参见代码或者在线 API 文档 \url{https://basicsr.readthedocs.io/en/latest/}。
+
+\dirtree{%
+    .1 BaseModel.\DTcomment{模型基类}.
+    .2 SRModel.
+    .3 SRGANModel.
+    .4 ESRGANModel.
+    .4 RealESRGANModel.
+    .3 RealESRNetModel.
+    .3 SwinIRModel.
+    .3 VideoBaseModel.
+    .4 EDVRModel.
+    .4 VideoRecurrentModel.
+    .5 VideoRecurrentGANModel.
+    .2 StyleGAN2Model.
+}
 
 % ----------------------------------
 \subsection{Model 的创建}\label{code_structure:model_creation}
 
-arch 和loss
+model 的创建是通过 Register 机制实现的。
+具体可以参考：
+\begin{enumerate}
+    \item 章节\ref{code_structure:register}：\nameref{code_structure:register} 说明了 Register 机制是如何根据配置文件中的类型，来自动实例化类的
+    \item 章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 通过一个完整的例子，说明了其中 model 的创建过程
+\end{enumerate}
+
+model 创建完后，网络结构、损失函数等都是在 model 的初始化过程中创建的。章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 也提供了一个概览。
 
 % ----------------------------------
-\subsection{Base Model 说明}\label{code_structure:dataset_example}
+\subsection{Base Model 和 Model 示例讲解}\label{code_structure:basemodel_example}
 
+\subsubsection{Base Model}\label{code_structure:base_model}
+\href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/base_model.py}{Base Model} 是所有模型的基类，定义一些共同操作。
+这里做一个简要的介绍。
 
-% ----------------------------------
-\subsection{保存模型、训练状态 和 Resume}\label{code_structure:dataset_prefecth}
-
-\todo{添加 resume 和保存文件     训练的时候， checkpoints 会保存两个文件：1）网络参数 .pth 文件；2）包含 optimizer 和 scheduler 的信息 .state 文件。根据这两个文件，则可以 resume 了。 resume 就是把最新的 .pth 和 .resume 文件正确load进来。详细的函数在 basicsr/train.py 的 load\_resume\_state 函数中。我后面也会具体写文章再介绍。下面这个截图就是模型训练过程中会保存的文件 models 和 training\_states  。}
-
-\begin{figure}[H]
-    \begin{center}
-        \includegraphics[width=0.7\linewidth]{figures/getting_start_4.png}
-        \caption{模型训练过程中会保存的 models 和 training\_states 文件}
-        \label{fig:getting_start_4}
-    \end{center}
-    \vspace{-0.5cm}
-\end{figure}
-
-模型部分定义了许多模型级别的操作，比如训练设置、训练数据如何送入模型、优化器的选择、损失函数计算、模型参数更新、训练中验证、测试过程等。模型部分定义在：
-\dirtree{%
-    .1 ROOT\_DIR.
-    .2 BasicSR.
-    .3 basicsr.
-    .4 models.
-    .5 \_\_init\_\_.py.\DTcomment{扫描所有models并注册，实例化某模型}.
-    .5 base\_model.py\DTcomment{模型的基类，定义许多共同操作}.
-    .5 edvr\_model.py.
-    .5 esrgan\_model.py.
-    .5 hifacegan\_model.py.
-    .5 realesrgan\_model.py.
-    .5 realesrnet\_model.py.
-    .5 sr\_model.py\DTcomment{图像超分模型}.
-    .5 srgan\_model.py.
-    .5 stylegan2\_model.py.
-    .5 swinir\_model.py.
-    .5 video\_base\_model.py\DTcomment{视频超分基类模型}.
-    .5 video\_gan\_model.py.
-    .5 video\_recurrent\_gan\_model.py.
-    .5 video\_recurrent\_model.py.
-}
-
-其中 \_\_init\_\_.py 会自动扫描 basicsr/models 中的文件，如果是以 \_model.py 结尾的，则为其中注册器中的模型进行 import 。然后根据 option 中的 model\_type 实例化对应模型并返回。
-
-\begin{note} % ---------------- Note block ---------------- %
-    注册器参见章节\ref{Register}。
-\end{note}
-
-为增加模型间的复用, 我们大量使用了继承, 以下为各个模型之间的继承关系:
-
-\dirtree{%
-    .1 Base\_Model.
-    .2 SR\_Model.
-    .3 SRGAN\_Model.
-    .4 ESRGAN\_Model.
-    .4 RealESRGAN\_Model.
-    .3 RealESRNet\_Model.
-    .3 SwinIR\_Model.
-    .3 Video\_Base\_Model.
-    .4 EDVR\_Model.
-    .4 VideoRecurrent\_Model.
-    .5 VideoRecurrentGAN\_Model.
-    .3 HiFaceGAN\_Model.
-    .2 StyleGAN2\_Model.
-}
-
-下面具体介绍一些重要模型及其功能，以及如何按照自己的需求自定义新的模型。
-
-\subsection{Base Model}
-Base Model是所有模型的基类，定义一些共同操作。比如：
-
-代码位置：\href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/base_model.py}{BasicSR/basicsr/models/base\_model.py}
 \begin{minted}[xleftmargin=20pt,breaklines,linenos,bgcolor=bg]{python}
-
-def print_network(self, net):
-# 输出网络信息
-
-def save_network(self, net, net_label, current_iter, param_key='params'):
-# 保存模型
-
-def save_training_state(self, epoch, current_iter):
-# 保存训练状态
-
-def load_network(self, net, load_path, strict=True, param_key='params'):
-# 加载模型
-
-def get_optimizer(self, optim_type, params, lr, **kwargs):
-# 定义优化器
-
-def _get__init__lr(self):
-# 定义初始学习率
-
-def update_learning_rate(self, current_iter, warmup_iter=-1):
-# 学习率更新
-
-def setup_schedulers(self):
-# 学习率调度器
+class BaseModel():
+    def __init__(self, opt):
+    # 初始化
+        ...
+    def feed_data(self, data):
+    # 喂数据，需要在继承的类里面具体实现
+        pass
+    def optimize_parameters(self):
+    # 优化参数，这里特指一次完整的训练过程，即 train_step
+        pass
+    def save(self, epoch, current_iter):
+    # 保存训练模型和训练状态
+        pass
+    def validation(self, dataloader, current_iter, tb_logger, save_img=False):
+    # validation 函数
+        ...
+    def model_ema(self, decay=0.999):
+    # 进行模型 EMA
+        ...
+    def model_to_device(self, net):
+    # 将模型放到 GPU 上
+        ...
+    def get_optimizer(self, optim_type, params, lr, **kwargs):
+    # 根据 yml 配置文件获取优化器
+        ...
+    def setup_schedulers(self):
+    # 根据 yml 配置文件获取学习率的策略方式
+        ...
+    @master_only
+    def print_network(self, net):
+    # 打印网络，包括总参数
+       ...
+    def update_learning_rate(self, current_iter, warmup_iter=-1):
+    # 更新学习率
+        ...
+    def get_current_learning_rate(self):
+    # 获取现在的学习率
+        ...
+    @master_only
+    def save_network(self, net, net_label, current_iter, param_key='params'):
+    # 保存网络参数
+        ...
+    def load_network(self, net, load_path, strict=True, param_key='params'):
+    # 加载网络参数
+        ...
+    @master_only
+    def save_training_state(self, epoch, current_iter):
+    # 保存网络训练状态
+        ...
+    def resume_training(self, resume_state):
+    # 断点恢复训练
+        ...
+    def reduce_loss_dict(self, loss_dict):
+    # 在多卡训练时，平均多个 GPU 的损失函数
+        ...
 \end{minted}
 
-\begin{hl} % ---------------- Highlight block ---------------- %
-    Base Model 的很多函数，可以在继承后的模型中根据要求来重写，比如不同模型读取数据的方式不同，则会重写不同的 feed\_data() 函数。
-\end{hl}
+\begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{说明}
+    \begin{itemize}
+        \item 对于没有实现的函数 (内容是 \texttt{pass})，需要在继承的类中实现函数的功能，即它们是必须要重新实现的
+        \item \texttt{@master\_only} 表示在多卡下，只在主卡上进行调用
+    \end{itemize}
+\end{exampleBox}
 
-\subsection{其他模型，以 SR Model 为例}\label{Model:SR Model}
+\subsubsection{SRModel 简单说明}\label{code_structure:sr_model}
 
-SR Model 是图像超分辨率模型的类，定义了基础的单张图像超分辨率模型。下面从一个模型的训练角度展示其中重要的函数：
-
-代码位置：\href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/sr_model.py}{BasicSR/basicsr/models/sr\_model.py}
+我们在这里简单说明 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/sr_model.py}{SRModel} 类，它是图像超分辨率模型的基础类，定义了基础的单张图像超分辨率模型。
+下面的代码主要为了说明核心流程，代码不一定完整。
 
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
 
 class SRModel(BaseModel):
     """Base SR model for single image super-resolution."""
-
     def ___init___(self, opt):
+    # 初始化，主要包括以下几块内容：
+
+        # 定义网络结构，根据配置文件，自动实例化相应的网络结构类
+        self.net_g = build_network(opt['network_g'])
+        self.net_g = self.model_to_device(self.net_g)  # 将网络放到 GPU 上
+        self.print_network(self.net_g)  # 打印网络
+
+        # 加载预训练网络
+        load_path = self.opt['path'].get('pretrain_network_g', None)
+        if load_path is not None:
+            param_key = self.opt['path'].get('param_key_g', 'params')
+            self.load_network(self.net_g, load_path, self.opt['path'].get('strict_load_g', True), param_key)
+
+        # 初始化训练的设置
+        if self.is_train:
+            self.init_training_settings()
 
     def init_training_settings(self):
-    # 初始化训练设置。包括优化器、损失函数的定义，学习率的初始化等。
+    # 初始化训练设置。包括优化器、损失函数的定义，学习率的初始化等
+        self.net_g.train()
+        ...
+        if self.ema_decay > 0:
+            # 如果设置了模型 EMA，则设置 EMA 模型和参数
+            ...
+
+        # 定以损失函数， 通过 build_loss，根据配置文件，实例化相应的损失函数
+        self.cri_pix = build_loss(train_opt['pixel_opt']).to(self.device)
+        self.cri_perceptual = build_loss(train_opt['perceptual_opt']).to(self.device)
+
+        # 设置优化器、学习率策略
+        self.setup_optimizers()
+        self.setup_schedulers()
 
     def setup_optimizers(self):
-    # 设置优化器，可以控制哪些参数会被更新。详情参阅4.7优化器部分。
+    # 设置优化器，可以控制哪些参数会被更新
+        for k, v in self.net_g.named_parameters():
+            optim_params.append(v)
+
+        optim_type = train_opt['optim_g'].pop('type')
+        self.optimizer_g = self.get_optimizer(optim_type, optim_params, **train_opt['optim_g'])
+        self.optimizers.append(self.optimizer_g)
 
     def feed_data(self, data):
-    # 把训练数据送入模型。这里是从 dataloader 中取出数据，用于训练或测试。在 SR Model 中，每次取用一个 batch(n,c,h,w) 数量的 LR 和 GT 图像。
-
-    # 其他模型对batch做不同操作时，经常会改写这个函数。比如只读取 GT 、读取额外 label 、读取图像路径、对读取的数据增加 degradation 等操作，都通过修改 feed\_data() 来实现。
+    # 把训练数据送入模型。这里是从 dataloader 中取出数据，用于训练或测试。在 SRModel 中，每次取用一个 batch 的 LR 和 GT 图像
+    # 其他模型对 batch 做不同操作时，经常会改写这个函数。比如只读取 GT 、读取额外 label 、对读取的数据添加 degradation 等操作，都通过修改 feed_data() 来实现
+        self.lq = data['lq'].to(self.device)
+        self.gt = data['gt'].to(self.device)
 
     def optimize_parameters(self, current_iter):
-    # 更新模型参数。在这个函数中，会实际调用模型跑出 SR 图像，再将 SR 与 GT 代入损失函数计算 loss，并且进行 loss 的回传和参数的更新。当有多个 loss 或需要自己添加 loss 时，或者需要特殊的更新步骤时，修改这里。
+    # 优化参数，这里会完成一次完整的训练过程，即 train_step
+        # 将优化器梯度归零
+        self.optimizer_g.zero_grad()
+        # forward 网络
+        self.output = self.net_g(self.lq)
 
-    # 比如在 GAN 系列的 Model 中，这个函数就是 SR 图像与 GT 一起输入判别网络来得到 loss ，再将不同的 loss 进行加权组合。并且 Generator 和 Discriminator 的参数都需要更新。
+        # 计算 loss
+        l_pix = self.cri_pix(self.output, self.gt)
+            l_total += l_pix
+            loss_dict['l_pix'] = l_pix
+        ...
 
+        # 梯度反传
+        l_total.backward()
+        # 优化器优化
+        self.optimizer_g.step()
+
+        # 同步多卡上的损失函数
+        self.log_dict = self.reduce_loss_dict(loss_dict)
+
+    def test(self):
+    # 测试函数
+        self.net_g.eval()
+        with torch.no_grad():
+            self.output = self.net_g(self.lq)
+        self.net_g.train()
+
+    def dist_validation(self, dataloader, current_iter, ...):
     def nondist_validation(self, dataloader, current_iter, ...):
-    # 训练中进行验证。会停止训练，调用 test() ，进行验证并记录指标、保存结果图，然后继续训练。
-
-    def get_current_visuals(self):
-    # 将当前图片从 GPU 中取出，以进行保存或其它操作。
+    # validation (dist 表示 distributed training，多卡训练)。这里分为了多卡和单卡的 validation
+    # 这个过程包括读取验证数据集、测试、计算指标、保存结果图等
 
     def save(self, epoch, current_iter):
-    # 保存模型。
+    # 保存训练模型和训练状态
 \end{minted}
 
-其他model的思想与SR Model大同小异，都是相互继承公用的函数，单独改写有特别需求的函数，完成一个模型包括获得数据、更新参数、验证等步骤的训练过程。
+% ----------------------------------
+\subsection{保存模型、训练状态 和 Resume}\label{code_structure:save_resume}
 
+训练的时候， checkpoints 会保存两个文件：
+\begin{enumerate}
+    \item 网络参数 .pth 文件。在每个实验的 models 文件夹中，文件名诸如：\texttt{net\_g\_5000.pth}、{net\_g\_10000.pth}
+    \item 包含 optimizer 和 scheduler 信息的 .state 文件。在每个实验的 training\_states 文件夹中，文件名诸如：\texttt{5000.state}、{10000.state}
+\end{enumerate}
 
-\subsection{自定义模型，以 SRGAN Model 为例}
+根据这两个文件，就可以 resume 了。
 
-当需要自定义某个模型的时候，首先在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models}{BasicSR/basicsr/models} 下新建 XXX\_model.py 文件，根据需要写一个新类（注意不要与现有类重名）继承 Base Model 或其他 model ，然后根据自己的需求改写主要函数即可。
+\subsubsection{如何 Resume？}\label{code_structure:howto_resume}
 
-比如 SRGAN\_Model 继承了绝大多数 SR\_Model 的函数，但是改写了 optimize\_parameters() ，适应 GAN 的参数更新需要。而 RealSRGAN\_Model 又继承了 SRGAN\_Model ，改写了 feed\_data() 以在线生成带有不同 degradation 的训练数据。
+Resume 指程序中断后，我们希望能够接着中断的地方，继续训练。
+只要有保存的网络参数和训练状态，我们就可以断点重训啦。
+在 Resume 下，实验文件夹不会被覆盖，而是会继续上次的实验文件夹继续保存文件。但是 log 文件会重新产生。
 
-\begin{note} % ---------------- Note block ---------------- %
-    上述被改写函数的介绍，参见章节\ref{Model:SR Model}。
-\end{note}
+有两种方式进行 resume：
+
+\begin{enumerate}
+    \item \textbf{手动 resume}。在 yml 配置文件内中，设置 resume\_state 为待 resume 的 .state 文件路径。然后重新运行训练命令。此时程序会自动查找相对应的网络参数 .pth 文件 (即不需要设置类似 pretrain\_network\_g 的路径)；然后进行 resume。注意： resume\_state设置后, 会覆盖 pretrain\_network\_g 的设定
+    \item \textbf{自动 resume}。只要在命令行中加入 ‘\textbf{-{}-auto\_resume}’，程序就会找到保存的最近的模型参数和状态，并加载进来，接着训练啦
+\end{enumerate}
+
+% ----------------------------------
+\subsection{模型 validation}\label{code_structure:validation}
+
+在框架设计的时候，我们把 validation 放到每个 model 中，作为它的成员函数。
+
+根据单卡和多卡训练的不同，我们分别定义了 \texttt{nondist\_validation} 和 \texttt{dist\_validation}，对应单卡和多卡 validation。
+
+% ----------------------------------
+\subsection{EMA 介绍}\label{code_structure:ema}
+
+EMA (Exponential Moving Average)，指数移动平均。
+它是用来“平均”一个变量在历史上的值。使用怎样的权重平均呢？如名字所示，随着时间，越是过往的时间，以一个指数衰减的权重来平均。
+
+在 BasicSR 里面，EMA 一般作用在模型的参数上。它的效果一般是：
+
+\begin{itemize}
+    \item 稳定训练效果。GAN 训练的结果一般瑕疵更少，视觉效果更好
+    \item 对于以 PSNR 为目的的模型，其 PSNR 一般会更高一些
+\end{itemize}
+
+由于开启 EMA的代价几乎可以不计，所以我们推荐开启 EMA。
+
+\begin{hl} % ---------------- Highlight block ---------------- %
+    \textbf{如何开启 EMA？}
+
+    在 yml 的配置文件中，我们只要指定 ema\_decay 大于 0，就会开始 EMA。
+    \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{yaml}
+# training settings
+train:
+  ema_decay: 0.9      # 开启 EMA, 滑动系数为 0.9
+\end{minted}
+\end{hl}
+
+开启了 EMA 后，保存的模型会有两个字段： \texttt{params} 和 \texttt{params\_ema}，其中  \texttt{params\_ema} 就是 EMA 保存的模型。
+在测试或者推理的时候，我们要留意加载的到底是 \texttt{params} 还是 \texttt{params\_ema}，这个在 yml 文件中，一般通过  \texttt{param\_key\_g: params\_ema} 来指定。
 
 % ------------------------------------------------------------------------------
 \section{网络结构 (Architecture)} \label{code_structure:arch}
@@ -1084,75 +1256,6 @@ def optimize_parameters(self, current_iter):
 
 % ------------------------------------------------------------------------------
 
-\section{训练[优化器 (optimizer) 与学习率调度器 (scheduler) ]}\label{code_structure:training}
-
-\begin{note} % ---------------- Note block ---------------- %
-    训练的整体pipeline参见\ref{}。
-\end{note}
-
-本节主要介绍其中的优化器、优化步骤和学习率调度相关内容。当训练进行到更新模型参数时，即
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-model.optimize_parameters(current_iter) # 在BasicSR/basicsr/train.py
-\end{minted}
-
-模型会运行得到结果、计算loss并根据优化器进行参数优化，然后更新学习率。
-
-这个步骤的具体代码定义在BasicSR/basicsr/models中具体的Model里，因为需要计算的loss的步骤是各不相同的，比如GAN需要经过判别器。
-
-代码位置：\href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/sr_model.py}{BasicSR/basicsr/models/sr\_model.py}，其他 model 文件中也有。
-
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-
-def optimize_parameters(self, current_iter):
-    self.optimizer_g.zero_grad()
-    # 优化器梯度归零
-
-    # 计算loss，代码省略
-
-    l_total.backward()
-    # loss反向传播，计算梯度
-
-    self.optimizer_g.step()
-    # 更新网络参数
-\end{minted}
-
-此时，optimizer 就会去更新参数。 optimizer 在 init\_training\_setting 中定义，定义的时候，会定义好哪些参数需要更新、按照什么样的方法去更新（优化方法）。
-
-代码位置：\href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/sr_model.py}{BasicSR/basicsr/models/sr\_model.py}，其他 model 文件中也有。
-
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-
-def setup_optimizers(self):
-    train_opt = self.opt['train']
-    optim_params = []
-    for k, v in self.net_g.named_parameters():
-        # 对于网络中的所有需要梯度的参数，添加进优化器中。
-        # 这里可以按照结构名称，来规定哪些参数需要使用当前优化器更新。
-        if v.requires_grad:
-            optim_params.append(v)
-        else:
-            logger = get_root_logger()
-            logger.warning(f'Params {k} will not be optimized.')
-
-    optim_type = train_opt['optim_g'].pop('type')
-    # 这里定义优化器的优化方法，如Adam
-    self.optimizer_g = self.get_optimizer(...)
-    self.optimizers.append(self.optimizer_g)
-    # 把当前这个优化器放到optimizers里面，也就是说可以定义多个优化器去优化同一网络的不同参数部分。
-\end{minted}
-
-而优化器更新参数时的学习率，来源于学习率调度器 scheduler。 scheduler 同样在 init\_training\_setting 中定义。学习率更新时，就是调用 scheduler ，来生成当前需要的学习率。代码在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/base_model.py}{BasicSR/basicsr/models/base\_model.py} 中：
-
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-
-def setup_schedulers(self):
-    # 选择scheduler类型，比如训练多少次迭代后，学习率衰减（MultiStepLR）。
-\end{minted}
-
-
-
-% ------------------------------------------------------------------------------
-
 \section{算子 (Ops)}\label{code_structure:ops}
 
 \subsection{什么是算子？}
@@ -1196,7 +1299,6 @@ from basicsr.ops.upfirdn2d import upfirdn2d
 \end{minted}
 
 % ------------------------------------------------------------------------------
-
 \section{日志系统 (Logger)} \label{code_structure:logger}
 
 

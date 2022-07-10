@@ -9,7 +9,7 @@
 
 值得提及的是，当用户使用 \textbf{BasicSR-template} 进行开发，尤其是针对\textbf{损失函数}和\textbf{指标}模块时，以下操作可能并不完全适用，具体详见 \textbf{BasicSR-template} 相关部分。
 
-\section{添加修改 Data Loader}
+\section{添加修改 Dataset}
 \begin{enumerate}
     \item Data Loader 文件的存放与命名：Data Loader文件存放在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/data}{basicsr/data/} 文件夹下。例如，\href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/data}{basicsr/data/paired\underline{~}image\underline{~}dataset.py}。用户可根据需求对已有的 Data Loader 进行修改，或是添加自定义 Data Loader 文件。在创建新的自定义 Data Loader 文件时，注意文件名需以  \textbf{\underline{~}dataset.py} 作为结尾。
 
