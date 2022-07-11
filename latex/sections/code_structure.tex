@@ -1169,8 +1169,16 @@ train:
 
 % ------------------------------------------------------------------------------
 \section{网络结构 (Architecture)} \label{code_structure:arch}
+
+% ----------------------------------
+\subsection{basic/arch 目录介绍}\label{code_structure:arch_contents}
+
+\todo{仿照 models 和 data 对目录简单进行说明。不需要对每一个文件说明，只要说明关键得几个即可}
+
+
 在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs}{basicsr/archs/} 目录下，我们提供了若干经典的网络结构。
 
+\todo{这个表格既然写了，就保留吧}
 \begin{table}[h]
     \centering
     {
@@ -1202,11 +1210,18 @@ train:
     \caption{BasicSR 提供的经典网络结构}
 \end{table}
 
+% ----------------------------------
+\subsection{网络结构 arch 的创建}\label{code_structure:arch_creation}
 
+\todo{参照 model arch 进行说明}
 
 % ------------------------------------------------------------------------------
-
 \section{损失函数 (Loss)}\label{code_structure:loss}
+
+% ----------------------------------
+\subsection{basic/losses 目录介绍}\label{code_structure:loss_contents}
+
+\todo{仿照 models 和 data 对目录简单进行说明。}
 
 损失函数部分定义了很多常用的损失函数。损失函数部分定义在：
 \dirtree{%
@@ -1218,44 +1233,14 @@ train:
     .5 losses.py.\DTcomment{损失函数的具体实现}.
     .5 loss\_util.py.\DTcomment{损失函数工具，如对损失函数加权、累加、平均等}.
 }
-\subsection{损失函数的使用}
 
-损失函数主要在不同 model 里被定义、计算和使用。下面是一个例子。
+% ----------------------------------
+\subsection{loss 的创建}\label{code_structure:loss_creation}
 
-代码位置：\href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/sr_model.py}{BasicSR/basicsr/models/sr\_model.py}，其他 model 文件中也有。
-
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-
-def init_training_settings(self):
-    ……
-    self.cri_pix = build_loss(train_opt['pixel_opt']).to(self.device)
-    # 定义损失函数
-
-
-def optimize_parameters(self, current_iter):
-    self.optimizer_g.zero_grad()
-    # 优化器梯度归零
-
-    l_pix = self.cri_pix(self.output, self.gt)
-    # 在更新参数时，需要计算 loss
-    l_total += l_pix
-    loss_dict['l_pix'] = l_pix
-    # 将 loss 记录到 log 文件里
-
-    l_total.backward()
-    # loss 反向传播，计算梯度
-
-    self.optimizer_g.step()
-    # 更新网络参数
-\end{minted}
-
-\subsection{自定义损失函数}
-
-在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/losses/losses.py}{BasicSR/basicsr/losses/losses.py} 下写一个新的损失函数类，并将类名写入\href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/losses/__init__.py}{BasicSR/basicsr/losses/\_\_init\_\_.py}。可以参考其他损失函数类的写法，对一个 batch 的数据进行计算并返回 loss 的值。
+\todo{参照 model arch 进行说明}
 
 
 % ------------------------------------------------------------------------------
-
 \section{算子 (Ops)}\label{code_structure:ops}
 
 \subsection{什么是算子？}
@@ -1301,16 +1286,6 @@ from basicsr.ops.upfirdn2d import upfirdn2d
 % ------------------------------------------------------------------------------
 \section{日志系统 (Logger)} \label{code_structure:logger}
 
-
-
-在 log 的时候, loss 项使用 l\_ 开头，这样在 Tensorboard 显示的时候，所有 loss 会被组织到一起。比如在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/srgan_model.py}{basicsr/models/srgan\_model.py} 中，使用了 l\_g\_pix，l\_g\_percep，l\_g\_gan 等。在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{basicsr/utils/logger.py} 中，他们会被组织到一起：
-\begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
-if k.startswith('l_'):
-    self.tb_logger.add_scalar(f'losses/{k}', v, current_iter)
-else:
-    self.tb_logger.add_scalar(k, v, current_iter)
-\end{minted}
-
 BasicSR 的日志系统主要包括实验过程中1.记录的 log 文件和2.可以通过 tensorboard 可视化的 tb\_logger。
 
 日志系统的实现不过多赘述，如果有兴趣可以参阅 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{BasicSR/basicsr/utils/logger.py}。本章节主要讲述日志系统各个项目代表什么；以及如何改代码，在日志中记录我们想记录的个性化内容。
@@ -1323,9 +1298,10 @@ BasicSR 的日志系统主要包括实验过程中1.记录的 log 文件和2.可
 
     添加一条 log 信息非常简单：
 
-    \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-logger.info(要添加的内容) # 添加正常信息
-logger.warning(要添加的警告) # 添加警告信息
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+logger = get_root_logger()  # 获得 logger
+logger.info(要添加的内容)  # 添加正常信息
+logger.warning(要添加的警告)  # 添加警告信息
 \end{minted}
 \end{hl}
 
@@ -1344,7 +1320,7 @@ log 文件是 \texttt{train\_[exp\_name]\_[timestamp].log} 的命名方式
     \vspace{-0.5cm}
 \end{figure}
 
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{yaml}
 # log 文件所在位置: experiments/实验名字/train_[exp_name]_[timestamp].log
 2022-06-17 02:27:36,068 INFO:
 # 在代码中调用 logger.info()后，会自动记录时间并增加条目 INFO:
@@ -1395,10 +1371,9 @@ INFO: Save the latest model.
 INFO: Validation validation
 # 训练结束，最终验证集结果
      #  psnr: 20.7466
-
 \end{minted}
 
-\subsection{tb\_logger 记录及解读}
+\subsection{tensorboard logger 记录及解读}
 
 除了上述的 log 文件外，BasicSR 还会生成可以用 tensorboard 打开的 tb\_logger 文件。一般保存在 BasicSR/experiments/tb\_logger/ 实验名。
 
@@ -1476,6 +1451,16 @@ tb_logger.add_scalar(f'metrics/{metric}', value, current_iter)
     loss_dict['l_pix'] = l_pix
     self.log_dict = self.reduce_loss_dict(loss_dict)
 \end{minted}
+
+\begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{log 命名的约定}
+在 log 的时候, loss 项使用 l\_ 开头，这样在 Tensorboard 显示的时候，所有 loss 会被组织到一起。比如在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/srgan_model.py}{basicsr/models/srgan\_model.py} 中，使用了 l\_g\_pix，l\_g\_percep，l\_g\_gan 等。在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{basicsr/utils/logger.py} 中，他们会被组织到一起：
+\begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
+if k.startswith('l_'):
+    self.tb_logger.add_scalar(f'losses/{k}', v, current_iter)
+else:
+    self.tb_logger.add_scalar(k, v, current_iter)
+\end{minted}
+\end{exampleBox}
 
 
 \subsection{Wandb 记录及解读}
