@@ -1173,12 +1173,26 @@ train:
 % ----------------------------------
 \subsection{basic/arch 目录介绍}\label{code_structure:arch_contents}
 
-\todo{仿照 models 和 data 对目录简单进行说明。不需要对每一个文件说明，只要说明关键得几个即可}
-
 
 在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs}{basicsr/archs/} 目录下，我们提供了若干经典的网络结构。
 
-\todo{这个表格既然写了，就保留吧}
+\vspace{0.5cm}
+\renewcommand*\DTstyle{\ttfamily\textcolor{black}}
+\dirtree{%
+    .1 \textcolor{orange}{basicsr}.
+    .2 archs.
+    .3 \textcolor{red}{\_\_init\_\_.py}.\DTcomment{\textcolor{red}{定义 build\_network，扫描所有 networks 并注册}}.
+    .3 edsr\_arch.py\DTcomment{下面是不同的网络结构，我们主要也是修改它们。它们都以 \texttt{\_arch.py} 结尾。具体描述参见下面的表格。}.
+    .3 srresnet\_arch.py.
+    .3 rrdbnet\_arch.py.
+    .3 ....
+}
+\vspace{0.5cm}
+
+\begin{hl} % ---------------- Highlight block ---------------- %
+    我们新建 arch 的时候，需要以 \texttt{\_arch.py} 结尾，这样才能够被程序自动扫描 import。
+\end{hl}
+
 \begin{table}[h]
     \centering
     {
@@ -1213,52 +1227,69 @@ train:
 % ----------------------------------
 \subsection{网络结构 arch 的创建}\label{code_structure:arch_creation}
 
-\todo{参照 model arch 进行说明}
+arch 的创建是通过 Register 机制实现的。
+具体可以参考：
+\begin{enumerate}
+    \item 章节\ref{code_structure:register}：\nameref{code_structure:register} 说明了 Register 机制是如何根据配置文件中的类型，来自动实例化类的
+    \item 章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 通过一个完整的例子，说明了其中 model 的创建过程，在 model 初始化时，进行了 arch 的创建。
+\end{enumerate}
 
 % ------------------------------------------------------------------------------
 \section{损失函数 (Loss)}\label{code_structure:loss}
 
 % ----------------------------------
 \subsection{basic/losses 目录介绍}\label{code_structure:loss_contents}
+在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/losses}{basicsr/losses/} 目录下，我们提供了若干常用的损失函数。
 
-\todo{仿照 models 和 data 对目录简单进行说明。}
-
-损失函数部分定义了很多常用的损失函数。损失函数部分定义在：
+\vspace{0.5cm}
+\renewcommand*\DTstyle{\ttfamily\textcolor{black}}
 \dirtree{%
-    .1 ROOT\_DIR.
-    .2 BasicSR.
-    .3 basicsr.
-    .4 losses.
-    .5 \_\_init\_\_.py.\DTcomment{扫描所有 loss 并注册，实例化某些损失函数}.
-    .5 losses.py.\DTcomment{损失函数的具体实现}.
-    .5 loss\_util.py.\DTcomment{损失函数工具，如对损失函数加权、累加、平均等}.
+    .1 \textcolor{orange}{basicsr}.
+    .2 losses.
+    .3 \textcolor{red}{\_\_init\_\_.py}.\DTcomment{\textcolor{red}{定义 build\_loss，扫描所有 loss 并注册}}.
+    .3 basic\_loss.py\DTcomment{下面是不同的损失函数，我们主要也是修改它们。它们都以 \texttt{\_loss.py} 结尾。}.
+    .3 gan\_loss.py.
+    .3 ....
 }
+\vspace{0.5cm}
+
+\begin{hl} % ---------------- Highlight block ---------------- %
+    我们新建 loss 的时候，需要以 \texttt{\_loss.py} 结尾，这样才能够被程序自动扫描 import。
+\end{hl}
 
 % ----------------------------------
 \subsection{loss 的创建}\label{code_structure:loss_creation}
 
-\todo{参照 model arch 进行说明}
+loss 的创建是通过 Register 机制实现的。
+具体可以参考：
+\begin{enumerate}
+    \item 章节\ref{code_structure:register}：\nameref{code_structure:register} 说明了 Register 机制是如何根据配置文件中的类型，来自动实例化类的
+    \item 章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 通过一个完整的例子，说明了其中 model 的创建过程，在 model 初始化时，进行了 loss 的创建。
+\end{enumerate}
 
 
 % ------------------------------------------------------------------------------
 \section{算子 (Ops)}\label{code_structure:ops}
 
+% ----------------------------------
 \subsection{什么是算子？}
 
 当使用pytorch时，绝大多数操作为张量 (Tensor) 的运算。张量计算的种类有很多，比如加法、乘法、矩阵相乘、矩阵转置等，这些计算被称为算子 (Operator)，它们是PyTorch的核心组件。
 
 一般情况下，pytorch推荐使用python层的前端语言来构建新的算子。但是有时候出于一些其他方面的考虑，会需要增加底层算子。例如有时候对性能要求很高，python不满足需求，又或者是需要链接其他的动态库(blas，mkl等)，因此pytorch也提供了直接扩展底层C++算子的能力。
 
+% ----------------------------------
 \subsection{BasicSR 中的自定义算子}
 
 BasicSR中所用的自定义算子代码在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/ops}{BasicSR/basicsr/ops} 中。采用C++ extension的方式添加。它与pytorch的相互解耦，分开编译，所以增加算子不需要修改pytorh的源码。它的原理其实就是通过pybind11，将C++编译为pytroch的一个模块，这样就可以在pytorch中通过这个新的模块来执行新的操作了。添加方法详情参阅 \href{https://pytorch.org/tutorials/advanced/cpp_extension.html#writing-a-mixed-c-cuda-extension}{pytorch官方文档} 。
 
 BasicSR中的自定义算子主要有deform\_conv，upfirdn2d，fused\_act三大类。deform\_conv主要用在各个视频恢复的模型上，是一种隐式的对齐方式。upfirdn2d，fused\_act，用在stylegan2中。
 
+% ----------------------------------
 \subsection{BasicSR 中算子的编译、安装、使用}
 
 \begin{note} % ---------------- Note block ---------------- %
-    编译和安装的过程参见\ref{Register}。
+    编译和安装的过程参见\label{installation:c++}。
 \end{note}
 
 当算子成功编译之后，调用自定义算子就像调用pytorch原生算子一样。
@@ -1270,29 +1301,37 @@ from torch import nn
 
 Class xxx():
     def __init__():
-        conv1 = nn.Conv2d(……)
+        conv1 = nn.Conv2d(...)
 
     def forward():
-        out = conv1(……)
+        out = conv1(...)
 
 # 调用自定义算子，可以直接在forward中使用
 from basicsr.ops.upfirdn2d import upfirdn2d
 
+Class xxx():
     def forward():
-        out = upfirdn2d(……)
+        out = upfirdn2d(...)
 
 \end{minted}
 
 % ------------------------------------------------------------------------------
 \section{日志系统 (Logger)} \label{code_structure:logger}
 
-BasicSR 的日志系统主要包括实验过程中1.记录的 log 文件和2.可以通过 tensorboard 可视化的 tb\_logger。
+BasicSR 的日志系统主要包括:
+
+1.记录的 log 文件
+
+2.可以通过 tensorboard 可视化的 tb\_logger。
+
+3.Wandb
 
 日志系统的实现不过多赘述，如果有兴趣可以参阅 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{BasicSR/basicsr/utils/logger.py}。本章节主要讲述日志系统各个项目代表什么；以及如何改代码，在日志中记录我们想记录的个性化内容。
 
+% ----------------------------------
 \subsection{log 文件记录及解读}
 
-当进行实验的时候，代码会在 BasicSR/experiments 中创建一个属于当前实验的文件夹，文件夹名字为实验名，文件夹中会存在一个 log 文件，下面我们来说明如何按照我们自己的要求记录 log 文件，以及现有 log 文件每个条目的意义。
+当进行实验的时候，代码会在 BasicSR/experiments 中创建一个属于当前实验的文件夹，文件夹名字为实验名，文件夹中会存在一个 按照 \texttt{train\_[exp\_name]\_[timestamp].log} 方式命名的 log 文件。下面我们来说明如何按照我们自己的要求记录 log 文件，以及现有 log 文件每个条目的意义。
 
 \begin{hl} % ---------------- Highlight block ---------------- %
 
@@ -1307,7 +1346,6 @@ logger.warning(要添加的警告)  # 添加警告信息
 
 在 model 文件中，已经定义好 logger 的情况下，只要在合适的位置添加上述语句，即可记录信息。每个 model 文件中都有大量的 logger 添加，故不具体展示使用位置，有兴趣的读者可以自己在 model 文件中搜索。
 
-log 文件是 \texttt{train\_[exp\_name]\_[timestamp].log} 的命名方式
 
 下面是一个 log 文件的例子：
 
@@ -1373,12 +1411,13 @@ INFO: Validation validation
      #  psnr: 20.7466
 \end{minted}
 
+% ----------------------------------
 \subsection{tensorboard logger 记录及解读}
 
-除了上述的 log 文件外，BasicSR 还会生成可以用 tensorboard 打开的 tb\_logger 文件。一般保存在 BasicSR/experiments/tb\_logger/ 实验名。
+除了上述的 log 文件外，BasicSR 还会生成可以用 tensorboard 打开的 tb\_logger 文件。一般保存在 BasicSR/experiments/tb\_logger/实验名。
 
 
-开启: 在 yml 配置文件中设置 `use\_tb\_logger: true`:
+开启: 在 yml 配置文件中设置 `use\_tb\_logger: true':
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
 # yml
     logger:
@@ -1410,6 +1449,16 @@ INFO: Validation validation
     也可以使用这种方法记录不是 loss 的其他值。
 \end{hl}
 
+\begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{log 命名的约定}
+在 log 的时候, loss 项使用 l\_ 开头，这样在 Tensorboard 显示的时候，所有 loss 会被组织到一起。比如在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/srgan_model.py}{basicsr/models/srgan\_model.py} 中，使用了 l\_g\_pix，l\_g\_percep，l\_g\_gan 等。在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{basicsr/utils/logger.py} 中，他们会被组织到一起：
+\begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
+if k.startswith('l_'):
+    self.tb_logger.add_scalar(f'losses/{k}', v, current_iter)
+else:
+    self.tb_logger.add_scalar(k, v, current_iter)
+\end{minted}
+\end{exampleBox}
+
 下面介绍具体的封装细节，tb\_logger 的初始化和记录代码为：
 
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
@@ -1426,7 +1475,7 @@ tb_logger.add_scalar(f'metrics/{metric}', value, current_iter)
     # 初始化tb_logger
     msg_logger = MessageLogger(opt, current_iter, tb_logger)
     # 实例化msg_logger，包含了tb_logger
-    ……
+    ...
     log_vars.update(model.get_current_log())
     # 更新log_vars
     msg_logger(log_vars)
@@ -1435,9 +1484,9 @@ tb_logger.add_scalar(f'metrics/{metric}', value, current_iter)
 # BasicSR/basicsr/utils/logger.py中定义了MessageLogger类：
 
     class MessageLogger():
-        ……
+        ...
         def __call__(self, log_vars):
-            ……
+            ...
             self.tb_logger.add_scalar(f'losses/{k}', v, current_iter)
             # 这里调用了添加tb_logger
 
@@ -1452,17 +1501,9 @@ tb_logger.add_scalar(f'metrics/{metric}', value, current_iter)
     self.log_dict = self.reduce_loss_dict(loss_dict)
 \end{minted}
 
-\begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{log 命名的约定}
-在 log 的时候, loss 项使用 l\_ 开头，这样在 Tensorboard 显示的时候，所有 loss 会被组织到一起。比如在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/srgan_model.py}{basicsr/models/srgan\_model.py} 中，使用了 l\_g\_pix，l\_g\_percep，l\_g\_gan 等。在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{basicsr/utils/logger.py} 中，他们会被组织到一起：
-\begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
-if k.startswith('l_'):
-    self.tb_logger.add_scalar(f'losses/{k}', v, current_iter)
-else:
-    self.tb_logger.add_scalar(k, v, current_iter)
-\end{minted}
-\end{exampleBox}
 
 
+% ----------------------------------
 \subsection{Wandb 记录及解读}
 
 \href{https://www.wandb.com/}{wandb} 类似tensorboard的云端版本, 可以在浏览器方便地查看模型训练的过程和曲线。我们目前只是把tensorboard的内容同步到wandb上, 因此要使用wandb, 必须打开tensorboard logger，参见上一节。\href{https://wandb.ai/xintao/basicsr?workspace=user-}{BasicSR wandb示例}
