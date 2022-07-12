@@ -9,7 +9,9 @@
 
 ⏬ 本文档的最新版可以从 [releases](https://github.com/XPixelGroup/BasicSR-docs/releases) 下载。
 
-<img src="cover.png" alt="Cover" width="200" class="center">
+<p align="center">
+    <img src="cover.png" alt="Cover" width="330">
+</p>
 
 ## 欢迎贡献
 
