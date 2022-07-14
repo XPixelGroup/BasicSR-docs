@@ -1,28 +1,166 @@
-\documentclass[../main.tex]{subfiles}
+% Modified from: https://arxiv.org/abs/2201.09746
+
+\documentclass[a4paper, 12pt, oneside]{memoir}
+\usepackage{style}
+
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+
+% ----------- support Chinese -------------
+\usepackage{CJKutf8}
+\usepackage{cmap}
+\usepackage[10pt]{type1ec}          % use only 10pt fonts
+\usepackage[T1]{fontenc}
+\usepackage{textalpha}              % improved LGR support
+\usepackage[overlap, CJK]{ruby}
+\usepackage{CJKulem}
+% ----------- End: support Chinese -------------
+
+% ----------- support table and shline -------------
+\usepackage{tabulary}
+\newcolumntype{x}[1]{>{\centering\arraybackslash}p{#1pt}}
+\newcommand{\tablestyle}[2]{\setlength{\tabcolsep}{#1}\renewcommand{\arraystretch}{#2}\centering\footnotesize}
+\newlength\savewidth\newcommand\shline{\noalign{\global\savewidth\arrayrulewidth
+        \global\arrayrulewidth 1pt}\hline\noalign{\global\arrayrulewidth\savewidth}}
+% ----------- End: support table and shline -------------
+
+\usepackage{fontawesome5}  % for icons used in the Author page
+\usepackage{dirtree}  % for folder structure
+\renewcommand*\DTstylecomment{\rmfamily\color{black}}
+\renewcommand*\DTstyle{\ttfamily\textcolor{red}}
+
+\newcommand{\todo}[1]{{\textbf{\color{red}{\emph{#1}}}}} % need to fill
+
+\DisemulatePackage{setspace}
+\usepackage{setspace}
+\setstretch{1.1}
+\setlength{\parskip}{5pt}
+
+\usepackage{minted}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+
+\usepackage{makecell}
+
+\usepackage{float}
+
+%\usepackage{import}
+\usepackage{subfiles}
+
+% title
+\title{
+    \vspace{4cm}
+    \normalfont \normalsize
+    \horrule{0.5pt} \\[0.4cm]
+    \huge \begin{CJK}{UTF8}{gbsn} BasicSR: 图像、视频复原增强开源库
+        \\ 解读文档\end{CJK}
+    \horrule{2pt} \\[0.5cm]
+}
+
+%\author{\href{https://github.com/xinntao/BasicSR}}
+
+\date{\normalsize\today}
 
 \begin{document}
+\mathversion{bold}
+\maketitle
+\thispagestyle{empty}
 
-\chapter{数据准备}
-\vspace{-2cm}
+\vspace{-15.5cm}
+\begin{adjustwidth}{0.5cm}{}
+    \hspace{5.5cm}
+    \includegraphics[width=0.3\textwidth]{figures/xpixel-logo.jpg}
+\end{adjustwidth}
+\vspace{1.2cm}
+\begin{adjustwidth}{0.5cm}{}
+    \includegraphics[width=0.07\textwidth]{figures/rocket_logo.png}
+\end{adjustwidth}
+\vspace{5cm}
 
-简要总结
+%\begin{adjustwidth}{7cm}{}
+\begin{center}
+    \includegraphics[width=0.5\textwidth]{figures/basicsr_logo.png}
+\end{center}
+%\end{adjustwidth}
+\begin{center}
+    \underline{\textbf{\url{https://github.com/XPixelGroup/BasicSR}}}
+\end{center}
+%	\begin{center}
+%		Version: V0
+%	\end{center}
 
-\section{常见用法}
+% 注释
+\vspace{0.2cm}
+\begin{center}
+    \textcolor{ChadBlue}{\underline{\textbf{Notes}}}
+\end{center}
+\vspace{0.5cm}
+\begin{CJK}{UTF8}{gbsn}
 
-- 链接 datasets
+    本文档的最新版可以从 \url{https://github.com/XPixelGroup/BasicSR-docs/releases} 下载。
 
-\section{格式}
+    欢迎大家一起来帮助查找文档中的错误，完善文档。
 
-- 参考: \url{https://github.com/XPixelGroup/BasicSR/blob/master/docs/DatasetPreparation_CN.md}
+    \faIcon{hand-point-right}快速跳转到\hyperref[toc]{文档主目录}。
+\end{CJK}
 
-\section{File Client 介绍}
+%\vspace{0.3cm}
+% \href{https://github.com/FortsAndMills/RL-Theory-book}{xxx}.
 
-\section{常见数据集介绍与准备}
 
-\subsection{DIV2K 与 DF2K}
 
-\subsection{REDS}
+% 作者页、目录
+\begin{CJK}{UTF8}{gbsn}
+    \subfile{sections/authors.tex}
+    \subfile{sections/xpixel_metaverse.tex}
 
-\subsection{Vimeo90K}
+    \newpage
+    \tableofcontents*\label{toc}
+\end{CJK}
+
+% 正文
+\begin{CJK}{UTF8}{gbsn}
+    {
+        %\pagestyle{headings}
+        \pagestyle{fancy}
+        \fancyhf{}
+        \rhead{\rightmark}
+        \chead{\thepage}
+        \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+        \lhead{第~\thechapter~章: \leftmark}
+        \rfoot{\hyperref[toc]{回到主目录}}
+
+        \subfile{sections/overview.tex}
+        \subfile{sections/installation.tex}
+        \subfile{sections/getting_start.tex}
+        \subfile{sections/code_structure.tex}
+        \subfile{sections/metrics.tex}
+        \subfile{sections/howto.tex}
+        \subfile{sections/data_preparation.tex}
+        \subfile{sections/scripts.tex}
+        \subfile{sections/deploy.tex}
+        \subfile{sections/template.tex}
+        \subfile{sections/experience.tex}
+    }
+\end{CJK}
+
+\clearpage
+\newpage
+\thispagestyle{empty}
+\begin{center}
+    \vspace*{5cm}
+    \includegraphics[width=16cm]{figures/good_luck.png}
+\end{center}
+\begin{center}
+    \vspace*{1cm}
+    \includegraphics[width=0.85\textwidth]{figures/basicsr_logo.png}
+\end{center}
+
+% 教程，暂时用不到 reference
+% \newpage
+
+% \Large \begin{CJK}{UTF8}{gbsn}\textbf{参考文献}\end{CJK}
+% {\small
+% \bibliography{bib}
+% }
 
 \end{document}
