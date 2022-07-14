@@ -1160,7 +1160,7 @@ EMA (Exponential Moving Average)，指数移动平均。
     \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{yaml}
 # training settings
 train:
-  ema_decay: 0.9      # 开启 EMA, 滑动系数为 0.9
+  ema_decay: 0.9  # 开启 EMA, 滑动系数为 0.9
 \end{minted}
 \end{hl}
 
@@ -1173,8 +1173,7 @@ train:
 % ----------------------------------
 \subsection{basic/arch 目录介绍}\label{code_structure:arch_contents}
 
-
-在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs}{basicsr/archs/} 目录下，我们提供了若干经典的网络结构。
+在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs}{basicsr/archs/} 目录下，我们提供了若干经典的网络结构：
 
 \vspace{0.5cm}
 \renewcommand*\DTstyle{\ttfamily\textcolor{black}}
@@ -1182,6 +1181,7 @@ train:
     .1 \textcolor{orange}{basicsr}.
     .2 archs.
     .3 \textcolor{red}{\_\_init\_\_.py}.\DTcomment{\textcolor{red}{定义 build\_network，扫描所有 networks 并注册}}.
+    .3 arch\_util.py.\DTcomment{定义一些在网络结构中常用的工具函数}.
     .3 edsr\_arch.py\DTcomment{下面是不同的网络结构，我们主要也是修改它们。它们都以 \texttt{\_arch.py} 结尾。具体描述参见下面的表格。}.
     .3 srresnet\_arch.py.
     .3 rrdbnet\_arch.py.
@@ -1199,26 +1199,25 @@ train:
         \begin{tabular}{|c|c|c|c|}
             \hline
             \textbf{网络结构} & \textbf{任务} & \textbf{文件}          & \textbf{描述}                          \\ \hline
-            EDSR              & 图像超分      & edsr\_arch.py          & 论文EDSR结构                           \\ \hline
-            SRResNet          & 图像超分      & srresnet\_arch.py      & 论文SRGAN的Generator                   \\ \hline
-            RRDB              & 图像超分      & rrdbnet\_arch.py       & 论文ESRGAN的Generator                  \\ \hline
-            RCAN              & 图像超分      & rcan\_arch.py          & 论文RCAN的结构                         \\ \hline
-            SwinIR            & 图像超分      & swinir\_arch.py        & 论文SwinIR的结构                       \\ \hline
-            ECBSR             & 图像超分      & ecbsr\_arch.py         & 论文ECBSR的结构                        \\ \hline
-            SRVGG             & 图像超分      & srvgg\_arch.py         & VGG结构改造的SR网络                    \\ \hline
-            EDVR              & 视频超分      & edvr\_arch.py          & 论文EDVR的结构                         \\ \hline
-            BasicVSR          & 视频超分      & basicvsr\_arch.py      & 论文BasicVSR的结构                     \\ \hline
-            BasicVSR++        & 视频超分      & basicvsrpp\_arch.py    & 论文BasicVSR++的结构                   \\ \hline
-            DUF               & 视频超分      & duf\_arch.py           & 论文DUF的结构                          \\ \hline
-            TOF               & 视频超分      & tof\_arch.py           & 论文TOF的结构                          \\ \hline
-            HiFaceGAN         & 人脸生成      & hifacegan\_arch.py     & 论文HiFaceGAN的结构                    \\ \hline
-            DFDNet            & 人脸生成      & dfdnet\_arch.py        & 论文Deep Face Dictionary Network的结构 \\ \hline
-            StyleGAN2         & 人脸生成      & stylegan2\_arch.py     & 论文StyleGAN2的结构                    \\ \hline
-            RIDNet            & 图像去噪      & ridnet\_arch\_arch.py  & 论文RIDNet的结构                       \\ \hline
-            VGG               & 工具结构      & vgg\_arch.py           & 经典VGG结构                            \\ \hline
-            InceptionV3       & 工具结构      & inception.py           & 经典InceptionV3的结构，用于计算FID指标 \\ \hline
-            VGG \& UNet       & 工具结构      & discriminator\_arch.py & 在GAN训练中，常用的Discriminator结构   \\ \hline
-            SpyNet            & 工具结构      & spynet\_arch.py        & 论文SpyNet的结构                       \\ \hline
+            EDSR              & 图像超分      & edsr\_arch.py          & 论文 EDSR 结构                           \\ \hline
+            SRResNet          & 图像超分      & srresnet\_arch.py      & 论文 SRGAN 的 Generator                   \\ \hline
+            RRDB              & 图像超分      & rrdbnet\_arch.py       & 论文 ESRGAN 的 Generator                  \\ \hline
+            RCAN              & 图像超分      & rcan\_arch.py          & 论文 RCAN 的结构                         \\ \hline
+            SwinIR            & 图像超分      & swinir\_arch.py        & 论文 SwinIR 的结构                       \\ \hline
+            ECBSR             & 图像超分      & ecbsr\_arch.py         & 论文 ECBSR 的结构                        \\ \hline
+            SRVGG             & 图像超分      & srvgg\_arch.py         & VGG 结构改造的 SR 网络                    \\ \hline
+            EDVR              & 视频超分      & edvr\_arch.py          & 论文 EDVR 的结构                         \\ \hline
+            BasicVSR          & 视频超分      & basicvsr\_arch.py      & 论文 BasicVSR 的结构                     \\ \hline
+            BasicVSR++        & 视频超分      & basicvsrpp\_arch.py    & 论文 BasicVSR++ 的结构                   \\ \hline
+            DUF               & 视频超分      & duf\_arch.py           & 论文 DUF 的结构                          \\ \hline
+            TOF               & 视频超分      & tof\_arch.py           & 论文 TOF 的结构                          \\ \hline
+            DFDNet            & 人脸复原      & dfdnet\_arch.py        & 论文 Deep Face Dictionary Network 的结构 \\ \hline
+            StyleGAN2         & 人脸生成      & stylegan2\_arch.py     & 论文 StyleGAN2 的结构                    \\ \hline
+            RIDNet            & 图像去噪      & ridnet\_arch\_arch.py  & 论文 RIDNet 的结构                       \\ \hline
+            VGG               & 工具结构      & vgg\_arch.py           & 经典 VGG 结构                            \\ \hline
+            InceptionV3       & 工具结构      & inception.py           & 经典 InceptionV3 的结构，用于计算 FID 指标 \\ \hline
+            VGG \& UNet       & 工具结构      & discriminator\_arch.py & 在 GAN 训练中，常用的 Discriminator 结构   \\ \hline
+            SpyNet            & 工具结构      & spynet\_arch.py        & 论文 SpyNet 的结构                       \\ \hline
         \end{tabular}
     }
     \caption{BasicSR 提供的经典网络结构}
@@ -1247,8 +1246,9 @@ arch 的创建是通过 Register 机制实现的。
     .1 \textcolor{orange}{basicsr}.
     .2 losses.
     .3 \textcolor{red}{\_\_init\_\_.py}.\DTcomment{\textcolor{red}{定义 build\_loss，扫描所有 loss 并注册}}.
-    .3 basic\_loss.py\DTcomment{下面是不同的损失函数，我们主要也是修改它们。它们都以 \texttt{\_loss.py} 结尾。}.
-    .3 gan\_loss.py.
+    .3 loss\_util.py\DTcomment{提供损失函数中的常用工具函数}.
+    .3 basic\_loss.py\DTcomment{下面是不同的损失函数，我们主要也是修改它们。它们都以 \texttt{\_loss.py} 结尾。这里主要定义 pixel loss (L1/L2), perceptual loss 等}.
+    .3 gan\_loss.py.\DTcomment{主要定义和 GAN 训练相关的函数}.
     .3 ....
 }
 \vspace{0.5cm}
@@ -1267,36 +1267,40 @@ loss 的创建是通过 Register 机制实现的。
     \item 章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 通过一个完整的例子，说明了其中 model 的创建过程，在 model 初始化时，进行了 loss 的创建。
 \end{enumerate}
 
-
 % ------------------------------------------------------------------------------
 \section{算子 (Ops)}\label{code_structure:ops}
 
 % ----------------------------------
 \subsection{什么是算子？}
 
-当使用pytorch时，绝大多数操作为张量 (Tensor) 的运算。张量计算的种类有很多，比如加法、乘法、矩阵相乘、矩阵转置等，这些计算被称为算子 (Operator)，它们是PyTorch的核心组件。
+当使用 PyTorch 时，绝大多数操作为张量 (Tensor) 的运算。张量计算的种类有很多，比如加法、乘法、矩阵相乘、矩阵转置等，这些计算被称为算子 (Operator)，它们是PyTorch的核心组件。
 
-一般情况下，pytorch推荐使用python层的前端语言来构建新的算子。但是有时候出于一些其他方面的考虑，会需要增加底层算子。例如有时候对性能要求很高，python不满足需求，又或者是需要链接其他的动态库(blas，mkl等)，因此pytorch也提供了直接扩展底层C++算子的能力。
+有时候出于一些其他方面的考虑，会需要增加底层算子。例如有时候对性能要求很高，Python 不满足需求，因此 PyTorch 也提供了直接扩展底层C++算子的能力。
 
 % ----------------------------------
 \subsection{BasicSR 中的自定义算子}
 
-BasicSR中所用的自定义算子代码在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/ops}{BasicSR/basicsr/ops} 中。采用C++ extension的方式添加。它与pytorch的相互解耦，分开编译，所以增加算子不需要修改pytorh的源码。它的原理其实就是通过pybind11，将C++编译为pytroch的一个模块，这样就可以在pytorch中通过这个新的模块来执行新的操作了。添加方法详情参阅 \href{https://pytorch.org/tutorials/advanced/cpp_extension.html#writing-a-mixed-c-cuda-extension}{pytorch官方文档} 。
+BasicSR 中所用的自定义算子代码在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/ops}{BasicSR/basicsr/ops} 中。采用 C++ extension 的方式添加。它与 PyTorch 相互解耦，分开编译。它的原理其实就是通过 pybind11，将 C++ 编译为 PyTorch 的一个模块，这样就可以在 PyTorch 中通过这个新的模块来执行新的操作了。添加方法详情参阅 \href{https://pytorch.org/tutorials/advanced/cpp_extension.html#writing-a-mixed-c-cuda-extension}{pytorch官方文档} 。
 
-BasicSR中的自定义算子主要有deform\_conv，upfirdn2d，fused\_act三大类。deform\_conv主要用在各个视频恢复的模型上，是一种隐式的对齐方式。upfirdn2d，fused\_act，用在stylegan2中。
+BasicSR 中的自定义算子主要有：
+
+\begin{itemize}
+    \item 可变性卷积 DCN：\href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/ops/dcn}{deform\_conv}。它在 BasicSR 里面主要用来做隐式对齐，比如用在 EDVR 中。注意：如果安装的 Torchvision 版本 >= 0.9.0，会自动使用 TorchVision 中提供的 DCN，故不需要安装此编译算子
+    \item StyleGAN2 中的特定的算子，比如：\href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/ops}{upfirdn2d, fused\_act}
+\end{itemize}
 
 % ----------------------------------
 \subsection{BasicSR 中算子的编译、安装、使用}
 
 \begin{note} % ---------------- Note block ---------------- %
-    编译和安装的过程参见\label{installation:c++}。
+    编译和安装的过程参见章节\ref{installation:c++}：\nameref{code_structure:data} \label{installation:c++}。
 \end{note}
 
-当算子成功编译之后，调用自定义算子就像调用pytorch原生算子一样。
+当算子成功编译之后，调用自定义算子就像调用 PyTorch 原生算子一样。
 
 
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-# 调用pytorch原生算子
+# 调用 PyTorch 原生算子 nn
 from torch import nn
 
 Class xxx():
@@ -1306,7 +1310,7 @@ Class xxx():
     def forward():
         out = conv1(...)
 
-# 调用自定义算子，可以直接在forward中使用
+# 调用自定义算子，可以直接在 forward 中使用
 from basicsr.ops.upfirdn2d import upfirdn2d
 
 Class xxx():
@@ -1320,11 +1324,11 @@ Class xxx():
 
 BasicSR 的日志系统主要包括:
 
-1.记录的 log 文件
-
-2.可以通过 tensorboard 可视化的 tb\_logger。
-
-3.Wandb
+\begin{enumerate}
+    \item 记录的 log 文件
+    \item 通过 tensorboard 可视化的 tb\_logger
+    \item 通过 \href{https://wandb.ai/}{wandb}
+\end{enumerate}
 
 日志系统的实现不过多赘述，如果有兴趣可以参阅 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{BasicSR/basicsr/utils/logger.py}。本章节主要讲述日志系统各个项目代表什么；以及如何改代码，在日志中记录我们想记录的个性化内容。
 
@@ -1344,14 +1348,11 @@ logger.warning(要添加的警告)  # 添加警告信息
 \end{minted}
 \end{hl}
 
-在 model 文件中，已经定义好 logger 的情况下，只要在合适的位置添加上述语句，即可记录信息。每个 model 文件中都有大量的 logger 添加，故不具体展示使用位置，有兴趣的读者可以自己在 model 文件中搜索。
-
-
 下面是一个 log 文件的例子：
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.7\linewidth]{figures/getting_start_6.png}
+        \includegraphics[width=0.9\linewidth]{figures/code_structure_log_example.png}
         \caption{实验过程中产生的 log 信息}
         \label{fig:getting_start_6}
     \end{center}
@@ -1371,12 +1372,12 @@ Version Information:
     TorchVision: 0.10.1+cu111
 INFO:
   name: 000_SRResNet_DIV2K
-  # 实验名，整个options的内容都会记录在这里，本文件中省略掉了。
+  # 实验名，整个 配置option 的内容都会记录在这里，这里省略掉了
 
 
 INFO: Dataset [XXXDataset] - XXXdata is built.
 INFO: Training statistics:
-# 训练数据的信息，数量、batchsize等
+# 训练数据的信息，数量、batchsize 等
     Number of train images: 38684
     Dataset enlarge ratio: 1
     Batch size per gpu: 16
@@ -1384,7 +1385,7 @@ INFO: Training statistics:
     Require iter number per epoch: 2418
     Total epochs: 207; iters: 500000.
 INFO: Dataset [PairedImageDataset] - validation is built.
-# dataset类型
+# dataset 类型
 INFO: Number of val images/folders in validation: 14
 # 验证集信息
 INFO: Network [MSRResNet] is created.
@@ -1398,8 +1399,12 @@ INFO: Loss [L1Loss] is created.
 INFO: Model [RealESRNetModel_XXX] is created.
 INFO: Start training from epoch: 0, iter: 0
 # 开始训练
-INFO: [XXX_0..][epoch:  0, iter:     100, lr:(2.000e-04,)] [eta: 2 days, 21:55:41, time (data): 0.040 (0.004)] l_pix: 5.0581e-02
-# epoch:第几轮；iter:第几次迭代（一次迭代是一个batch）, lr:学习率][eta：剩余时间预估 time (data):跑了百分之多少的数据了] l_pix:当前的loss
+INFO: [001_M..][epoch:  0, iter:     100, lr:(2.000e-04,)] [eta: 2 days, 21:55:41, time (data): 0.040 (0.004)] l_pix: 5.0581e-02
+# [001_M..]: 实验名字，推荐使用数字打头的实验名，这样可以很方便区分实验
+# [epoch: 第几轮, iter: 第几次迭代 (一次迭代是一个batch), lr:学习率 (如果分组，则会显示多组)]
+# [eta：预估剩余时间, time (data):一次迭代所需时间 (读取数据的时间)]
+# l_pix: 当前的各项 loss
+
 INFO: Validation validation
 # 验证集验证结果
      #  psnr: 18.0289
@@ -1417,24 +1422,24 @@ INFO: Validation validation
 除了上述的 log 文件外，BasicSR 还会生成可以用 tensorboard 打开的 tb\_logger 文件。一般保存在 BasicSR/experiments/tb\_logger/实验名。
 
 
-开启: 在 yml 配置文件中设置 `use\_tb\_logger: true':
+如何开启: 在 yml 配置文件中设置 `\texttt{use\_tb\_logger: true}':
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
 # yml
     logger:
       use_tb_logger: true
 \end{minted}
 
-在浏览器中查看：
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-# bash
-    tensorboard --logdir tb_logger --port 5500 --bind_all
+在命令行输入以下命令，就可以在浏览器中查看：
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{bash}
+tensorboard --logdir tb_logger --port 5500 --bind_all
 \end{minted}
 
+下图\ref{fig:tensorboard_demo}是一个示例：
 \begin{figure}[h]
     %\vspace{-0.5cm}
     \begin{center}
         %\fbox{\rule{0pt}{2.5in} \rule{0.9\linewidth}{0pt}}
-        \includegraphics[width=0.8\linewidth]{figures/tensorboard_demo.png}
+        \includegraphics[width=0.8\linewidth]{figures/code_structure_tensorboard.png}
         % \vspace{-1cm}
         \caption{tensorboard示例图}
         \label{fig:tensorboard_demo}
@@ -1442,11 +1447,12 @@ INFO: Validation validation
     %\vspace{-0.7cm}
 \end{figure}
 
-目前 BasicSR 里 tb\_logger 主要记录 validation 结果和训练过程中的 loss。validation 结果会随增加 metric 而增加，不过多赘述，重点介绍如何添加 loss 记录到 tb\_logger 。
+目前 BasicSR 里 tb\_logger 主要记录 validation 结果和训练过程中的 loss。validation 结果会随着 metric 而增加，不过多赘述。重点介绍如何添加 loss 记录到 tb\_logger 。
 
 \begin{hl} % ---------------- Highlight block ---------------- %
-    虽说封装的很深，但是实际在框架中使用起来，只需要在 xx\_model.py 计算 loss 之后，把新的 loss， loss\_dict['新的loss'] = 新的loss ，即可同时记录在 tb\_logger 和 los 文件中。
-    也可以使用这种方法记录不是 loss 的其他值。
+    虽说封装的很深，但是实际在框架中使用起来，只需要在 xx\_model.py 计算 loss 之后，执行 \texttt{loss\_dict['新的loss'] = 新的loss} ，即可同时记录在 tb\_logger 和 log 文件中。
+
+    注意：也可以使用这种方法记录不是 loss 的其他值。
 \end{hl}
 
 \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{log 命名的约定}
@@ -1462,8 +1468,9 @@ else:
 下面介绍具体的封装细节，tb\_logger 的初始化和记录代码为：
 
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+# 这个是记录validation结果的
 tb_logger.add_scalar(f'metrics/{metric}', value, current_iter)
-# 这个是记录validation结果的。
+
 \end{minted}
 
 一个上述语句封装的例子：
