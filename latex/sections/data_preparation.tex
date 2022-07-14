@@ -71,7 +71,7 @@ io_backend:
 % ------------------------------------------------------------------------------
 \subsection{文件结构}
 
-除了标准的 LMDB 文件 (data.mdb 和 lock.mdb) 外, 我们还增加了 
+除了标准的 LMDB 文件 (data.mdb 和 lock.mdb) 外, 我们还增加了
  meta\_info.txt 来记录额外的信息. 下面用一个例子来说明.
 
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{yaml}
@@ -97,7 +97,7 @@ meta\_info.txt, 我们采用txt来记录, 是为了可读性. 其里面的内容
 \begin{enumerate}
 \item图像名称 (带后缀): 0001\_s001.png
 \item图像大小: (480,480,3) 表示是480x480x3的图像
-\item其他参数 (BasicSR里面使用了 cv2 压缩 png 程度): 因为在复原任务中, 我们通常使用 png 来存储, 所以这个 1 表示 png 的压缩程度 
+\item其他参数 (BasicSR里面使用了 cv2 压缩 png 程度): 因为在复原任务中, 我们通常使用 png 来存储, 所以这个 1 表示 png 的压缩程度
 CV\_IMWRITE\_PNG\_COMPRESSION 是 1. 它可以取值为 [0, 9] 的整数, 更大的值表示更强的压缩, 即更小的储存空间和更长的压缩时间
 \end{enumerate}
 
@@ -166,7 +166,7 @@ class FileClient(object):
     def __init__(self, backend='disk', **kwargs):
         if backend not in self._backends:
             raise ValueError(f'Backend {backend} is not supported.'
-                             f' Currently supported ones are' 
+                             f' Currently supported ones are'
                              f'{list(self._backends.keys())}')
         self.backend = backend
         self.client = self._backends[backend](**kwargs)
@@ -205,7 +205,7 @@ python scripts/data_preparation/extract_subimages.py
 使用之前可能需要修改文件里面的路径和配置参数. 注意: sub-image 的尺寸和训练 patch 的尺寸 (gt\_size) 是不同的. 我们先把2K分辨率的图像 crop 成 sub-images (往往是 480x480), 然后存储起来. 在训练的时候, dataloader 会读取这些 sub-images, 然后进一步随机裁剪成 gt\_size x gt\_size 的大小.
 \item\,[可选]若需要使用 LMDB, 则需要制作 LMDB, 参考 LMDB 具体说明. python scripts/data\_preparation/create\_lmdb.py, 注意选择 create\_lmdb\_for\_div2k 函数, 并需要修改函数相应的配置和路径.
 \item 测试: tests/test\_paired\_image\_dataset.py, 注意修改函数相应的配置和路径.
-\item\,[可选] 若需要使用 meta\_info\_file, 
+\item\,[可选] 若需要使用 meta\_info\_file,
 运行 python scripts/data\_preparation/\\generate\_meta\_info.py 来生成 meta\_info\_file.
 \end{enumerate}
 
@@ -215,20 +215,20 @@ python scripts/data_preparation/extract_subimages.py
 REDS 数据集官方网站：\href{https://seungjunnah.github.io/Datasets/reds.html}{REDS}.
 我们重新整合了 training 和 validation 数据到一个文件夹中: 训练集合原来有240个 clip (序号从000到239), 我们把 validation clips 重命名, 从240到269.\\
 
-\noindent\textbf{Validation的划分}
+\noindent\textbf{Validation 的划分}
 
-官方的 validation 划分和 EDVR 的划分不同 (当时为了比赛的设置):\\
+官方的 validation 划分和 EDVR 的划分不同 (当时为了比赛的设置):
+
 \begin{table}[htbp]
     \centering
-    {
         \begin{tabular}{|c|c|c|}
             \hline
             \textbf{name} & \textbf{clips} & \textbf{total number}                               \\ \hline
             REDSOfficial              & [240, 269]      & 30 clips                               \\ \hline
             REDS4          & 000, 011, 015, 020 clips from the original training set      & 4 clips       \\ \hline
         \end{tabular}
-    }
-\end{table}\\
+    \caption{Validation 的划分}
+\end{table}
 余下的 clips 拿来做训练集合. 注意: 我们不需要显式地分开训练和验证集合, dataloader 会做这件事.\\
 
 \noindent\textbf{数据准备步骤}
