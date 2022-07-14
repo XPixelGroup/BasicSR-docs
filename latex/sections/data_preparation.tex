@@ -249,7 +249,7 @@ REDS 数据集官方网站：\href{https://seungjunnah.github.io/Datasets/reds.h
 \begin{enumerate}
 \item 下载数据: \href{http://data.csail.mit.edu/tofu/dataset/vimeo_septuplet.zip}{Septuplets dataset --> The original training + test set (82GB)}. 这些是 Ground-Truth. 里面有 sep\_trainlist.txt 文件来区分训练数据.
 \item 生成低分辨率图片. The low-resolution images in the Vimeo90K test dataset are generated with the MATLAB bicubic downsampling kernel. Use the script \textbf{data\_scripts/generate\_LR\_Vimeo90K.m} (run in MATLAB) to generate the low-resolution images.
-\item\,[可选] 若需要使用 LMDB, 则需要制作 LMDB, 参考 LMDB具体说明. python scripts/data\_preparation/create\_lmdb.py, 注意选择 create\_lmdb\_for\_vimeo90k 函数, 并需要修改函数相应的配置和路径.
+\item\,[可选] 若需要使用 LMDB, 则需要制作 LMDB, 参考 LMDB 具体说明. 运行脚本: python scripts/data\_preparation/create\_lmdb.py, 注意选择 create\_lmdb\_for\_vimeo90k 函数, 并需要修改函数相应的配置和路径.
 \item 测试: python tests/test\_vimeo90k\_dataset.py, 注意修改函数相应的配置和路径.
 \end{enumerate}
 
