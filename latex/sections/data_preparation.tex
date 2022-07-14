@@ -1,166 +1,235 @@
-% Modified from: https://arxiv.org/abs/2201.09746
-
-\documentclass[a4paper, 12pt, oneside]{memoir}
-\usepackage{style}
-
-\usepackage[utf8]{inputenc}
-\usepackage{fancyhdr}
-
-% ----------- support Chinese -------------
-\usepackage{CJKutf8}
-\usepackage{cmap}
-\usepackage[10pt]{type1ec}          % use only 10pt fonts
-\usepackage[T1]{fontenc}
-\usepackage{textalpha}              % improved LGR support
-\usepackage[overlap, CJK]{ruby}
-\usepackage{CJKulem}
-% ----------- End: support Chinese -------------
-
-% ----------- support table and shline -------------
-\usepackage{tabulary}
-\newcolumntype{x}[1]{>{\centering\arraybackslash}p{#1pt}}
-\newcommand{\tablestyle}[2]{\setlength{\tabcolsep}{#1}\renewcommand{\arraystretch}{#2}\centering\footnotesize}
-\newlength\savewidth\newcommand\shline{\noalign{\global\savewidth\arrayrulewidth
-        \global\arrayrulewidth 1pt}\hline\noalign{\global\arrayrulewidth\savewidth}}
-% ----------- End: support table and shline -------------
-
-\usepackage{fontawesome5}  % for icons used in the Author page
-\usepackage{dirtree}  % for folder structure
-\renewcommand*\DTstylecomment{\rmfamily\color{black}}
-\renewcommand*\DTstyle{\ttfamily\textcolor{red}}
-
-\newcommand{\todo}[1]{{\textbf{\color{red}{\emph{#1}}}}} % need to fill
-
-\DisemulatePackage{setspace}
-\usepackage{setspace}
-\setstretch{1.1}
-\setlength{\parskip}{5pt}
-
-\usepackage{minted}
-\definecolor{bg}{rgb}{0.95,0.95,0.95}
-
-\usepackage{makecell}
-
-\usepackage{float}
-
-%\usepackage{import}
-\usepackage{subfiles}
-
-% title
-\title{
-    \vspace{4cm}
-    \normalfont \normalsize
-    \horrule{0.5pt} \\[0.4cm]
-    \huge \begin{CJK}{UTF8}{gbsn} BasicSR: 图像、视频复原增强开源库
-        \\ 解读文档\end{CJK}
-    \horrule{2pt} \\[0.5cm]
-}
-
-%\author{\href{https://github.com/xinntao/BasicSR}}
-
-\date{\normalsize\today}
+\documentclass[../main.tex]{subfiles}
 
 \begin{document}
-\mathversion{bold}
-\maketitle
-\thispagestyle{empty}
 
-\vspace{-15.5cm}
-\begin{adjustwidth}{0.5cm}{}
-    \hspace{5.5cm}
-    \includegraphics[width=0.3\textwidth]{figures/xpixel-logo.jpg}
-\end{adjustwidth}
-\vspace{1.2cm}
-\begin{adjustwidth}{0.5cm}{}
-    \includegraphics[width=0.07\textwidth]{figures/rocket_logo.png}
-\end{adjustwidth}
-\vspace{5cm}
+\chapter{数据准备}
+\vspace{-2cm}
+这部分主要讲述数据存储形式，file client类的基本构成，以及各种数据集的获取和描述。
 
-%\begin{adjustwidth}{7cm}{}
-\begin{center}
-    \includegraphics[width=0.5\textwidth]{figures/basicsr_logo.png}
-\end{center}
-%\end{adjustwidth}
-\begin{center}
-    \underline{\textbf{\url{https://github.com/XPixelGroup/BasicSR}}}
-\end{center}
-%	\begin{center}
-%		Version: V0
-%	\end{center}
+\section{常见用法}
+目前, 我们可以通过configuration.yaml文件方便的修改. 以支持DIV2K的 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/data/paired_image_dataset.py}{PairedImageDataset} 为例, 根据不同的要求修改yaml文件.
 
-% 注释
-\vspace{0.2cm}
-\begin{center}
-    \textcolor{ChadBlue}{\underline{\textbf{Notes}}}
-\end{center}
-\vspace{0.5cm}
-\begin{CJK}{UTF8}{gbsn}
+\begin{enumerate}
 
-    本文档的最新版可以从 \url{https://github.com/XPixelGroup/BasicSR-docs/releases} 下载。
+\item 直接读取硬盘数据
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{yaml}
+type: PairedImageDataset
+dataroot_gt: datasets/DIV2K/DIV2K_train_HR_sub
+dataroot_lq: datasets/DIV2K/DIV2K_train_LR_bicubic/X4_sub
+io_backend:
+  type: disk
+\end{minted}
 
-    欢迎大家一起来帮助查找文档中的错误，完善文档。
+\item 使用LMDB. 在使用前需要先制作LMDB, 参见 \href{https://github.com/XPixelGroup/BasicSR/blob/master/docs/DatasetPreparation_CN.md#LMDB%E5%85%B7%E4%BD%93%E8%AF%B4%E6%98%8E}{LMDB具体说明}, 注意我们在原有的 LMDB 上, 新增加了 meta 信息, 而且具体保存二进制内容也不同, 因此其他来源的LMDB并不能直接拿过来使用.
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{yaml}
+type: PairedImageDataset
+dataroot_gt: datasets/DIV2K/DIV2K_train_HR_sub.lmdb
+dataroot_lq: datasets/DIV2K/DIV2K_train_LR_bicubic_X4_sub.lmdb
+io_backend:
+  type: lmdb
+\end{minted}
 
-    \faIcon{hand-point-right}快速跳转到\hyperref[toc]{文档主目录}。
-\end{CJK}
+\item 使用Memcached 机器/集群需要支持 Memcached. 具体的配置文件根据实际的 Memcached 需要进行修改:
+能直接拿过来使用.
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{yaml}
+type: PairedImageDataset
+dataroot_gt: datasets/DIV2K_train_HR_sub
+dataroot_lq: datasets/DIV2K_train_LR_bicubicX4_sub
+io_backend:
+  type: memcached
+  server_list_cfg: /mnt/lustre/share/memcached_client/server_list.conf
+  client_cfg: /mnt/lustre/share/memcached_client/client.conf
+  sys_path: /mnt/lustre/share/pymc/py3
+\end{minted}
 
-%\vspace{0.3cm}
-% \href{https://github.com/FortsAndMills/RL-Theory-book}{xxx}.
+\end{enumerate}
+
+\section{数据存储格式}
+
+% - 参考: \url{https://github.com/XPixelGroup/BasicSR/blob/master/docs/DatasetPreparation_CN.md}
+
+目前支持的数据存储形式有以下三种:
+\begin{enumerate}
+\item直接以图像/视频帧的格式存放在硬盘
+\item制作成 LMDB. 训练数据使用这种形式, 一般会加快读取速度.
+\item若是支持 Memcached, 则可以使用. 它们一般应用在集群上.
+\end{enumerate}
+
+\subsection{LMDB具体说明}
+我们在训练的时候使用 LMDB 存储形式可以加快IO和CPU解压缩的速度 (测试的时候数据较少, 一般就没有太必要使用 LMDB). 其具体的加速要根据机器的配置来, 以下几个因素会影响:
+\begin{enumerate}
+\item有的机器设置了定时清理缓存, 而 LMDB 依赖于缓存. 因此若一直缓存不进去, 则需要检查一下. 一般 free -h 命令下, LMDB 占用的缓存会记录在 buff/cache 条目下面.
+\item机器的内存是否足够大, 能够把整个 LMDB 数据都放进去. 如果不是, 则它由于需要不断更换缓存, 会影响速度.
+\item若是第一次缓存 LMDB 数据集, 可能会影响训练速度. 可以在训练前, 进入 LMDB 数据集目录, 把数据先缓存进去: cat data.mdb > /dev/nul
+\end{enumerate}
+除了标准的 LMDB 文件 (data.mdb 和 lock.mdb) 外, 我们还增加了 
+ meta\_info.txt 来记录额外的信息. 下面用一个例子来说明:
+
+\subsection{文件结构}
+
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{yaml}
+DIV2K_train_HR_sub.lmdb
+├── data.mdb
+├── lock.mdb
+├── meta_info.txt
+\end{minted}
+
+
+\subsection{meta信息}
+meta\_info.txt, 我们采用txt来记录, 是为了可读性. 其里面的内容为:
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{yaml}
+0001_s001.png (480,480,3) 1
+0001_s002.png (480,480,3) 1
+0001_s003.png (480,480,3) 1
+0001_s004.png (480,480,3) 1
+...
+\end{minted}
+
+每一行记录了一张图片, 有三个字段, 分别表示:
+\begin{enumerate}
+\item图像名称 (带后缀): 0001\_s001.png
+\item图像大小: (480,480,3) 表示是480x480x3的图像
+\item其他参数 (BasicSR里面使用了 cv2 压缩 png 程度): 因为在复原任务中, 我们通常使用 png 来存储, 所以这个 1 表示 png 的压缩程度 
+CV\_IMWRITE\_PNG\_COMPRESSION 是 1. 它可以取值为[0, 9]的整数, 更大的值表示更强的压缩, 即更小的储存空间和更长的压缩时间.
+\end{enumerate}
+
+\subsection{二进制内容}
+为了方便, 我们在 LMDB 数据集中存储的二进制内容是 cv2 encode过的 image: cv2.imencode('.png', img, [cv2.IMWRITE\_PNG\_COMPRESSION, compress\_level]. 可以通过 compress\_level 控制压缩程度, 平衡存储空间和读取(包括解压缩)的速度.
+
+
+\subsection{如何制作}
+我们提供了脚本来制作. 在运行脚本前, 需要根据需求修改相应的参数. 目前支持 DIV2K, REDS 和 Vimeo90K 数据集; 其他数据集可仿照进行制作.
+python scripts/data\_preparation/create\_lmdb.py
+
+
+\subsection{预读取数据}
+除了使用LMDB来加速外, 还可以采用预读取数据来加速, 实现参见\href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/data/prefetch_dataloader.py}{prefetch\_dataloader}
+这个可以通过配置文件中的 prefetch\_mode 来指定. 目前提供了三种模式:
+
+\begin{enumerate}
+\item None. 默认不使用. 如果使用了 LMDB 或者 IO 不成问题, 则可不使用
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{yaml}
+prefetch_mode: ~
+\end{minted}
+
+\item prefetch\_mode: cuda. 使用 CUDA prefetcher, 具体介绍参见 NVIDIA/apex. 它会多占用一些GPU显存. 注意: 这个模式下, 一定要设置 pin\_memory=True
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{yaml}
+prefetch_mode: cuda
+pin_memory: true
+\end{minted}
+
+\item prefetch\_mode: cpu. 使用 CPU prefetcher, 具体介绍参见 IgorSusmelj/pytorch-styleguide. (目前测试，这个加速不明显)
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{yaml}
+prefetch_mode: cpu
+num_prefetch_queue: 1  # 1 by default
+\end{minted}
+
+\end{enumerate}
 
 
 
-% 作者页、目录
-\begin{CJK}{UTF8}{gbsn}
-    \subfile{sections/authors.tex}
-    \subfile{sections/xpixel_metaverse.tex}
 
-    \newpage
-    \tableofcontents*\label{toc}
-\end{CJK}
+\section{File Client 介绍}
+我们参考了MMCV 优雅的 FileClient 设计. 为了使其兼容 BasicSR, 我们对接口做了一些改动 (主要是为了适应LMDB), 参见\href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/file_client.py}{file\_client.py}.
 
-% 正文
-\begin{CJK}{UTF8}{gbsn}
-    {
-        %\pagestyle{headings}
-        \pagestyle{fancy}
-        \fancyhf{}
-        \rhead{\rightmark}
-        \chead{\thepage}
-        \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
-        \lhead{第~\thechapter~章: \leftmark}
-        \rfoot{\hyperref[toc]{回到主目录}}
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+class FileClient(object):
+    """A general file client to access files in different backend.
+    The client loads a file or text in a specified backend from its path
+    and return it as a binary file. it can also register other backend
+    accessor with a given name and backend class.
+    Attributes:
+        backend (str): The storage backend type. Options are "disk",
+            "memcached" and "lmdb".
+        client (:obj:`BaseStorageBackend`): The backend object.
+    """
 
-        \subfile{sections/overview.tex}
-        \subfile{sections/installation.tex}
-        \subfile{sections/getting_start.tex}
-        \subfile{sections/code_structure.tex}
-        \subfile{sections/metrics.tex}
-        \subfile{sections/howto.tex}
-        \subfile{sections/data_preparation.tex}
-        \subfile{sections/scripts.tex}
-        \subfile{sections/deploy.tex}
-        \subfile{sections/template.tex}
-        \subfile{sections/experience.tex}
+    _backends = {
+        'disk': HardDiskBackend,
+        'memcached': MemcachedBackend,
+        'lmdb': LmdbBackend,
     }
-\end{CJK}
 
-\clearpage
-\newpage
-\thispagestyle{empty}
-\begin{center}
-    \vspace*{5cm}
-    \includegraphics[width=16cm]{figures/good_luck.png}
-\end{center}
-\begin{center}
-    \vspace*{1cm}
-    \includegraphics[width=0.85\textwidth]{figures/basicsr_logo.png}
-\end{center}
+    def __init__(self, backend='disk', **kwargs):
+        if backend not in self._backends:
+            raise ValueError(f'Backend {backend} is not supported.'
+                             f' Currently supported ones are' 
+                             f'{list(self._backends.keys())}')
+        self.backend = backend
+        self.client = self._backends[backend](**kwargs)
 
-% 教程，暂时用不到 reference
-% \newpage
+    def get(self, filepath, client_key='default'):
+        # client_key is used only for lmdb, where different fileclients have
+        # different lmdb environments.
+        if self.backend == 'lmdb':
+            return self.client.get(filepath, client_key)
+        else:
+            return self.client.get(filepath)
 
-% \Large \begin{CJK}{UTF8}{gbsn}\textbf{参考文献}\end{CJK}
-% {\small
-% \bibliography{bib}
-% }
+    def get_text(self, filepath):
+        return self.client.get_text(filepath)
+\end{minted}
+
+
+
+\section{常见数据集介绍与准备}
+推荐把数据通过 ln -s xxx yyy 软链到BasicSR/datasets下. 如果你的文件结构不同, 需要相应地修改configuration yaml文件的路径.
+\subsection{DIV2K 与 DF2K}
+DIV2K与DF2K数据集被广泛使用在图像复原的任务中.
+
+\noindent\textbf{数据准备步骤}
+\begin{enumerate}
+\item 从\href{https://data.vision.ee.ethz.ch/cvl/DIV2K}{官网}下载数据.
+\item Crop to sub-images: 因为 DIV2K 数据集是 2K 分辨率的 (比如: 2048x1080), 而我们在训练的时候往往并不要那么大 (常见的是 128x128 或者 192x192 的训练patch). 因此我们可以先把2K的图片裁剪成有overlap的 480x480 的子图像块. 然后再由 dataloader 从这个 480x480 的子图像块中随机crop出 128x128 或者 192x192 的训练patch.
+运行脚本 \href{https://github.com/XPixelGroup/BasicSR/blob/master/scripts/data_preparation/extract_subimages.py}{extract\_subimages.py}:
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{yaml}
+python scripts/data_preparation/extract_subimages.py
+\end{minted}
+使用之前可能需要修改文件里面的路径和配置参数. 注意: sub-image 的尺寸和训练patch的尺寸 (gt\_size) 是不同的. 我们先把2K分辨率的图像 crop 成 sub-images (往往是 480x480), 然后存储起来. 在训练的时候, dataloader会读取这些sub-images, 然后进一步随机裁剪成 gt\_size x gt\_size的大小.
+\item\,[可选]若需要使用 LMDB, 则需要制作 LMDB, 参考 LMDB具体说明. python scripts/data\_preparation/create\_lmdb.py, 注意选择create\_lmdb\_for\_div2k函数, 并需要修改函数相应的配置和路径.
+\item 测试: tests/test\_paired\_image\_dataset.py, 注意修改函数相应的配置和路径.
+\item\,[可选]若需要使用 meta\_info\_file, 
+运行 python scripts/data\_preparation/\\generate\_meta\_info.py 来生成 meta\_info\_file.
+\end{enumerate}
+
+
+\subsection{REDS}
+REDS数据集官方网站：\href{https://seungjunnah.github.io/Datasets/reds.html}{REDS}
+我们重新整合了 training 和 validation 数据到一个文件夹中: 训练集合原来有240个clip (序号从000到239), 我们把validation clips重命名, 从240到269.\\
+
+\noindent\textbf{Validation的划分}
+官方的validation划分和EDVR的划分不同 (当时为了比赛的设置):\\
+\begin{table}[htbp]
+    \centering
+    {
+        \begin{tabular}{|c|c|c|}
+            \hline
+            \textbf{name} & \textbf{clips} & \textbf{total number}                               \\ \hline
+            REDSOfficial              & [240, 269]      & 30 clips                               \\ \hline
+            REDS4          & 000, 011, 015, 020 clips from the original training set      & 4 clips       \\ \hline
+        \end{tabular}
+    }
+\end{table}\\
+余下的clips拿来做训练集合. 注意: 我们不需要显式地分开训练和验证集合, dataloader会做这件事.\\
+
+\noindent\textbf{数据准备步骤}
+
+\begin{enumerate}
+\item 从\href{https://seungjunnah.github.io/Datasets/reds.html}{官网}下载数据
+\item 整合 training 和 validation 数据: python scripts/data\_preparation/regroup\_reds\_dataset.py
+\item\,[可选] 若需要使用 LMDB, 则需要制作 LMDB, 参考 LMDB具体说明. python scripts/data\_preparation/create\_lmdb.py, 注意选择create\_lmdb\_for\_reds函数, 并需要修改函数相应的配置和路径.
+\item 测试: python tests/test\_reds\_dataset.py, 注意修改函数相应的配置和路径.
+\end{enumerate}
+
+\subsection{Vimeo90K}
+官网地址：\href{http://toflow.csail.mit.edu/}{Vimeo90K}\\
+
+\noindent\textbf{数据准备步骤}
+\begin{enumerate}
+\item 下载数据: \href{http://data.csail.mit.edu/tofu/dataset/vimeo_septuplet.zip}{Septuplets dataset --> The original training + test set (82GB)}. 这些是Ground-Truth. 里面有sep\_trainlist.txt文件来区分训练数据.
+\item 生成低分辨率图片. (TODO) The low-resolution images in the Vimeo90K test dataset are generated with the MATLAB bicubic downsampling kernel. Use the script data\_scripts/generate\_LR\_Vimeo90K.m (run in MATLAB) to generate the low-resolution images.
+\item\,[可选] 若需要使用 LMDB, 则需要制作 LMDB, 参考 LMDB具体说明. python scripts/data\_preparation/create\_lmdb.py, 注意选择create\_lmdb\_for\_vimeo90k函数, 并需要修改函数相应的配置和路径.
+\item 测试: python tests/test\_vimeo90k\_dataset.py, 注意修改函数相应的配置和路径.
+\end{enumerate}
 
 \end{document}
