@@ -164,7 +164,7 @@ class StyleGAN2Model(BaseModel):
 \begin{enumerate}[第 1 步]
     \item 指标的存放与命名：指标文件存放在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics}{basicsr/metrics/} 文件夹下。对于命名规则无要求，一般直接以功能命名即可，如 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics/psnr_ssim.py}{basicsr/metrics/psnr\_ssim.py}。
 
-    \item 编写自定义指标：在指标文件中对自定义指标函数进行命名，\textbf{需要注意新建函数名不能与已有函数名重复，否则会导致后续注册机制报错}。关于指标的功能详解见第\ref{chaper:metrics}章：\nameref{chaper:metrics}。在编写完自定义指标后，注意在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics/__init__.py}{basicsr/metrics/\_\_init\_\_.py} 文件中对添加的自定义指标进行导入。以 \textbf{calculate\_psnr} 为例：
+    \item 编写自定义指标：在指标文件中对自定义指标函数进行命名，\textbf{需要注意新建函数名不能与已有函数名重复，否则会导致后续注册机制报错}。关于指标的功能详解见第\ref{chapter:metrics}章：\nameref{chapter:metrics}。在编写完自定义指标后，注意在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics/__init__.py}{basicsr/metrics/\_\_init\_\_.py} 文件中对添加的自定义指标进行导入。以 \textbf{calculate\_psnr} 为例：
           \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
 from .psnr_ssim import calculate_psnr
 \end{minted}

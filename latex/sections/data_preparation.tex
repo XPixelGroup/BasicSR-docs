@@ -4,7 +4,7 @@
 
 \chapter{数据准备}\label{chapter:data_preparation}
 \vspace{-2cm}
-这部分主要讲述数据存储形式，以及一些常见数据集的获取和描述。
+这部分主要讲述数据存储形式，FileClient 类，以及一些常见数据集的获取和描述。
 
 % ------------------------------------------------------------------------------
 \section{常见用法}\label{data_preparation:common_use}
@@ -128,7 +128,7 @@ meta 文件是记录数据集信息的。一般我们使用 txt 格式，这样�
 
 \begin{enumerate}
     \item 制作 LMDB 后会同步产生一个 meta 文件，这个meta 有着自己固定的格式，不能修改，否则可能会影响 LMDB 数据的读取。详细参见章节\ref{data_preparation:lmdb}：\nameref{data_preparation:lmdb}
-    \item PairedImageDataset 支持 \texttt{meta_info_file} 参数，会使用这个 meta 文件生成待读取的文件路径。这个可以根据用户自己的需要进行自定义
+    \item PairedImageDataset 支持 \texttt{meta\_info\_file} 参数，会使用这个 meta 文件生成待读取的文件路径。这个可以根据用户自己的需要进行自定义
 \end{enumerate}
 
 \todo{待完善}
@@ -136,7 +136,7 @@ meta 文件是记录数据集信息的。一般我们使用 txt 格式，这样�
 % ----------------------------------
 \subsection{现有 meta 文件说明}\label{data_preparation:existing_meta_file}
 
-在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/data/meta_info}{basicsr/data/meta_info} 目录下有提供了一些常用的 meta 文件，说明如下：
+在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/data/meta_info}{basicsr/data/meta\_info} 目录下有提供了一些常用的 meta 文件，说明如下：
 
 \todo{待完善}
 
@@ -145,7 +145,7 @@ meta 文件是记录数据集信息的。一般我们使用 txt 格式，这样�
 
 我们参考了 MMCV 的 FileClient 设计。为了使其兼容 BasicSR，我们对接口做了一些改动 (主要是为了适应 LMDB)。具体可以参见代码 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/file_client.py}{file\_client.py}。
 
-\todo{后续添加详细说明}
+\todo{待完善}
 
 % ------------------------------------------------------------------------------
 \section{常见数据集介绍与准备}\label{data_preparation:dataset}
@@ -232,7 +232,7 @@ Vimeo90K 是常用的视频帧数据集。官网地址：\url{http://toflow.csai
  python scripts/data_preparation/create_lmdb.py --dataset vimeo90k
 \end{minted}
     注意选择 create\_lmdb\_for\_vimeo90k 函数，并需要修改函数相应的配置和路径
-    \item 单元测试：我们可以单独测试 dataset 是否正常。注意修改函数相应的配置和路径：test\_scripts/test\_vimeo90k\_dataset.py。 
+    \item 单元测试：我们可以单独测试 dataset 是否正常。注意修改函数相应的配置和路径：test\_scripts/test\_vimeo90k\_dataset.py。
 \end{enumerate}
 
 \end{document}
