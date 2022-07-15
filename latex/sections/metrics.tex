@@ -2,23 +2,24 @@
 
 \begin{document}
 
-\chapter{指标}
+\chapter{指标}\label{chapter:metrics}
 \vspace{-2cm}
 
-本章节介绍在图像超分辨研究中经常使用的评价指标的相关知识，以及如何在BasicSR框架中使用这些指标进行测试。
+本章节介绍在图像超分辨研究中经常使用的评价指标的相关知识，以及如何在 BasicSR 框架中使用这些指标进行测试。
 
-
+% ------------------------------------------------------------------------------
 \section{概述}
 
+深度学习发展的旋风产生了源源不断的图像处理算法，这些算法可以生成失真较小、或对人感知上友好的复原图像。然而，限制图像处理方法未来发展的关键瓶颈之一就是“评估机制”。尽管人眼几乎可以毫不费力地区分感知上更好的图像，但算法要公平地衡量视觉质量是一项挑战。我们通常通过一些图像质量评估方法 (Image quality assessment， IQA) 测量复原图像和真实图像(Ground Truth，GT) 之间的相似性来评估。最近，一些不需要参考图像的 IQA 方法也被用于评估各种算法，例如 Ma 和 Perceptual Index (PI) 。在某种程度上，这些 IQA 方法是图像处理领域取得长足进步的主要原因，因为他们提供了一个量化的基准，以促进指标上更优秀的算法的诞生。
 
-深度学习发展的旋风产生了源源不断的图像处理算法，这些算法可以生成失真较小、或对人感知上友好的复原图像。然而，限制图像处理方法未来发展的关键瓶颈之一就是“评估机制”。尽管人眼几乎可以毫不费力地区分感知上更好的图像，但算法要公平地衡量视觉质量是一项挑战。我们通常通过一些图像质量评估方法（Image quality assessment， IQA）测量复原图像和真实图像（Ground Truth，GT）之间的相似性来评估。最近，一些不需要参考图像的 IQA 方法也被用于评估各种算法，例如 Ma 和 Perceptual Index (PI) 。在某种程度上，这些 IQA 方法是图像处理领域取得长足进步的主要原因，因为他们提供了一个量化的基准，以促进指标上更优秀的算法的诞生。
-
-接下来，我们先介绍图像质量评估（IQA）方面的知识。IQA 方法用于测量在采集、压缩、复制和后处理操作过程中可能会降低的图像质量。根据不同的使用场景，IQA 方法可以分为全参考法（Full-reference IQA，FR-IQA）和无参考法（No-reference IQA，NR-IQA）。FR-IQA 方法通常从信息或感知特征相似度的角度衡量两幅图像之间的相似度，已广泛应用于图像/视频编码、恢复和通信质量的评估。除了最广泛使用的 PSNR，FR-IQA 已经经过广泛的研究，并至少可以追溯到 2004 年提出的 SSIM，它首先在测量图像相似性时引入了结构信息。PSNR 和 SSIM 同时也是在各种图像复原研究中使用最广泛的评价指标。除此之外，很多 FR-IQA 方法也被提出来弥补 IQA 方法的结果与人类判断之间的差距，例如 IFC，VSI，FSIM 等。然而，不断出现的新算法一直在不断提高图像恢复的效果，PSNR 和 SSIM 的定量结果和感知质量之间越来越不一致。有研究指出，面向感知效果的图像处理中，PSNR 和 SSIM 等指标衡量的失真程度和图像所展示的感知质量是彼此冲突的。此时，一些更符合人感知判断的评价指标也被用于评价图像复原算法，如 LPIPS。
+接下来，我们先介绍图像质量评估(IQA) 方面的知识。IQA 方法用于测量在采集、压缩、复制和后处理操作过程中可能会降低的图像质量。根据不同的使用场景，IQA 方法可以分为全参考法 (Full-reference IQA，FR-IQA) 和无参考法 (No-reference IQA，NR-IQA) 。FR-IQA 方法通常从信息或感知特征相似度的角度衡量两幅图像之间的相似度，已广泛应用于图像/视频编码、恢复和通信质量的评估。除了最广泛使用的 PSNR，FR-IQA 已经经过广泛的研究，并至少可以追溯到 2004 年提出的 SSIM，它首先在测量图像相似性时引入了结构信息。PSNR 和 SSIM 同时也是在各种图像复原研究中使用最广泛的评价指标。除此之外，很多 FR-IQA 方法也被提出来弥补 IQA 方法的结果与人类判断之间的差距，例如 IFC，VSI，FSIM 等。然而，不断出现的新算法一直在不断提高图像恢复的效果，PSNR 和 SSIM 的定量结果和感知质量之间越来越不一致。有研究指出，面向感知效果的图像处理中，PSNR 和 SSIM 等指标衡量的失真程度和图像所展示的感知质量是彼此冲突的。此时，一些更符合人感知判断的评价指标也被用于评价图像复原算法，如 LPIPS。
 
 除了上述 FR-IQA 方法外，一些 NR-IQA 方法也经常被用来在没有参考图像时评价图像的质量。一个比较典型的场景就是对真实世界中图像复原效果的评价。一些流行的 NR-IQA 方法包括 NIQE、BRISQUE 和 PI。在最近的一些工作中，结合 NR-IQA 和 FR-IQA 方法来测量 IR 算法。
 
+% ------------------------------------------------------------------------------
 \section{PSNR}
-PSNR （Peak signal-to-noise ratio，峰值信噪比） 是图像处理研究中应用最广泛的评价指标之一。PSNR 是一个表示信号的最大可能功率和影响它的精度的破坏性噪声功率的比值的工程术语。PSNR 常用对数分贝单位来表示，简写为 dB（decibel）。PSNR 基于逐像素的均方误差（Mean square error，MSE）来定义。两个尺寸为 $m\times n$ 的单通道图像 $I$ 和 $I'$，其中 $I$是高质量的参考图像，$I'$为经过退化的低质量图片或者复原后的图像，那么它们的的均方误差定义为：
+
+PSNR  (Peak signal-to-noise ratio，峰值信噪比)  是图像处理研究中应用最广泛的评价指标之一。PSNR 是一个表示信号的最大可能功率和影响它的精度的破坏性噪声功率的比值的工程术语。PSNR 常用对数分贝单位来表示，简写为 dB (decibel) 。PSNR 基于逐像素的均方误差 (Mean square error，MSE) 来定义。两个尺寸为 $m\times n$ 的单通道图像 $I$ 和 $I'$，其中 $I$是高质量的参考图像，$I'$为经过退化的低质量图片或者复原后的图像，那么它们的的均方误差定义为：
 $$
 \mathrm{MSE}=\frac{1}{mn}\sum_{i=1}^{m}\sum_{j=1}^n(I[i,j]-I'[i,j])^2.
 $$
@@ -28,7 +29,7 @@ $$
 $$
 其中，$\mathrm{Peak}$是表示图像像素强度的最大取值，如果每个采样点用 8 位表示，那么$\mathrm{Peak}=255$。
 
-在 BasicSR 框架中，与 PSNR 计算相关的代码存放在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/metrics/psnr_ssim.py#L12}{basicsr/metrics/psnr\_ssim.py} 文件中。对于\texttt{numpy.ndarray}类型的变量，我们约定输入图像的数据格式为 \texttt{Unit8}，尺寸为 \texttt{[h,w,c]} (高，宽，通道数) 。对于彩色图片通道顺序为 \texttt{BGR}。此时输入图像像素的取值范围为$[0,255]$整数取值。此时，我们使用如下函数计算 PSNR：
+在 BasicSR 框架中，与 PSNR 计算相关的代码存放在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/metrics/psnr_ssim.py#L12}{basicsr/metrics/psnr\_ssim.py} 文件中。对于 \texttt{numpy.ndarray} 类型的变量，我们约定输入图像的数据格式为 \texttt{Unit8}，尺寸为 \texttt{[h,w,c]} (高，宽，通道数) 。对于彩色图片通道顺序为 \texttt{BGR}。此时输入图像像素的取值范围为$[0,255]$整数取值。此时，我们使用如下函数计算 PSNR：
 
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
 @METRIC_REGISTRY.register()
@@ -41,7 +42,7 @@ def calculate_psnr(img, img2, crop_border, input_order='HWC',
     ...
 \end{minted}
 
-当输入变量为 \texttt{torch.Tensor} 类型时，我们约定输入图像的数据格式为 \texttt{Float32}，尺寸为 \texttt{[n,c,h,w]} (批次大小，通道数（3或者1），高，宽) 。对于彩色图片通道顺序为 \texttt{RGB}。此时输入图像像素的取值范围为$ [0,1]$ 浮点数取值。此时，我们使用如下以 \texttt{\_pt} 结尾的函数计算 PSNR：
+当输入变量为 \texttt{torch.Tensor} 类型时，我们约定输入图像的数据格式为 \texttt{Float32}，尺寸为 \texttt{[n,c,h,w]} (批次大小，通道数 (3或者1) ，高，宽) 。对于彩色图片通道顺序为 \texttt{RGB}。此时输入图像像素的取值范围为$ [0,1]$ 浮点数取值。此时，我们使用如下以 \texttt{\_pt} 结尾的函数计算 PSNR：
 
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
 
@@ -51,13 +52,13 @@ def calculate_psnr_pt(img, img2, crop_border,
     ...
 \end{minted}
 
-需要注意的是，此函数支持对于一整个批次（batch）的数据计算 PSNR。
+需要注意的是，此函数支持对于一整个批次 (batch) 的数据计算 PSNR。
 
-在实现上, PSNR 的计算在不同人、不同版本的实现之间有微小的差异。我们对比了我们的实现和其他实现之间的差异，结果如\tablename~\ref{tab:psnr} 所示
+在实现上, PSNR 的计算在不同人、不同版本的实现之间有微小的差异。我们对比了我们的实现和其他实现之间的差异，结果如\tablename~\ref{tab:psnr} 所示：
 
 \begin{table}[]
     \centering
-    \begin{tabular}{c|c|c|c|c|c} 
+    \begin{tabular}{c|c|c|c|c|c}
     \toprule
         Image & 色彩空间 & Matlab & Numpy & Pytorch CPU & Pytorch GPU \\
         \midrule
@@ -67,12 +68,13 @@ def calculate_psnr_pt(img, img2, crop_border,
 Set14/comic&Y&--&21.720398&21.720398&21.721663\\
 \bottomrule
     \end{tabular}
-    \caption{各个 PSNR 实现结果之间的比较。}
+    \caption{各个 PSNR 实现结果之间的比较}
     \label{tab:psnr}
 \end{table}
 
+% ------------------------------------------------------------------------------
 \section{SSIM}
-SSIM（structural similarity index，图像结构相似性指标）是另一个被广泛使用的图像相似度评价指标。与 PSNR 评价逐像素的图像之间差异不同，SSIM 在图像质量上的衡量更侧重于图像的结构信息，这与人类对于视觉信息的感知是相似的。因此普遍认为 SSIM 更贴近人类对于图像质量的判断。
+SSIM (structural similarity index，图像结构相似性指标) 是另一个被广泛使用的图像相似度评价指标。与 PSNR 评价逐像素的图像之间差异不同，SSIM 在图像质量上的衡量更侧重于图像的结构信息，这与人类对于视觉信息的感知是相似的。因此普遍认为 SSIM 更贴近人类对于图像质量的判断。
 
 此处的结构相似性的基本思想是自然图像是高度结构化的，即自然图像中相邻像素之间存在很强的相关性，这种相关性承载着场景中物体的结构信息。人类视觉系统习惯于在查看图像时提取这样的结构信息。因此，在设计衡量图像畸变程度的图像质量测量指标时，结构畸变的测量是重要的一环。
 
@@ -98,7 +100,7 @@ $$
 
 \begin{table}[]
     \centering
-    \begin{tabular}{c|c|c|c|c|c} 
+    \begin{tabular}{c|c|c|c|c|c}
     \toprule
         Image & 色彩空间 & Matlab & Numpy & Pytorch CPU & Pytorch GPU \\
         \midrule
@@ -108,12 +110,45 @@ $$
 Set14/comic&Y&--&0.585511&0.585511&0.585522\\
 \bottomrule
     \end{tabular}
-    \caption{各个 SSIM 实现结果之间的比较。}
+    \caption{各个 SSIM 实现结果之间的比较}
     \label{tab:psnr}
 \end{table}
 
+% ------------------------------------------------------------------------------
 \section{NIQE}
 
-\section{其他常用指标}
+将在第二期加入
+
+% ------------------------------------------------------------------------------
+\section{如何使用指标}
+
+% ----------------------------------
+\subsection{通过配置文件指定}
+
+在训练的 validation 阶段或者使用 \texttt{test.py} 测试时，我们可以在配饰文件中指定所需要使用的指标。这样程序就会自动计算相应指标了。
+比如下面的配置就会计算 PSNR 和 NIQE 的指标，分别调用了 \texttt{calculate_psnr} 和 \texttt{calculate_niqe}。
+
+\begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
+# validation settings
+val:
+  ...
+  metrics:  # 这块是 validation 中使用的指标的配置
+    psnr:  # metric 名字, 这个名字可以是任意的
+      type: calculate_psnr  # 选择指标类型
+      # 以下属性是灵活的, 根据不同 metric 有不同的设置
+      crop_border: 4  # 计算指标时 crop 图像边界像素范围 (不纳入计算范围)
+      test_y_channel: false  # 是否转成在 Y(CbCr) 空间上计算
+      better: higher  # 该指标是越高越好，还是越低越好。选择 higher 或者 lower，默认为 higher
+    niqe:  # 这是在 validation 中使用的另外一个指标
+      type: calculate_niqe
+      crop_border: 4
+      better: lower  # the lower, the better
+\end{minted}
+
+% ----------------------------------
+\subsection{使用脚本计算}
+
+我们在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/scripts/metrics}{scripts/metrics} 文件中也提供了调用指标的脚本。
+读者可以根据相关说明计算指标。
 
 \end{document}

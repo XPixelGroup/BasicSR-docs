@@ -1,7 +1,10 @@
 \usepackage[T2A, T1]{fontenc}    % ?!?
 \usepackage[utf8]{inputenc}      % позволяет использовать не-ASCII символы
 \usepackage[english]{babel}     % используем русский язык
-
+\AtBeginDocument{%
+  \renewcommand\tablename{表}
+  \renewcommand\figurename{图}
+}
 \usepackage{graphicx}            % Картинки
 \usepackage{tikz}                % Схемы с картинками (нужны для орешков ;) )
 %\usepackage{media9}              % вставка с ютуба

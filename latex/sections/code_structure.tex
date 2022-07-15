@@ -388,8 +388,8 @@ datasets:  # 这块是 dataset 的配置
     \begin{itemize}
         \item 常见数据 (dataset) 的定义在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/data}{basicsr/data} 目录中。详细说明参见章节\ref{code_structure:data}：\nameref{code_structure:data}
         \item data loader 定义在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/data/__init__.py}{basicsr/data/\_\_init\_\_.py} 文件中
-        \item meta\_info\_file：细节请参看章节\ref{data_preparation:meta_info}：\nameref{data_preparation:meta_info} \todo{更新链接}
-        \item io\_backend：细节请参看章节\ref{data_preparation:meta_info}：\nameref{data_preparation:meta_info} \todo{更新链接}
+        \item meta\_info\_file：细节请参看章节\ref{data_preparation:meta_file}：\nameref{data_preparation:meta_file}
+        \item io\_backend：读取数据的方式，细节请参看章节\ref{data_preparation:common_use}：\nameref{data_preparation:common_use}
         \item dataset\_enlarge\_ratio：它代表了手工扩大 dataset 的倍率。例如，如果训练数据集有15张图，设置 dataset\_enlarge\_ratio 为100，那么程序会重复读取这些图片100次，这样一个 epoch 下来，便会读取1500张图 (事实上是重复读的)。这个方法经常用来加速 data loader, 因为在有的机器上，一个 epoch 结束，会重启进程，导致拖慢训练
         \item prefetch\_mode:，\textbf{默认为 None，即 $\sim$。\texttt{cpu} 表示使用 CPU prefetcher。\texttt{cuda} 表示使用 CUDA prefetcher。它会多占用一些GPU显存. 注意: 这个模式下, 一定要设置 \texttt{pin\_memory=True}}。详情参见章节\ref{code_structure:dataset_prefecth}：\nameref{code_structure:dataset_prefecth}
     \end{itemize}
@@ -518,7 +518,7 @@ val:  # 这块是 validation 的配置
 
 \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{validation 相关配置}
     \begin{itemize}
-        \item 关于 metrics，请参考章节\ref{metrics:}：\nameref{metrics:} \todo{更新}
+        \item 关于 metrics 的介绍，请参考章节\ref{chapter:metrics}：\nameref{chapter:metrics}
         \item 指标在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics}{basicsr/metrics} 目录中定义
         \item BasicSR 支持在 validation 时使用多个指标，只需要在配置文件中添加配置，比如上面的 \texttt{psnr} 和 \texttt{niqe}
     \end{itemize}
@@ -537,7 +537,7 @@ logger:  # 这块是 logging 的配置
 
 \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{训练日志相关配置}
     \begin{itemize}
-        \item 关于 wandb，目前 wandb 只是同步 tensorboard 的内容, 因此要使用 wandb, 必须也同时使用 tensorboard。更多关于 wandb，参见章节\ref{metrics:}：\nameref{metrics:} \todo{更新}
+        \item 关于 wandb，目前 wandb 只是同步 tensorboard 的内容, 因此要使用 wandb, 必须也同时使用 tensorboard。更多关于 wandb，参见章节\ref{code_structure:wandb_record}：\nameref{code_structure:wandb_record}
     \end{itemize}
 \end{exampleBox}
 
@@ -709,7 +709,7 @@ python basicsr/train.py -opt options/train/SRResNet_SRGAN/train_MSRResNet_x4.yml
 \vspace{0.5cm}
 
 \begin{note} % ---------------- Note block ---------------- %
-    meta\_info 的 txt 文件是可以根据自己的需要创建的。BasicSR 提供了一些约定的 meta\_info 文件，具体参见章节\ref{data_preparation:todo}：\nameref{data_preparation:todo}。\todo{待更新}
+    meta\_info 的 txt 文件是可以根据自己的需要创建的。BasicSR 提供了一些约定的 meta\_info 文件，具体参见章节\ref{data_preparation:meta_file}：\nameref{data_preparation:meta_file}。
 \end{note}
 
 \begin{hl} % ---------------- Highlight block ---------------- %
@@ -778,7 +778,7 @@ class PairedImageDataset(data.Dataset):
         \item 若提供了 meta\_info 文件，则直接从该文件中列出的文件路径读取数据
         \item 输入文件目录，代码会自动扫描该目录中的文件，然后读取
     \end{enumerate}
-    详见参见 File Client 说明章节\ref{data_preparation:todo}：\nameref{data_preparation:todo}。 \todo{待更新}
+    详见参见 File Client 说明章节\ref{data_preparation:file_client}：\nameref{data_preparation:file_client}。
 \end{exampleBox}
 
 \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{python}
@@ -877,7 +877,7 @@ num_prefetch_queue: 1  # 1 by default
 \end{enumerate}
 
 \begin{note} % ---------------- Note block ---------------- %
-    如果训练过程中 IO 读取慢，推荐使用 LMDB 数据格式加速，详见章节\ref{data_preparation:todo}：\nameref{data_preparation:todo}。 \todo{待更新}
+    如果训练过程中 IO 读取慢，推荐使用 LMDB 数据格式加速，详见章节\ref{data_preparation:lmdb}：\nameref{data_preparation:lmdb}。
 \end{note}
 
 % ------------------------------------------------------------------------------

@@ -116,14 +116,39 @@ python scripts/data_preparation/create_lmdb.py  --dataset vimeo90k
     除了使用 LMDB 加速 IO 外，还可以使用 prefetch 方式，具体参见章节\ref{code_structure:dataset_prefecth}：\nameref{code_structure:dataset_prefecth}。
 \end{note}
 
+% ------------------------------------------------------------------------------
+\section{meta 文件介绍}\label{data_preparation:meta_file}
+
+meta 文件是记录数据集信息的。一般我们使用 txt 格式，这样我们打开就能够知道它里面记录的内容。
+
+有时候我们从一个目录里面扫描全部的文件会比较慢、耗时，此时如果提供了 meta 文件，就可以比较快速地得到所有文件 (比如图片) 的路径列表了。
+
+同时我们也会使用 meta 文件来划分数据集，比如训练、测试集等。
+
+它一般在以下几个场景中使用：
+
+\begin{enumerate}
+    \item 制作 LMDB 后会同步产生一个 meta 文件，这个meta 有着自己固定的格式，不能修改，否则可能会影响 LMDB 数据的读取。详细参见章节\ref{data_preparation:lmdb}：\nameref{data_preparation:lmdb}
+    \item PairedImageDataset 支持 \texttt{meta_info_file} 参数，会使用这个 meta 文件生成待读取的文件路径。这个可以根据用户自己的需要进行自定义
+\end{enumerate}
+
+\todo{待完善}
+
 % ----------------------------------
+\subsection{现有 meta 文件说明}\label{data_preparation:existing_meta_file}
+
+在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/data/meta_info}{basicsr/data/meta_info} 目录下有提供了一些常用的 meta 文件，说明如下：
+
+\todo{待完善}
+
+% ------------------------------------------------------------------------------
 \section{File Client 介绍}\label{data_preparation:file_client}
 
 我们参考了 MMCV 的 FileClient 设计。为了使其兼容 BasicSR，我们对接口做了一些改动 (主要是为了适应 LMDB)。具体可以参见代码 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/file_client.py}{file\_client.py}。
 
 \todo{后续添加详细说明}
 
-% ----------------------------------
+% ------------------------------------------------------------------------------
 \section{常见数据集介绍与准备}\label{data_preparation:dataset}
 
 推荐把数据通过 \texttt{ln -s src dst} 软链到 datasets 目录下。
