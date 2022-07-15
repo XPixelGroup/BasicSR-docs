@@ -13,8 +13,9 @@
     \item 注册新添加类
     \item 以及在配置文件中进行设置
 \end{enumerate}
+
 这一部分的内容大体上十分相似，使用者只要对某一个模块比较熟悉（如添加修改网络结构），即可快速类比至其他各个部分。
-在添加新的自定义模块时，理解并参考已有文件可以帮助使用者快速使用。
+在添加新的自定义模块时，理解并参考已有文件可以帮助使用者快速上手。
 
 值得提及的是，当用户使用 \textbf{BasicSR-template} 进行开发，尤其是针对\textbf{指标}模块时，以下操作可能并不完全适用，具体详见第\ref{chapter:template}章：\nameref{chapter:template} 相关部分。
 
@@ -79,7 +80,7 @@ class SRModel(nn.Module):
 type: SRModel  # 设置为需要使用的模型类名
 ...
 \end{minted}
-            除此之外，模型与整个配置文件的内容都是息息相关的，涉及到数据的读取与处理、模型网络结构、训练优化和测试评估等几乎所有部分的设置组成，而非一个独立的部分。用户在修改配置文件的结构时，建议参考已有模板，对模型修改的部分在配置文件中做对应处理。
+            除此之外，模型与整个配置文件的内容都是息息相关的，涉及到数据的读取与处理、模型网络结构、训练优化和测试评估等几乎所有内容的设置组成，而非一个独立的部分。用户在修改配置文件的结构时，建议参考已有文件作为模板，重点对模型进行修改的部分在配置文件中做对应处理。
 
 \end{enumerate}
 
@@ -91,13 +92,13 @@ type: SRModel  # 设置为需要使用的模型类名
 
     \item 编写自定义网络结构：在网络结构文件中对自定义网络结构类进行命名，\textbf{需要注意新建类名不能与已有类名重复，否则会导致后续注册机制报错}。关于网络结构文件中的函数功能详解见章节\ref{code_structure:arch}：\nameref{code_structure:arch}。对于需要手工设置的参数，用户可以灵活利用 \textbf{opt} 参数从配置文件中读取。
 
-    \item 注册网络结构：用户需要对新建的网络结构类进行注册。注册机制的原理详见章节\ref{code_structure:register}：\nameref{code_structure:register}。此处具体操作为，首先对 \textbf{ARCH\_REGISTRY} 函数进行导入，然后在新建类上方添加修饰器来注册新建类。以 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs/srresnet_arch.py}{srresnet\_arch.py} 中的 \textbf{MSRResNet} 为例：
+    \item 注册网络结构：用户需要对新建的网络结构类进行注册。注册机制的原理详见章节\ref{code_structure:register}：\nameref{code_structure:register}。此处具体操作为，首先对 \textbf{ARCH\_REGISTRY} 函数进行导入，然后在新建类上方添加修饰器来注册新建类。以 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs/srresnet_arch.py}{srresnet\_arch.py} 中的 \textbf{MSRResNet} 类为例：
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
 from basicsr.utils.registry import ARCH_REGISTRY
 
 @ARCH_REGISTRY.register()
 class MSRResNet(nn.Module):
-...
+    ...
 \end{minted}
 
     \item 在配置文件中设置自定义网络结构：将配置文件（即 YAML 文件）中 \textbf{network structures} 部分中的 \textbf{type} 参数设置为新建的网络结构类名即可。
@@ -163,17 +164,17 @@ class StyleGAN2Model(BaseModel):
 \begin{enumerate}[第 1 步]
     \item 指标的存放与命名：指标文件存放在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics}{basicsr/metrics/} 文件夹下。对于命名规则无要求，一般直接以功能命名即可，如 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics/psnr_ssim.py}{basicsr/metrics/psnr\_ssim.py}。
 
-    \item 编写自定义指标：在指标文件中对自定义指标进行命名，\textbf{需要注意新建类名不能与已有类名重复，否则会导致后续注册机制报错}。关于指标的功能详解见第\ref{cchaper:metrics}章：\nameref{chaper:metrics}。在编写完自定义指标后，注意在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics/__init__.py}{basicsr/metrics/\_\_init\_\_.py} 文件中对添加的自定义指标进行导入。以 \textbf{calculate\_psnr} 为例：
+    \item 编写自定义指标：在指标文件中对自定义指标函数进行命名，\textbf{需要注意新建函数名不能与已有函数名重复，否则会导致后续注册机制报错}。关于指标的功能详解见第\ref{chaper:metrics}章：\nameref{chaper:metrics}。在编写完自定义指标后，注意在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics/__init__.py}{basicsr/metrics/\_\_init\_\_.py} 文件中对添加的自定义指标进行导入。以 \textbf{calculate\_psnr} 为例：
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
 from .psnr_ssim import calculate_psnr
 \end{minted}
 
-    \item 注册指标：用户需要对新建的指标函数进行注册。注册机制的原理详见章节\ref{code_structure:register}：\nameref{code_structure:register}。此处具体操作为，首先对 \textbf{METRIC\_REGISTRY} 函数进行导入，然后在新建函数上方添加修饰器来注册新建类。以 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics/psnr_ssim.py}{psnr\_ssim.py} 中的 \textbf{calculate\_psnr} 为例：
+    \item 注册指标：用户需要对新建的指标函数进行注册。注册机制的原理详见章节\ref{code_structure:register}：\nameref{code_structure:register}。此处具体操作为，首先对 \textbf{METRIC\_REGISTRY} 函数进行导入，然后在新建函数上方添加修饰器来注册新建函数。以 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics/psnr_ssim.py}{psnr\_ssim.py} 中的 \textbf{calculate\_psnr} 为例：
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
 from basicsr.utils.registry import METRIC_REGISTRY
 
 @METRIC_REGISTRY.register()
-class calculate_psnr(nn.Module):
+def calculate_psnr(img, img2, ... ):
     ...
 \end{minted}
 
@@ -183,7 +184,7 @@ class calculate_psnr(nn.Module):
 val:
   ...
   metrics:
-    psnr:  # 指标名称，可以是任意的
+    psnr:  # 指标名称，可以是任意的，用于标记
       type: calculate_psnr  # 设置为需要使用的指标函数名
       ...
 \end{minted}
