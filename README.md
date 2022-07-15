@@ -7,7 +7,11 @@
 
 这是 [BasicSR](https://github.com/XPixelGroup/BasicSR) 的中文解读文档 LaTex 源码文件。
 
-⏬ 本文档的最新版可以从 [releases](https://github.com/XPixelGroup/BasicSR-docs/releases) 下载。
+## [PDF 下载](https://github.com/XPixelGroup/BasicSR-docs/releases)
+
+⏬ 本 PDF 的最新版可以从 [releases 页面](https://github.com/XPixelGroup/BasicSR-docs/releases) 下载。
+
+(Release 界面的 **Assets** 下面有编译好的最新 PDF，可以下载)
 
 <p align="center">
    <a href="https://github.com/XPixelGroup/BasicSR-docs/releases" target="_blank">
