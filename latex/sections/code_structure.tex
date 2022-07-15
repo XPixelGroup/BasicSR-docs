@@ -893,10 +893,10 @@ num_prefetch_queue: 1  # 1 by default
 \dirtree{%
     .1 \textcolor{orange}{basicsr}.
     .2 models.
-    .3 \textcolor{red}{\_\_init\_\_.py}.\DTcomment{\textcolor{red}{定义 build\_model，扫描所有 models 并注册}}.
-    .3 \textcolor{red}{base\_model.py}\DTcomment{\textcolor{red}{模型的基类，定义模型的共用操作}}.
+    .3 \textcolor{red}{\_\_init\_\_.py}.\DTcomment{\textcolor{red}{定义 build\_model，扫描所有 models 并注册。}}.
+    .3 \textcolor{red}{base\_model.py}\DTcomment{\textcolor{red}{模型的基类，定义模型的共用操作。}}.
     .3 lr\_scheduler.py\DTcomment{自定义的学习率策略}.
-    .3 sr\_model.py\DTcomment{下面是不同的模型，我们主要也是修改它们。它们都以 \texttt{\_model.py} 结尾。 sr\_model 是用于超分的模型}.
+    .3 sr\_model.py\DTcomment{下面是不同的模型，我们主要也是修改它们，它们都以 \texttt{\_model.py} 结尾。 sr\_model 是用于超分的模型。}.
     .3 srgan\_model.py.
     .3 realesrgan\_model.py.
     .3 edvr\_model.py.
@@ -934,8 +934,8 @@ num_prefetch_queue: 1  # 1 by default
 model 的创建是通过 Register 机制实现的。
 具体可以参考：
 \begin{enumerate}
-    \item 章节\ref{code_structure:register}：\nameref{code_structure:register} 说明了 Register 机制是如何根据配置文件中的类型，来自动实例化类的
-    \item 章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 通过一个完整的例子，说明了其中 model 的创建过程
+    \item 章节\ref{code_structure:register}：\nameref{code_structure:register} 说明了 Register 机制是如何根据配置文件中的类型，来自动实例化类的。
+    \item 章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 通过一个完整的例子，说明了其中 model 的创建过程。
 \end{enumerate}
 
 model 创建完后，网络结构、损失函数等都是在 model 的初始化过程中创建的。章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 也提供了一个概览。
@@ -1180,8 +1180,8 @@ train:
 \dirtree{%
     .1 \textcolor{orange}{basicsr}.
     .2 archs.
-    .3 \textcolor{red}{\_\_init\_\_.py}.\DTcomment{\textcolor{red}{定义 build\_network，扫描所有 networks 并注册}}.
-    .3 arch\_util.py.\DTcomment{定义一些在网络结构中常用的工具函数}.
+    .3 \textcolor{red}{\_\_init\_\_.py}.\DTcomment{\textcolor{red}{定义 build\_network，扫描所有 networks 并注册。}}.
+    .3 arch\_util.py.\DTcomment{定义一些在网络结构中常用的工具函数。}.
     .3 edsr\_arch.py\DTcomment{下面是不同的网络结构，我们主要也是修改它们。它们都以 \texttt{\_arch.py} 结尾。具体描述参见下面的表格。}.
     .3 srresnet\_arch.py.
     .3 rrdbnet\_arch.py.
@@ -1198,26 +1198,26 @@ train:
     {
         \begin{tabular}{|c|c|c|c|}
             \hline
-            \textbf{网络结构} & \textbf{任务} & \textbf{文件}          & \textbf{描述}                              \\ \hline
-            EDSR              & 图像超分      & edsr\_arch.py          & 论文 EDSR 结构                             \\ \hline
-            SRResNet          & 图像超分      & srresnet\_arch.py      & 论文 SRGAN 的 Generator                    \\ \hline
-            RRDB              & 图像超分      & rrdbnet\_arch.py       & 论文 ESRGAN 的 Generator                   \\ \hline
-            RCAN              & 图像超分      & rcan\_arch.py          & 论文 RCAN 的结构                           \\ \hline
-            SwinIR            & 图像超分      & swinir\_arch.py        & 论文 SwinIR 的结构                         \\ \hline
-            ECBSR             & 图像超分      & ecbsr\_arch.py         & 论文 ECBSR 的结构                          \\ \hline
-            SRVGG             & 图像超分      & srvgg\_arch.py         & VGG 结构改造的 SR 网络                     \\ \hline
-            EDVR              & 视频超分      & edvr\_arch.py          & 论文 EDVR 的结构                           \\ \hline
-            BasicVSR          & 视频超分      & basicvsr\_arch.py      & 论文 BasicVSR 的结构                       \\ \hline
-            BasicVSR++        & 视频超分      & basicvsrpp\_arch.py    & 论文 BasicVSR++ 的结构                     \\ \hline
-            DUF               & 视频超分      & duf\_arch.py           & 论文 DUF 的结构                            \\ \hline
-            TOF               & 视频超分      & tof\_arch.py           & 论文 TOF 的结构                            \\ \hline
-            DFDNet            & 人脸复原      & dfdnet\_arch.py        & 论文 Deep Face Dictionary Network 的结构   \\ \hline
-            StyleGAN2         & 人脸生成      & stylegan2\_arch.py     & 论文 StyleGAN2 的结构                      \\ \hline
-            RIDNet            & 图像去噪      & ridnet\_arch\_arch.py  & 论文 RIDNet 的结构                         \\ \hline
-            VGG               & 工具结构      & vgg\_arch.py           & 经典 VGG 结构                              \\ \hline
+            \textbf{网络结构} & \textbf{任务} & \textbf{文件}          & \textbf{描述}                          \\ \hline
+            EDSR              & 图像超分      & edsr\_arch.py          & 论文 EDSR 结构                           \\ \hline
+            SRResNet          & 图像超分      & srresnet\_arch.py      & 论文 SRGAN 的 Generator                   \\ \hline
+            RRDB              & 图像超分      & rrdbnet\_arch.py       & 论文 ESRGAN 的 Generator                  \\ \hline
+            RCAN              & 图像超分      & rcan\_arch.py          & 论文 RCAN 的结构                         \\ \hline
+            SwinIR            & 图像超分      & swinir\_arch.py        & 论文 SwinIR 的结构                       \\ \hline
+            ECBSR             & 图像超分      & ecbsr\_arch.py         & 论文 ECBSR 的结构                        \\ \hline
+            SRVGG             & 图像超分      & srvgg\_arch.py         & VGG 结构改造的 SR 网络                    \\ \hline
+            EDVR              & 视频超分      & edvr\_arch.py          & 论文 EDVR 的结构                         \\ \hline
+            BasicVSR          & 视频超分      & basicvsr\_arch.py      & 论文 BasicVSR 的结构                     \\ \hline
+            BasicVSR++        & 视频超分      & basicvsrpp\_arch.py    & 论文 BasicVSR++ 的结构                   \\ \hline
+            DUF               & 视频超分      & duf\_arch.py           & 论文 DUF 的结构                          \\ \hline
+            TOF               & 视频超分      & tof\_arch.py           & 论文 TOF 的结构                          \\ \hline
+            DFDNet            & 人脸复原      & dfdnet\_arch.py        & 论文 Deep Face Dictionary Network 的结构 \\ \hline
+            StyleGAN2         & 人脸生成      & stylegan2\_arch.py     & 论文 StyleGAN2 的结构                    \\ \hline
+            RIDNet            & 图像去噪      & ridnet\_arch\_arch.py  & 论文 RIDNet 的结构                       \\ \hline
+            VGG               & 工具结构      & vgg\_arch.py           & 经典 VGG 结构                            \\ \hline
             InceptionV3       & 工具结构      & inception.py           & 经典 InceptionV3 的结构，用于计算 FID 指标 \\ \hline
             VGG \& UNet       & 工具结构      & discriminator\_arch.py & 在 GAN 训练中，常用的 Discriminator 结构   \\ \hline
-            SpyNet            & 工具结构      & spynet\_arch.py        & 论文 SpyNet 的结构                         \\ \hline
+            SpyNet            & 工具结构      & spynet\_arch.py        & 论文 SpyNet 的结构                       \\ \hline
         \end{tabular}
     }
     \caption{BasicSR 提供的经典网络结构}
@@ -1229,7 +1229,7 @@ train:
 arch 的创建是通过 Register 机制实现的。
 具体可以参考：
 \begin{enumerate}
-    \item 章节\ref{code_structure:register}：\nameref{code_structure:register} 说明了 Register 机制是如何根据配置文件中的类型，来自动实例化类的
+    \item 章节\ref{code_structure:register}：\nameref{code_structure:register} 说明了 Register 机制是如何根据配置文件中的类型，来自动实例化类的。
     \item 章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 通过一个完整的例子，说明了其中 model 的创建过程，在 model 初始化时，进行了 arch 的创建。
 \end{enumerate}
 
@@ -1245,10 +1245,10 @@ arch 的创建是通过 Register 机制实现的。
 \dirtree{%
     .1 \textcolor{orange}{basicsr}.
     .2 losses.
-    .3 \textcolor{red}{\_\_init\_\_.py}.\DTcomment{\textcolor{red}{定义 build\_loss，扫描所有 loss 并注册}}.
-    .3 loss\_util.py\DTcomment{提供损失函数中的常用工具函数}.
-    .3 basic\_loss.py\DTcomment{下面是不同的损失函数，我们主要也是修改它们。它们都以 \texttt{\_loss.py} 结尾。这里主要定义 pixel loss (L1/L2), perceptual loss 等}.
-    .3 gan\_loss.py.\DTcomment{主要定义和 GAN 训练相关的函数}.
+    .3 \textcolor{red}{\_\_init\_\_.py}.\DTcomment{\textcolor{red}{定义 build\_loss，扫描所有 loss 并注册。}}.
+    .3 loss\_util.py\DTcomment{提供损失函数中的常用工具函数。}.
+    .3 basic\_loss.py\DTcomment{下面是不同的损失函数，我们主要也是修改它们。它们都以 \texttt{\_loss.py} 结尾。这里主要定义 pixel loss (L1/L2), perceptual loss 等。}.
+    .3 gan\_loss.py.\DTcomment{主要定义和 GAN 训练相关的函数。}.
     .3 ....
 }
 \vspace{0.5cm}
@@ -1263,7 +1263,7 @@ arch 的创建是通过 Register 机制实现的。
 loss 的创建是通过 Register 机制实现的。
 具体可以参考：
 \begin{enumerate}
-    \item 章节\ref{code_structure:register}：\nameref{code_structure:register} 说明了 Register 机制是如何根据配置文件中的类型，来自动实例化类的
+    \item 章节\ref{code_structure:register}：\nameref{code_structure:register} 说明了 Register 机制是如何根据配置文件中的类型，来自动实例化类的。
     \item 章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 通过一个完整的例子，说明了其中 model 的创建过程，在 model 初始化时，进行了 loss 的创建。
 \end{enumerate}
 
@@ -1296,8 +1296,8 @@ class SRModel(BaseModel):
 \end{note}
 
 \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{log 命名的约定}
-    在 log 的时候, loss 项使用 l\_ 开头，这样在 Tensorboard 显示的时候，所有 loss 会被组织到一起。比如在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/srgan_model.py}{basicsr/models/srgan\_model.py} 中，使用了 l\_g\_pix，l\_g\_percep，l\_g\_gan 等。在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{basicsr/utils/logger.py} 中，他们会被组织到一起：
-    \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
+在 log 的时候, loss 项使用 l\_ 开头，这样在 Tensorboard 显示的时候，所有 loss 会被组织到一起。比如在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/srgan_model.py}{basicsr/models/srgan\_model.py} 中，使用了 l\_g\_pix，l\_g\_percep，l\_g\_gan 等。在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{basicsr/utils/logger.py} 中，他们会被组织到一起：
+\begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
 if k.startswith('l_'):
     self.tb_logger.add_scalar(f'losses/{k}', v, current_iter)
 else:
@@ -1323,7 +1323,7 @@ BasicSR 中所用的自定义算子代码在 \href{https://github.com/XPixelGrou
 BasicSR 中的自定义算子主要有：
 
 \begin{itemize}
-    \item 可变性卷积 DCN：\href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/ops/dcn}{deform\_conv}。它在 BasicSR 里面主要用来做隐式对齐，比如用在 EDVR 中。注意：如果安装的 Torchvision 版本 >= 0.9.0，会自动使用 TorchVision 中提供的 DCN，故不需要安装此编译算子
+    \item 可变形卷积 DCN：\href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/ops/dcn}{deform\_conv}。它在 BasicSR 里面主要用来做隐式对齐，比如用在 EDVR 中。注意：如果安装的 Torchvision 版本 >= 0.9.0，会自动使用 TorchVision 中提供的 DCN，故不需要安装此编译算子
     \item StyleGAN2 中的特定的算子，比如：\href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/ops}{upfirdn2d, fused\_act}
 \end{itemize}
 
@@ -1368,7 +1368,7 @@ BasicSR 的日志系统主要包括:
     \item \href{https://wandb.ai/}{wandb}
 \end{enumerate}
 
-日志系统的实现不过多赘述，如果有兴趣可以参阅 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{BasicSR/basicsr/utils/logger.py}。本章节主要讲述日志系统各个项目代表什么；以及如何使用。
+日志系统的实现不过多赘述，如果有兴趣可以参阅 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{BasicSR/basicsr/utils/logger.py}。本章节主要讲述日志系统各个项目代表什么，以及如何使用。
 
 % ----------------------------------
 \subsection{log 文件记录与解读}\label{code_structure:log_record}
@@ -1379,11 +1379,11 @@ BasicSR 的日志系统主要包括:
 
     添加一条 log 信息非常简单：
 
-    \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
 logger = get_root_logger()  # 获得 logger
 logger.info(要添加的内容)  # 添加正常信息
 logger.warning(要添加的警告)  # 添加警告信息
-    \end{minted}
+\end{minted}
 \end{hl}
 
 下面是一个 log 文件的例子：
@@ -1491,8 +1491,8 @@ tensorboard --logdir tb_logger --port 5500 --bind_all
 \textbf{如何添加}
 
 \begin{enumerate}
-    \item 被添加到 log 文件 (第\ref{code_structure:log_record}小节：\nameref{code_structure:log_record}) 中的值，会被自动添加到 tb\_logger 中， 比如损失函数 (第\ref{code_structure:loss_log}小节：\nameref{code_structure:loss_log})
-    \item 其他需要的 (比如 validation 时，metric的值)，可仿照下面的方式进行添加
+    \item 被添加到 log 文件 (第\ref{code_structure:log_record}小节：\nameref{code_structure:log_record}) 中的值，会被自动添加到 tb\_logger 中， 比如损失函数。 (第\ref{code_structure:loss_log}小节：\nameref{code_structure:loss_log})
+    \item 其他需要的 (比如 validation 时，metric的值)，可仿照下面的方式进行添加。
 \end{enumerate}
 
 下面是 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/sr_model.py}{basicr/models/sr\_models.py} 中 validation 添加 metrics 值到 tb\_logger 的例子：
