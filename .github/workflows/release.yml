@@ -64,7 +64,24 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        release_name: BasicSR 中文文档 ${{ github.ref }}
+        body: |
+            🚀 See you again 😸
+            🚀Have a nice day 😸 and happy everyday 😃
+            🚀 Long time no see ☄️
+
+            ✨ **Highlights**
+            ✅ [Features] Support ...
+
+            🐛 **Bug Fixes**
+
+            🌴 **Improvements**
+
+            📢📢📢
+
+            <p align="center">
+               <img src="https://raw.githubusercontent.com/XPixelGroup/BasicSR/master/assets/basicsr_xpixel_logo.png" height=150>
+            </p>
         draft: true
         prerelease: false
 
