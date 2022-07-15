@@ -1,4 +1,4 @@
-# BasicSR 中文解读文档
+# [BasicSR](https://github.com/XPixelGroup/BasicSR) 中文解读文档
 
 [![download](https://img.shields.io/github/downloads/XPixelGroup/BasicSR-docs/total)](https://github.com/XPixelGroup/BasicSR-docs/releases)
 ![visitors](https://visitor-badge.glitch.me/badge?page_id=XPixelGroup/BasicSR-docs)

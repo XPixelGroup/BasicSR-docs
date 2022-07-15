@@ -1267,6 +1267,44 @@ loss 的创建是通过 Register 机制实现的。
     \item 章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 通过一个完整的例子，说明了其中 model 的创建过程，在 model 初始化时，进行了 loss 的创建。
 \end{enumerate}
 
+% ----------------------------------
+\subsection{loss 在日志中的添加}\label{code_structure:loss_log}
+
+loss 添加的大部分工作都是代码自动化的。在实际使用中，只需要在 xx\_model.py 计算 loss 之后，执行 \texttt{loss\_dict['新的loss'] = 新的loss} ，即可同时记录在 log 和 tensorboard (tb\_logger) 文件中。
+
+以 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/sr_model.py}{basicr/models/sr\_models.py} 为例：
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+class SRModel(BaseModel):
+    ...
+    def optimize_parameters(self, current_iter):
+        ...
+        loss_dict = OrderedDict()  # 使用有序字典，可以在 log 显示的时候，保持我们添加先后的顺序
+        ...
+        loss_dict['l_pix'] = l_pix  # 添加 pixel loss, 字典的 key 以 l_ 打头
+        loss_dict['l_percep'] = l_percep  # 添加 perceptual loss, 字典的 key 以 l_ 打头
+        ...
+        self.log_dict = self.reduce_loss_dict(loss_dict)  # 通过调用 reduce_loss_dict 来同步多卡的 loss
+        # 只要赋值到 self.log_dict，程序即可自动进行后续的 log
+\end{minted}
+
+\begin{note} % ---------------- Note block ---------------- %
+    \textbf{添加非 loss 的值}
+
+    有时候需要记录每个 iteration 的其他一些值 (比如 gradient norm)，我们希望可以在 log 文件的每一行记录和 tb\_logger 中都有体现。如果为了简便，也可以使用以上这种方法记录不是 loss 的其他值。即把其他值也添加到 loss\_dict 中。
+
+    注：其实 loss\_dict 正确的含义应该是 log\_dict。但由于历史原因，被叫做 loss\_dict，然后为了后面的兼容，我们就不改名字了。
+\end{note}
+
+\begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{log 命名的约定}
+在 log 的时候, loss 项使用 l\_ 开头，这样在 Tensorboard 显示的时候，所有 loss 会被组织到一起。比如在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/srgan_model.py}{basicsr/models/srgan\_model.py} 中，使用了 l\_g\_pix，l\_g\_percep，l\_g\_gan 等。在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{basicsr/utils/logger.py} 中，他们会被组织到一起：
+\begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
+if k.startswith('l_'):
+    self.tb_logger.add_scalar(f'losses/{k}', v, current_iter)
+else:
+    self.tb_logger.add_scalar(k, v, current_iter)
+\end{minted}
+\end{exampleBox}
+
 % ------------------------------------------------------------------------------
 \section{算子 (Ops)}\label{code_structure:ops}
 
@@ -1320,20 +1358,20 @@ Class xxx():
 \end{minted}
 
 % ------------------------------------------------------------------------------
-\section{日志系统 (Logger)} \label{code_structure:logger}
+\section{日志系统 (Logger)}\label{code_structure:logger}
 
 BasicSR 的日志系统主要包括:
 
 \begin{enumerate}
     \item 记录的 log 文件
     \item 通过 tensorboard 可视化的 tb\_logger
-    \item 通过 \href{https://wandb.ai/}{wandb}
+    \item \href{https://wandb.ai/}{wandb}
 \end{enumerate}
 
-日志系统的实现不过多赘述，如果有兴趣可以参阅 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{BasicSR/basicsr/utils/logger.py}。本章节主要讲述日志系统各个项目代表什么；以及如何改代码，在日志中记录我们想记录的个性化内容。
+日志系统的实现不过多赘述，如果有兴趣可以参阅 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{BasicSR/basicsr/utils/logger.py}。本章节主要讲述日志系统各个项目代表什么；以及如何使用。
 
 % ----------------------------------
-\subsection{log 文件记录及解读}
+\subsection{log 文件记录与解读}\label{code_structure:log_record}
 
 当进行实验的时候，代码会在 BasicSR/experiments 中创建一个属于当前实验的文件夹，文件夹名字为实验名，文件夹中会存在一个 按照 \texttt{train\_[exp\_name]\_[timestamp].log} 方式命名的 log 文件。下面我们来说明如何按照我们自己的要求记录 log 文件，以及现有 log 文件每个条目的意义。
 
@@ -1350,7 +1388,7 @@ logger.warning(要添加的警告)  # 添加警告信息
 
 下面是一个 log 文件的例子：
 
-\begin{figure}[H]
+\begin{figure}[htb]
     \begin{center}
         \includegraphics[width=0.9\linewidth]{figures/code_structure_log_example.png}
         \caption{实验过程中产生的 log 信息}
@@ -1417,17 +1455,20 @@ INFO: Validation validation
 \end{minted}
 
 % ----------------------------------
-\subsection{tensorboard logger 记录及解读}
+\subsection{tensorboard logger 记录及解读}\label{code_structure:tblog_record}
 
 除了上述的 log 文件外，BasicSR 还会生成可以用 tensorboard 打开的 tb\_logger 文件。一般保存在 BasicSR/experiments/tb\_logger/实验名。
 
+\textbf{如何开启}
 
-如何开启: 在 yml 配置文件中设置 `\texttt{use\_tb\_logger: true}':
+在 yml 配置文件中设置 `\texttt{use\_tb\_logger: true}':
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-# yml
+# yml 配置文件
     logger:
       use_tb_logger: true
 \end{minted}
+
+\textbf{如何查看}
 
 在命令行输入以下命令，就可以在浏览器中查看：
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{bash}
@@ -1447,85 +1488,56 @@ tensorboard --logdir tb_logger --port 5500 --bind_all
     %\vspace{-0.7cm}
 \end{figure}
 
-目前 BasicSR 里 tb\_logger 主要记录 validation 结果和训练过程中的 loss。validation 结果会随着 metric 而增加，不过多赘述。重点介绍如何添加 loss 记录到 tb\_logger 。
+\textbf{如何添加}
 
-\begin{hl} % ---------------- Highlight block ---------------- %
-    虽说封装的很深，但是实际在框架中使用起来，只需要在 xx\_model.py 计算 loss 之后，执行 \texttt{loss\_dict['新的loss'] = 新的loss} ，即可同时记录在 tb\_logger 和 log 文件中。
+\begin{enumerate}
+    \item 被添加到 log 文件 (第\ref{code_structure:log_record}小节：\nameref{code_structure:log_record}) 中的值，会被自动添加到 tb\_logger 中， 比如损失函数 (第\ref{code_structure:loss_log}小节：\nameref{code_structure:loss_log})
+    \item 其他需要的 (比如 validation 时，metric的值)，可仿照下面的方式进行添加
+\end{enumerate}
 
-    注意：也可以使用这种方法记录不是 loss 的其他值。
-\end{hl}
-
-\begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{log 命名的约定}
-在 log 的时候, loss 项使用 l\_ 开头，这样在 Tensorboard 显示的时候，所有 loss 会被组织到一起。比如在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/srgan_model.py}{basicsr/models/srgan\_model.py} 中，使用了 l\_g\_pix，l\_g\_percep，l\_g\_gan 等。在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{basicsr/utils/logger.py} 中，他们会被组织到一起：
-\begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
-if k.startswith('l_'):
-    self.tb_logger.add_scalar(f'losses/{k}', v, current_iter)
-else:
-    self.tb_logger.add_scalar(k, v, current_iter)
-\end{minted}
-\end{exampleBox}
-
-下面介绍具体的封装细节，tb\_logger 的初始化和记录代码为：
+下面是 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/sr_model.py}{basicr/models/sr\_models.py} 中 validation 添加 metrics 值到 tb\_logger 的例子：
 
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-# 这个是记录validation结果的
-tb_logger.add_scalar(f'metrics/{metric}', value, current_iter)
-
-\end{minted}
-
-一个上述语句封装的例子：
-
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-# BasicSR/basicsr/train.py中：
-
-    tb_logger = init_tb_loggers(opt)
-    # 初始化tb_logger
-    msg_logger = MessageLogger(opt, current_iter, tb_logger)
-    # 实例化msg_logger，包含了tb_logger
+def _log_validation_metric_values(self, current_iter, dataset_name, tb_logger):
     ...
-    log_vars.update(model.get_current_log())
-    # 更新log_vars
-    msg_logger(log_vars)
-    # 调用messagelogger
-
-# BasicSR/basicsr/utils/logger.py中定义了MessageLogger类：
-
-    class MessageLogger():
-        ...
-        def __call__(self, log_vars):
-            ...
-            self.tb_logger.add_scalar(f'losses/{k}', v, current_iter)
-            # 这里调用了添加tb_logger
-
-# BasicSR/basicsr/models/base_model.py中定义了get_current_log()：
-
-    def get_current_log(self):
-        return self.log_dict
-
-# self.log_dict在BasicSR/basicsr/models/sr_model.py中：
-
-    loss_dict['l_pix'] = l_pix
-    self.log_dict = self.reduce_loss_dict(loss_dict)
+    for metric, value in self.metric_results.items():
+        tb_logger.add_scalar(f'metrics/{dataset_name}/{metric}', value, current_iter)
 \end{minted}
 
+如果有需要添加其他图片内容，也可以根据需要添加，比如在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/stylegan2_model.py}{basicsr/models/stylegan2\_model.py} 中 validation 添加 samples 到 tb\_logger 的例子：
 
+\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+def nondist_validation(self, dataloader, current_iter, tb_logger, save_img):
+    # add sample images to tb_logger
+    result = (result / 255.).astype(np.float32)
+    result = cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
+    if tb_logger is not None:
+        tb_logger.add_image('samples', result, global_step=current_iter, dataformats='HWC')
+\end{minted}
 
 % ----------------------------------
-\subsection{Wandb 记录及解读}
+\subsection{Wandb 记录及解读}\label{code_structure:wandb_record}
 
-\href{https://www.wandb.com/}{wandb} 类似tensorboard的云端版本, 可以在浏览器方便地查看模型训练的过程和曲线。我们目前只是把tensorboard的内容同步到wandb上, 因此要使用wandb, 必须打开tensorboard logger，参见上一节。\href{https://wandb.ai/xintao/basicsr?workspace=user-}{BasicSR wandb示例}
+\href{https://www.wandb.com/}{wandb} 类似 tensorboard 的云端版本, 可以在浏览器方便地查看模型训练的过程和曲线。
 
+\begin{note} % ---------------- Note block ---------------- %
+    \textbf{BasicSR 提供了部分模型的 Wandb 训练曲线}
+
+    \href{https://app.wandb.ai/xintao/basicsr}{https://app.wandb.ai/xintao/basicsr}
+\end{note}
+
+我们目前只是把 tensorboard 的内容同步到 wandb 上, 因此要使用 wandb, 必须打开 tensorboard logger。
 配置文件如下:
+
 \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
-yml
 logger:
-  # 是否使用tensorboard logger
+  # 是否使用 tensorboard logger
   use_tb_logger: true
-  # 是否使用wandb logger,目前wandb只是同步tensorboard的内容,因此要使用wandb, 必须也同时使用tensorboard
+  # 是否使用 wandb logger,目前 wandb 只是同步 tensorboard 的内容,因此要使用 wandb, 必须也同时使用 tensorboard
   wandb:
-    # wandb的project. 默认是 None, 即不使用wandb.
-    # 这里使用了 basicsr wandb project: https://app.wandb.ai/xintao/basicsr project: basicsr
-    # 如果是resume, 可以输入上次的wandb id, 则log可以接起来
+    # wandb 的 project. 默认是 None, 即不使用 wandb
+    project: ~
+    # 如果是 resume, 可以输入上次的 wandb id, 则 log 可以接起来
     resume_id: ~
 \end{minted}
 
