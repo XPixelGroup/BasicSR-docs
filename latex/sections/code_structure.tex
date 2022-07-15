@@ -934,8 +934,8 @@ num_prefetch_queue: 1  # 1 by default
 model 的创建是通过 Register 机制实现的。
 具体可以参考：
 \begin{enumerate}
-    \item 章节\ref{code_structure:register}：\nameref{code_structure:register} 说明了 Register 机制是如何根据配置文件中的类型，来自动实例化类的。
-    \item 章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 通过一个完整的例子，说明了其中 model 的创建过程。
+    \item 章节\ref{code_structure:register}：\nameref{code_structure:register} 说明了 Register 机制是如何根据配置文件中的类型，来自动实例化类的
+    \item 章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 通过一个完整的例子，说明了其中 model 的创建过程
 \end{enumerate}
 
 model 创建完后，网络结构、损失函数等都是在 model 的初始化过程中创建的。章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 也提供了一个概览。
@@ -1229,8 +1229,8 @@ train:
 arch 的创建是通过 Register 机制实现的。
 具体可以参考：
 \begin{enumerate}
-    \item 章节\ref{code_structure:register}：\nameref{code_structure:register} 说明了 Register 机制是如何根据配置文件中的类型，来自动实例化类的。
-    \item 章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 通过一个完整的例子，说明了其中 model 的创建过程，在 model 初始化时，进行了 arch 的创建。
+    \item 章节\ref{code_structure:register}：\nameref{code_structure:register} 说明了 Register 机制是如何根据配置文件中的类型，来自动实例化类的
+    \item 章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 通过一个完整的例子，说明了其中 model 的创建过程，在 model 初始化时，进行了 arch 的创建
 \end{enumerate}
 
 % ------------------------------------------------------------------------------
@@ -1263,8 +1263,8 @@ arch 的创建是通过 Register 机制实现的。
 loss 的创建是通过 Register 机制实现的。
 具体可以参考：
 \begin{enumerate}
-    \item 章节\ref{code_structure:register}：\nameref{code_structure:register} 说明了 Register 机制是如何根据配置文件中的类型，来自动实例化类的。
-    \item 章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 通过一个完整的例子，说明了其中 model 的创建过程，在 model 初始化时，进行了 loss 的创建。
+    \item 章节\ref{code_structure:register}：\nameref{code_structure:register} 说明了 Register 机制是如何根据配置文件中的类型，来自动实例化类的
+    \item 章节\ref{getting_start:data_model_creation}：\nameref{getting_start:data_model_creation} 通过一个完整的例子，说明了其中 model 的创建过程，在 model 初始化时，进行了 loss 的创建
 \end{enumerate}
 
 % ----------------------------------
@@ -1491,8 +1491,8 @@ tensorboard --logdir tb_logger --port 5500 --bind_all
 \textbf{如何添加}
 
 \begin{enumerate}
-    \item 被添加到 log 文件 (第\ref{code_structure:log_record}小节：\nameref{code_structure:log_record}) 中的值，会被自动添加到 tb\_logger 中， 比如损失函数。 (第\ref{code_structure:loss_log}小节：\nameref{code_structure:loss_log})
-    \item 其他需要的 (比如 validation 时，metric的值)，可仿照下面的方式进行添加。
+    \item 被添加到 log 文件 (第\ref{code_structure:log_record}小节：\nameref{code_structure:log_record}) 中的值，会被自动添加到 tb\_logger 中， 比如损失函数 (第\ref{code_structure:loss_log}小节：\nameref{code_structure:loss_log})
+    \item 其他需要的 (比如 validation 时，metric的值)，可仿照下面的方式进行添加
 \end{enumerate}
 
 下面是 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/sr_model.py}{basicr/models/sr\_models.py} 中 validation 添加 metrics 值到 tb\_logger 的例子：
