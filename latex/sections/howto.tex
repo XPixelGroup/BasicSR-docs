@@ -28,7 +28,7 @@
 
     \item 注册 Dataset ：用户需要对新建的 Dataset 类进行注册。注册机制的原理详见章节\ref{code_structure:register}：\nameref{code_structure:register}。此处具体操作为，首先对 \textbf{DATASET\_REGISTRY} 函数进行导入，然后在新建类上方添加修饰器来注册新建函数。以 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/data/paired_image_dataset.py}{paired\_image\_dataset.py} 中的 \textbf{PairedImageDataset} 为例：
 
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+          \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
 from basicsr.utils.registry import DATASET_REGISTRY
 
 @DATASET_REGISTRY.register()
@@ -39,7 +39,7 @@ class PairedImageDataset(data.Dataset):
     \item 在配置文件中设置自定义 Dataset ：将配置文件（即 YAML 文件）中 \textbf{datasets} 部分中 \textbf{type} 参数设置为新建的 Dataset 类名即可。
           该部分其余参数的功能与 Dataset 中用户自定义的功能对应。以使用 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/data/paired_image_dataset.py}{paired\_image\_dataset.py} 中的 \textbf{PairedImageDataset} 为例：
 
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+          \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
 # dataset and data loader settings
 dataset:
   ...
@@ -56,7 +56,7 @@ dataset:
 
     \item 编写自定义模型：在模型文件中对自定义模型类进行命名，\textbf{需要注意新建类名不能与已有类名重复，否则会导致后续注册机制报错}。关于模型文件中的函数功能详解见章节\ref{code_structure:model}：\nameref{code_structure:model}。模型部分涉及的函数较多，但一般情况下需要改写的部分非常有限。用户往往只需要继承已有模型，并对需要更改的函数进行重构即可。以 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/models}{basicsr/archs/swinir\_model.py} 中的 \textbf{SwinIRModel} 为例，该模型相较于图像超分通用的 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/models}{basicsr/archs/sr\_model.py} 中的 \textbf{SRModel} 仅需更改 test 函数，因此 \textbf{SwinIRModel} 类在继承了 \textbf{SRModel} 的基础上只对 \textbf{test} 函数进行了重构：
 
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+          \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
 class SwinIRModel(SRModel):  # SwinIRModel 继承自 SRModel
     def test(self):  # 重构 test 函数
         ...
@@ -64,7 +64,7 @@ class SwinIRModel(SRModel):  # SwinIRModel 继承自 SRModel
 
     \item 注册模型：用户需要对新建的模型类进行注册。注册机制的原理详见章节\ref{code_structure:register}：\nameref{code_structure:register}。此处具体操作为，首先对 \textbf{MODEL\_REGISTRY} 函数进行导入，然后在新建类上方添加修饰器来注册新建类。以 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/models/sr_model.py}{sr\_model.py} 中的 \textbf{SRModel} 为例：
 
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+          \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
 from basicsr.utils.registry import MODEL_REGISTRY
 
 @MODEL_REGISTRY.register()
@@ -74,13 +74,13 @@ class SRModel(nn.Module):
 
     \item 在配置文件中设置自定义模型：将配置文件（即 YAML 文件）中 \textbf{general settings} 部分中的 \textbf{model\_type} 参数设置为新建的模型类名即可。以使用 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/models/sr_model.py}{sr\_model.py} 中的 \textbf{SRModel} 为例：
 
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+          \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
 # general settings
 ...
 type: SRModel  # 设置为需要使用的模型类名
 ...
 \end{minted}
-            除此之外，模型与整个配置文件的内容都是息息相关的，涉及到数据的读取与处理、模型网络结构、训练优化和测试评估等几乎所有内容的设置组成，而非一个独立的部分。用户在修改配置文件的结构时，建议参考已有文件作为模板，重点对模型进行修改的部分在配置文件中做对应处理。
+          除此之外，模型与整个配置文件的内容都是息息相关的，涉及到数据的读取与处理、模型网络结构、训练优化和测试评估等几乎所有内容的设置组成，而非一个独立的部分。用户在修改配置文件的结构时，建议参考已有文件作为模板，重点对模型进行修改的部分在配置文件中做对应处理。
 
 \end{enumerate}
 
@@ -93,7 +93,7 @@ type: SRModel  # 设置为需要使用的模型类名
     \item 编写自定义网络结构：在网络结构文件中对自定义网络结构类进行命名，\textbf{需要注意新建类名不能与已有类名重复，否则会导致后续注册机制报错}。关于网络结构文件中的函数功能详解见章节\ref{code_structure:arch}：\nameref{code_structure:arch}。对于需要手工设置的参数，用户可以灵活利用 \textbf{opt} 参数从配置文件中读取。
 
     \item 注册网络结构：用户需要对新建的网络结构类进行注册。注册机制的原理详见章节\ref{code_structure:register}：\nameref{code_structure:register}。此处具体操作为，首先对 \textbf{ARCH\_REGISTRY} 函数进行导入，然后在新建类上方添加修饰器来注册新建类。以 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs/srresnet_arch.py}{srresnet\_arch.py} 中的 \textbf{MSRResNet} 类为例：
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+          \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
 from basicsr.utils.registry import ARCH_REGISTRY
 
 @ARCH_REGISTRY.register()
@@ -104,7 +104,7 @@ class MSRResNet(nn.Module):
     \item 在配置文件中设置自定义网络结构：将配置文件（即 YAML 文件）中 \textbf{network structures} 部分中的 \textbf{type} 参数设置为新建的网络结构类名即可。
           该部分其余参数的功能与模型和网络结构中用户自定义的功能对应。以使用 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs/srresnet_arch.py}{srresnet\_arch.py} 中的 \textbf{MSRResNet} 为例：
 
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+          \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
 # network structures
 network_g:  # g网络设置
   ...
@@ -122,7 +122,7 @@ network_g:  # g网络设置
     \item 编写自定义损失函数：在损失函数文件中对自定义损失函数类进行命名，\textbf{需要注意新建类名不能与已有类名重复，否则会导致后续注册机制报错}。关于损失函数的功能详解见章节\ref{code_structure:loss}：\nameref{code_structure:loss}。对于需要手工设置的参数，用户可以灵活利用 \textbf{opt} 参数从配置文件中读取。
 
     \item 注册损失函数：用户需要对新建的损失函数类进行注册。注册机制的原理详见章节\ref{code_structure:register}：\nameref{code_structure:register}。此处具体操作为，首先对 \textbf{LOSS\_REGISTRY} 函数进行导入，然后在新建类上方添加修饰器来注册新建类。以 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/losses/basic_loss.py}{basicsr/losses/basic\_loss.py} 中的 \textbf{L1Loss} 为例：
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+          \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
 from basicsr.utils.registry import LOSS_REGISTRY
 
 @LOSS_REGISTRY.register()
@@ -131,7 +131,7 @@ class L1Loss(nn.Module):
 \end{minted}
 
     \item 在配置文件中设置自定义损失函数：将配置文件（即 YAML 文件）中 \textbf{losses} 部分中相应损失函数项的 \textbf{type} 参数设置为新建的损失类名即可。需要注意损失函数项的存在与模型有关。以使用 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/losses/basic_loss.py}{basicsr/losses/basic\_loss.py} 中的 \textbf{L1Loss} 为例：
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+          \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
 # losses
 pixel_opt:  # pixel-wise 损失函数项，与模型有关
   type: L1Loss  # 设置为需要使用的损失函数类名
@@ -145,7 +145,7 @@ pixel_opt:  # pixel-wise 损失函数项，与模型有关
     在实际使用情况中，我们会遇到一些损失函数，他们不是以类 (\texttt{Class} )的形式出现，而是普通的函数。比如 StyleGAN2 中使用的 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/losses/gan_loss.py}{r1\_penalty} 和 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/losses/gan_loss.py}{gradient\_penalty\_loss}。
 
     此时，我们不再以注册机制的方式使用，而是直接在模型中调用相关函数。
-\begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{python}
+    \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{python}
 from basicsr.losses.gan_loss import r1_penalty
 
 class StyleGAN2Model(BaseModel):
@@ -165,12 +165,12 @@ class StyleGAN2Model(BaseModel):
     \item 指标的存放与命名：指标文件存放在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics}{basicsr/metrics/} 文件夹下。对于命名规则无要求，一般直接以功能命名即可，如 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics/psnr_ssim.py}{basicsr/metrics/psnr\_ssim.py}。
 
     \item 编写自定义指标：在指标文件中对自定义指标函数进行命名，\textbf{需要注意新建函数名不能与已有函数名重复，否则会导致后续注册机制报错}。关于指标的功能详解见第\ref{chaper:metrics}章：\nameref{chaper:metrics}。在编写完自定义指标后，注意在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics/__init__.py}{basicsr/metrics/\_\_init\_\_.py} 文件中对添加的自定义指标进行导入。以 \textbf{calculate\_psnr} 为例：
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+          \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
 from .psnr_ssim import calculate_psnr
 \end{minted}
 
     \item 注册指标：用户需要对新建的指标函数进行注册。注册机制的原理详见章节\ref{code_structure:register}：\nameref{code_structure:register}。此处具体操作为，首先对 \textbf{METRIC\_REGISTRY} 函数进行导入，然后在新建函数上方添加修饰器来注册新建函数。以 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics/psnr_ssim.py}{psnr\_ssim.py} 中的 \textbf{calculate\_psnr} 为例：
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+          \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
 from basicsr.utils.registry import METRIC_REGISTRY
 
 @METRIC_REGISTRY.register()
@@ -179,7 +179,7 @@ def calculate_psnr(img, img2, ... ):
 \end{minted}
 
     \item 在配置文件中设置自定义指标：将配置文件（即 YAML文件）中 \textbf{validation settings} 部分中 \textbf{metric} 部分中的  \textbf{type} 参数设置为新建的指标函数名即可。指标的其他参数设置对应其功能部分代码。以使用 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics/psnr_ssim.py}{psnr\_ssim.py} 中的 \textbf{calculate\_psnr} 为例：
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
+          \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg]{python}
 # validation settings
 val:
   ...
@@ -194,9 +194,9 @@ val:
     \textbf{注意}
 
     \begin{itemize}
-    \item 指标的新建注册机制和其他几类 (dataset, model, arch, loss) 不同：1) 需要显式地在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics/__init__.py}{basicsr/metrics/\_\_init\_\_.py} import 函数；2) 新建的是函数而不是类
-    \item 目前指标主要是在 Numpy 上计算的，比如 \texttt{calculate\_psnr}、\texttt{calculate\_ssim}，有些也提供了基于 PyTorch 计算的版本，比如 \texttt{calculate\_psnr\_pt}、\texttt{calculate\_psnr\_pt}
-\end{itemize}
+        \item 指标的新建注册机制和其他几类 (dataset, model, arch, loss) 不同：1) 需要显式地在 \href{https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/metrics/__init__.py}{basicsr/metrics/\_\_init\_\_.py} import 函数；2) 新建的是函数而不是类
+        \item 目前指标主要是在 Numpy 上计算的，比如 \texttt{calculate\_psnr}、\texttt{calculate\_ssim}，有些也提供了基于 PyTorch 计算的版本，比如 \texttt{calculate\_psnr\_pt}、\texttt{calculate\_psnr\_pt}
+    \end{itemize}
 \end{note}
 
 \end{document}

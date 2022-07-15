@@ -200,7 +200,7 @@ _arch_modules = [importlib.import_module(f'basicsr.archs.{file_name}') for file_
 类似的，DATASET，ARCH，MODEL，LOSS 都在相关的 \_\_init\_\_.py 文件中定义了扫描并自动 import 的操作。
 
 总结一下，当我们在新开发网络结构时 (其他模块也类似)，只要做两件事，修改两个文件就好了。BasicSR 背后的动态实例化和 REGISTRY 机制会帮你完成剩下的事。
- \begin{enumerate}
+\begin{enumerate}
     \item 写一个单独的网络结构文件 (以 \_arch.py 结尾)。在写好的 Class 前加上 @ARCH\_REGISTRY.register() 装饰器
     \item 在配置文件中指定使用哪一个网络结构，即上面的 Class name
 \end{enumerate}
@@ -269,7 +269,7 @@ def get(self, name, suffix='basicsr'):
     return ret
 \end{minted}
 它实现的逻辑如下：
- \begin{enumerate}
+\begin{enumerate}
     \item 如果 get 函数指定了 suffix，则会优先找带有 suffix 的类/函数
     \item 一般我们的 get 函数都不会指定 suffix。这样的情况，程序优先找自己实现的 (比如 Real-ESRGAN 代码库中的) 类/函数
     \item 如果在自己实现的类/函数中没有找到，则会找 BasicSR 官方库中的实现的相同名字的类
@@ -770,15 +770,15 @@ class PairedImageDataset(data.Dataset):
         self.std = opt['std'] if 'std' in opt else None
 \end{minted}
 \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{数据读取格式}
-在 option 文件中可以指定数据读取方式 (\texttt{opt['io\_backend']})。
+    在 option 文件中可以指定数据读取方式 (\texttt{opt['io\_backend']})。
 
-我们支持三种读取数据的模式：
-\begin{enumerate}
-    \item 直接从 lmdb 格式的文件中读取
-    \item 若提供了 meta\_info 文件，则直接从该文件中列出的文件路径读取数据
-    \item 输入文件目录，代码会自动扫描该目录中的文件，然后读取
-\end{enumerate}
-详见参见 File Client 说明章节\ref{data_preparation:todo}：\nameref{data_preparation:todo}。 \todo{待更新}
+    我们支持三种读取数据的模式：
+    \begin{enumerate}
+        \item 直接从 lmdb 格式的文件中读取
+        \item 若提供了 meta\_info 文件，则直接从该文件中列出的文件路径读取数据
+        \item 输入文件目录，代码会自动扫描该目录中的文件，然后读取
+    \end{enumerate}
+    详见参见 File Client 说明章节\ref{data_preparation:todo}：\nameref{data_preparation:todo}。 \todo{待更新}
 \end{exampleBox}
 
 \begin{minted}[xleftmargin=20pt,linenos,breaklines,bgcolor=bg]{python}
@@ -859,21 +859,21 @@ class PairedImageDataset(data.Dataset):
 
 \begin{enumerate}
     \item \texttt{None} 模式。默认不使用。如果使用了 LMDB 或者 IO 开销不大，可以不使用 prefetch。
-\begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
+          \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
 prefetch_mode: ~
-\end{minted}
+          \end{minted}
 
     \item \texttt{cuda} 模式。使用 CUDA prefetcher，具体介绍可以参考 \href{https://github.com/NVIDIA/apex/issues/304#}{NVIDIA/apex}。这个模式会多占用一些 GPU 显存。注意，如果使用这个模型，一定要设置 \texttt{pin\_memory=True}。
-\begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
+          \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
 prefetch_mode: cuda
 pin_memory: true
-\end{minted}
+          \end{minted}
 
-\item \texttt{cpu} 模式。使用 CPU prefetcher，具体介绍可以参考 \href{https://github.com/IgorSusmelj/pytorch-styleguide/issues/5#}{IgorSusmelj/pytorch-styleguide}。这个加速效果可能不明显。
-\begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
+    \item \texttt{cpu} 模式。使用 CPU prefetcher，具体介绍可以参考 \href{https://github.com/IgorSusmelj/pytorch-styleguide/issues/5#}{IgorSusmelj/pytorch-styleguide}。这个加速效果可能不明显。
+          \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
 prefetch_mode: cpu
 num_prefetch_queue: 1  # 1 by default
-\end{minted}
+          \end{minted}
 \end{enumerate}
 
 \begin{note} % ---------------- Note block ---------------- %
@@ -1198,26 +1198,26 @@ train:
     {
         \begin{tabular}{|c|c|c|c|}
             \hline
-            \textbf{网络结构} & \textbf{任务} & \textbf{文件}          & \textbf{描述}                          \\ \hline
-            EDSR              & 图像超分      & edsr\_arch.py          & 论文 EDSR 结构                           \\ \hline
-            SRResNet          & 图像超分      & srresnet\_arch.py      & 论文 SRGAN 的 Generator                   \\ \hline
-            RRDB              & 图像超分      & rrdbnet\_arch.py       & 论文 ESRGAN 的 Generator                  \\ \hline
-            RCAN              & 图像超分      & rcan\_arch.py          & 论文 RCAN 的结构                         \\ \hline
-            SwinIR            & 图像超分      & swinir\_arch.py        & 论文 SwinIR 的结构                       \\ \hline
-            ECBSR             & 图像超分      & ecbsr\_arch.py         & 论文 ECBSR 的结构                        \\ \hline
-            SRVGG             & 图像超分      & srvgg\_arch.py         & VGG 结构改造的 SR 网络                    \\ \hline
-            EDVR              & 视频超分      & edvr\_arch.py          & 论文 EDVR 的结构                         \\ \hline
-            BasicVSR          & 视频超分      & basicvsr\_arch.py      & 论文 BasicVSR 的结构                     \\ \hline
-            BasicVSR++        & 视频超分      & basicvsrpp\_arch.py    & 论文 BasicVSR++ 的结构                   \\ \hline
-            DUF               & 视频超分      & duf\_arch.py           & 论文 DUF 的结构                          \\ \hline
-            TOF               & 视频超分      & tof\_arch.py           & 论文 TOF 的结构                          \\ \hline
-            DFDNet            & 人脸复原      & dfdnet\_arch.py        & 论文 Deep Face Dictionary Network 的结构 \\ \hline
-            StyleGAN2         & 人脸生成      & stylegan2\_arch.py     & 论文 StyleGAN2 的结构                    \\ \hline
-            RIDNet            & 图像去噪      & ridnet\_arch\_arch.py  & 论文 RIDNet 的结构                       \\ \hline
-            VGG               & 工具结构      & vgg\_arch.py           & 经典 VGG 结构                            \\ \hline
+            \textbf{网络结构} & \textbf{任务} & \textbf{文件}          & \textbf{描述}                              \\ \hline
+            EDSR              & 图像超分      & edsr\_arch.py          & 论文 EDSR 结构                             \\ \hline
+            SRResNet          & 图像超分      & srresnet\_arch.py      & 论文 SRGAN 的 Generator                    \\ \hline
+            RRDB              & 图像超分      & rrdbnet\_arch.py       & 论文 ESRGAN 的 Generator                   \\ \hline
+            RCAN              & 图像超分      & rcan\_arch.py          & 论文 RCAN 的结构                           \\ \hline
+            SwinIR            & 图像超分      & swinir\_arch.py        & 论文 SwinIR 的结构                         \\ \hline
+            ECBSR             & 图像超分      & ecbsr\_arch.py         & 论文 ECBSR 的结构                          \\ \hline
+            SRVGG             & 图像超分      & srvgg\_arch.py         & VGG 结构改造的 SR 网络                     \\ \hline
+            EDVR              & 视频超分      & edvr\_arch.py          & 论文 EDVR 的结构                           \\ \hline
+            BasicVSR          & 视频超分      & basicvsr\_arch.py      & 论文 BasicVSR 的结构                       \\ \hline
+            BasicVSR++        & 视频超分      & basicvsrpp\_arch.py    & 论文 BasicVSR++ 的结构                     \\ \hline
+            DUF               & 视频超分      & duf\_arch.py           & 论文 DUF 的结构                            \\ \hline
+            TOF               & 视频超分      & tof\_arch.py           & 论文 TOF 的结构                            \\ \hline
+            DFDNet            & 人脸复原      & dfdnet\_arch.py        & 论文 Deep Face Dictionary Network 的结构   \\ \hline
+            StyleGAN2         & 人脸生成      & stylegan2\_arch.py     & 论文 StyleGAN2 的结构                      \\ \hline
+            RIDNet            & 图像去噪      & ridnet\_arch\_arch.py  & 论文 RIDNet 的结构                         \\ \hline
+            VGG               & 工具结构      & vgg\_arch.py           & 经典 VGG 结构                              \\ \hline
             InceptionV3       & 工具结构      & inception.py           & 经典 InceptionV3 的结构，用于计算 FID 指标 \\ \hline
             VGG \& UNet       & 工具结构      & discriminator\_arch.py & 在 GAN 训练中，常用的 Discriminator 结构   \\ \hline
-            SpyNet            & 工具结构      & spynet\_arch.py        & 论文 SpyNet 的结构                       \\ \hline
+            SpyNet            & 工具结构      & spynet\_arch.py        & 论文 SpyNet 的结构                         \\ \hline
         \end{tabular}
     }
     \caption{BasicSR 提供的经典网络结构}
@@ -1296,8 +1296,8 @@ class SRModel(BaseModel):
 \end{note}
 
 \begin{exampleBox}[righthand ratio=0.00, sidebyside, sidebyside align=center, lower separated=false]{log 命名的约定}
-在 log 的时候, loss 项使用 l\_ 开头，这样在 Tensorboard 显示的时候，所有 loss 会被组织到一起。比如在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/srgan_model.py}{basicsr/models/srgan\_model.py} 中，使用了 l\_g\_pix，l\_g\_percep，l\_g\_gan 等。在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{basicsr/utils/logger.py} 中，他们会被组织到一起：
-\begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
+    在 log 的时候, loss 项使用 l\_ 开头，这样在 Tensorboard 显示的时候，所有 loss 会被组织到一起。比如在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/models/srgan_model.py}{basicsr/models/srgan\_model.py} 中，使用了 l\_g\_pix，l\_g\_percep，l\_g\_gan 等。在 \href{https://github.com/XPixelGroup/BasicSR/blob/master/basicsr/utils/logger.py}{basicsr/utils/logger.py} 中，他们会被组织到一起：
+    \begin{minted}[xleftmargin=20pt,bgcolor=bg,breaklines]{python}
 if k.startswith('l_'):
     self.tb_logger.add_scalar(f'losses/{k}', v, current_iter)
 else:
@@ -1379,11 +1379,11 @@ BasicSR 的日志系统主要包括:
 
     添加一条 log 信息非常简单：
 
-\begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
+    \begin{minted}[xleftmargin=20pt,linenos,bgcolor=bg,breaklines]{python}
 logger = get_root_logger()  # 获得 logger
 logger.info(要添加的内容)  # 添加正常信息
 logger.warning(要添加的警告)  # 添加警告信息
-\end{minted}
+    \end{minted}
 \end{hl}
 
 下面是一个 log 文件的例子：

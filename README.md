@@ -5,7 +5,7 @@
 [![license](https://img.shields.io/github/license/xinntao/BasicSR-docs)](https://github.com/XPixelGroup/BasicSR-docs/blob/master/LICENSE)
 [![release](https://github.com/XPixelGroup/BasicSR-docs/actions/workflows/release.yml/badge.svg)](https://github.com/XPixelGroup/BasicSR-docs/blob/master/.github/workflows/release.yml)
 
-这是 [BasicSR](https://github.com/XPixelGroup/BasicSR) 的中文解读文档。
+这是 [BasicSR](https://github.com/XPixelGroup/BasicSR) 的中文解读文档 LaTex 源码文件。
 
 ⏬ 本文档的最新版可以从 [releases](https://github.com/XPixelGroup/BasicSR-docs/releases) 下载。
 
